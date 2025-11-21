@@ -20,11 +20,10 @@ const Link = ({ href, children, className, ...props }: any) => {
 };
 
 const categories = [
-  { id: 'undergrad', label: 'Undergraduate Student', icon: GraduationCap },
-  { id: 'highschool', label: 'High School Student', icon: School },
-  { id: 'middleschool', label: 'Middle School Student', icon: BookOpen },
-  { id: 'grad', label: 'Graduate Student', icon: GraduationCap },
-  { id: 'professional', label: 'Professional', icon: Briefcase },
+  { id: 'high-school', label: 'High School', icon: School },
+  { id: 'undergrad', label: 'Undergraduate', icon: GraduationCap },
+  { id: 'graduate', label: 'Graduate', icon: GraduationCap },
+  { id: 'professional', label: 'Working Professional', icon: Briefcase },
   { id: 'educator', label: 'Educator', icon: Users },
   { id: 'other', label: 'Other', icon: HelpCircle },
 ];

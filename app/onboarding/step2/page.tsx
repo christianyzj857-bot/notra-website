@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { FileText, Upload, Youtube, Mic, AlertCircle } from 'lucide-react';
-import { onboardingSamples, type OnboardingRole } from '../config';
+import { ONBOARDING_SAMPLES } from '@/sample-data/onboardingSamples';
+import { type OnboardingRole } from '@/types/notra';
 
 export default function OnboardingStep2() {
   const [isDragging, setIsDragging] = useState(false);
@@ -11,7 +12,7 @@ export default function OnboardingStep2() {
   const [hasDroppedSample, setHasDroppedSample] = useState(false);
   const [showClickHint, setShowClickHint] = useState(false);
   const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
-  const [sampleFile, setSampleFile] = useState(onboardingSamples['other'].file);
+  const [sampleFile, setSampleFile] = useState(ONBOARDING_SAMPLES.find(s => s.role === 'other')?.file || ONBOARDING_SAMPLES[0].file);
 
   // Check if user came from step1 and get role
   useEffect(() => {
@@ -20,8 +21,9 @@ export default function OnboardingStep2() {
       if (!stage) {
         window.location.href = '/onboarding/step1';
       } else {
-        setOnboardingRole(stage);
-        setSampleFile(onboardingSamples[stage]?.file || onboardingSamples['other'].file);
+        setOnboardingRole(stage as OnboardingRole);
+        const sample = ONBOARDING_SAMPLES.find(s => s.role === stage) || ONBOARDING_SAMPLES.find(s => s.role === 'other') || ONBOARDING_SAMPLES[0];
+        setSampleFile(sample.file);
       }
     }
   }, []);
@@ -69,7 +71,7 @@ export default function OnboardingStep2() {
     
     // Store file info temporarily (client-side only)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('onboarding_file_name', sampleFile.fileName);
+      localStorage.setItem('onboarding_file_name', sampleFile.title);
       localStorage.setItem('onboarding_file_type', 'application/pdf');
     }
     
@@ -195,7 +197,7 @@ export default function OnboardingStep2() {
             `}
           >
             <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${sampleFile.iconColor} flex items-center justify-center flex-shrink-0`}>
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
@@ -203,7 +205,10 @@ export default function OnboardingStep2() {
                   {sampleFile.title}
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  {sampleFile.subtitle}
+                  {sampleFile.subject} • {sampleFile.level}
+                </p>
+                <p className="text-slate-500 text-xs mt-1">
+                  {sampleFile.description}
                 </p>
               </div>
               <div className="text-slate-400 text-sm">

@@ -1,13 +1,23 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
+import { getSessionById } from "@/lib/db";
+import { pickRelevantSections, trimMessages } from "@/lib/chat-utils";
+import { ChatRequestBody, ChatMode } from "@/types/notra";
 
 export const runtime = "edge";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// --- System Prompt (Notra 的核心人设) ---
-const SYSTEM_PROMPT = `
-You are Notra, an intelligent learning assistant for university students.
+// Model mapping
+const MODEL_MAP = {
+  "gpt-4o-mini": "gpt-4o-mini",
+  "gpt-4o": "gpt-4o",
+  "gpt-5.1": "gpt-4o", // Placeholder - update when GPT-5.1 is available
+} as const;
+
+// --- General Chat System Prompt ---
+const GENERAL_SYSTEM_PROMPT = `
+You are Notra, an intelligent learning assistant for students.
 Your tone is professional, encouraging, and concise.
 
 CORE ABILITIES:
@@ -34,33 +44,106 @@ DO NOT output standard Python plotting code (matplotlib) unless explicitly reque
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { messages, provider = "openai" }: { messages: any[]; provider?: string } = body;
+    const body: ChatRequestBody = await req.json();
+    const { messages, model = "gpt-4o-mini", mode = "general", sessionId, userPlan = "free" } = body;
 
-    if (!OPENAI_API_KEY) return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
+    if (!OPENAI_API_KEY) {
+      return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
+    }
+
+    // Validate mode and sessionId
+    if (mode === "note" && !sessionId) {
+      return NextResponse.json(
+        { error: "sessionId is required when mode is 'note'" },
+        { status: 400 }
+      );
+    }
 
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-    // 根据 provider 选择模型
-    let model = "gpt-4o";
-    if (provider === "openai-mini") {
-      model = "gpt-4o-mini";
-    } else if (provider === "openai-5") {
-      // GPT-5.1 目前可能还不存在，使用 gpt-4o 作为后备
-      // 当 GPT-5.1 可用时，可以改为 "gpt-5.1" 或相应的模型名称
-      model = "gpt-4o";
-    }
+    // Model selection and cost control
+    let selectedModel = MODEL_MAP[model] || "gpt-4o-mini";
     
-    // 插入 System Prompt 到消息列表头部
-    const messagesWithSystem = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...messages
+    // Free users: force downgrade to 4o-mini
+    if (userPlan === "free" && (model === "gpt-4o" || model === "gpt-5.1")) {
+      selectedModel = "gpt-4o-mini";
+    }
+
+    // Prepare messages based on mode
+    let systemMessage = GENERAL_SYSTEM_PROMPT;
+    let conversationMessages = messages;
+
+    if (mode === "note" && sessionId) {
+      // Get session data (note: getSessionById uses Node.js APIs, so this won't work in Edge runtime)
+      // For Edge runtime, we'd need to use a different approach (e.g., fetch from an API endpoint)
+      // For now, we'll handle this gracefully
+      try {
+        const sessionResponse = await fetch(`${req.headers.get('origin') || 'http://localhost:3000'}/api/session/${sessionId}`);
+        if (!sessionResponse.ok) {
+          return NextResponse.json(
+            { error: "Session not found" },
+            { status: 404 }
+          );
+        }
+        const session = await sessionResponse.json();
+
+      // Get latest user question for relevance filtering
+      const latestUserMessage = messages
+        .filter(m => m.role === "user")
+        .pop()?.content || "";
+
+      // Pick relevant note sections to reduce token usage
+      const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
+
+        // Build context-aware system prompt
+        let contextText = `Summary: ${session.summaryForChat}\n\n`;
+        
+        if (session.notes && session.notes.length > 0) {
+          const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
+          if (relevantSections.length > 0) {
+            contextText += "Relevant sections:\n";
+            relevantSections.forEach((section: any) => {
+              contextText += `- ${section.heading}: ${section.content.substring(0, 200)}\n`;
+            });
+          } else {
+            // Fallback to summary only if no relevant sections
+            contextText += "Key concepts from the study material.\n";
+          }
+        }
+
+        systemMessage = `You are Notra, an AI learning assistant.
+The user is asking questions about THIS STUDY MATERIAL:
+
+${contextText}
+
+Answer concisely, focusing only on this material, unless the user explicitly asks general questions.
+If the question is not related to the study material, politely redirect to the material or answer briefly.`;
+      } catch (err) {
+        // If session fetch fails, fall back to general mode
+        console.error('Failed to fetch session:', err);
+      }
+    }
+
+    // Trim messages to save tokens (keep recent 3 rounds)
+    const trimmedMessages = trimMessages(conversationMessages, 3);
+
+    // Build final messages array with proper types
+    const messagesWithSystem: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemMessage },
+      ...trimmedMessages.map(m => ({
+        role: m.role as "user" | "assistant",
+        content: m.content
+      })),
     ];
 
+    // Set max_tokens for cost control
+    const maxTokens = userPlan === "free" ? 512 : 768;
+
     const completion = await openai.chat.completions.create({
-      model,
+      model: selectedModel,
       messages: messagesWithSystem,
       stream: true,
+      max_tokens: maxTokens,
     });
 
     const encoder = new TextEncoder();

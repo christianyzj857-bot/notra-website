@@ -72,6 +72,32 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Load recent sessions on mount
+  useEffect(() => {
+    const loadRecentSessions = async () => {
+      try {
+        const response = await fetch('/api/sessions/recent');
+        if (response.ok) {
+          const sessions = await response.json();
+          const formattedProjects: Project[] = sessions.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            type: s.type,
+            createdAt: new Date(s.createdAt).getTime(),
+            summary: s.summaryForChat || 'No summary available'
+          }));
+          setProjects(formattedProjects);
+          if (formattedProjects.length > 0) {
+            setSelectedProject(formattedProjects[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load recent sessions:', error);
+      }
+    };
+    loadRecentSessions();
+  }, []);
+
   // Create new empty project
   const handleNewNote = () => {
     const newProject: Project = {
@@ -456,7 +482,7 @@ export default function Dashboard() {
                   </div>
 
                   <button
-                    onClick={() => alert('Coming soon')}
+                    onClick={() => window.location.href = `/dashboard/${selectedProject.id}`}
                     className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
                   >
                     Open in full view
