@@ -214,7 +214,10 @@ export default function NotraConsole() {
     if (pendingImage) {
       sendMessage(input || "Analyze this image.", 'image', pendingImage);
     } 
-    // 文件已经在handleFileChange中处理并发送，这里不需要再处理 
+    // 处理文件发送 (当前是 Mock 模式)
+    else if (pendingFile) {
+      sendMessage(`[Attached File: ${pendingFile.name}]\n${input || "Please analyze this file."}`, 'file', undefined, pendingFile.name);
+    } 
     // 纯文本发送
     else { 
       sendMessage(input, 'text'); 
@@ -305,13 +308,13 @@ export default function NotraConsole() {
       // 视频和音频复用 transcribe 接口
       await handleAudioUpload(file);
     } else if (file.type === "application/pdf" || file.name.endsWith(".pdf") || 
-               file.type.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+               file.type.startsWith("text/") || file.name.endsWith(".txt") || 
+               file.name.endsWith(".md") || file.name.endsWith(".json")) {
       // 处理PDF和文本文件 - 实际提取内容
       setIsTranscribing(true);
       try {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("fileType", file.type);
         
         const res = await fetch("/api/process-file", { 
           method: "POST", 
@@ -323,21 +326,16 @@ export default function NotraConsole() {
         if (res.ok && data.text) {
           // 文件内容提取成功，发送给AI分析
           const fileContent = data.text;
-          const maxLength = 50000; // 限制长度，避免超出token限制
-          const truncatedContent = fileContent.length > maxLength 
-            ? fileContent.substring(0, maxLength) + "\n\n[内容已截断，仅显示前50000字符]"
-            : fileContent;
-          
           sendMessage(
-            `Below is the content extracted from the file "${file.name}". Please analyze and summarize it:\n\n${truncatedContent}`,
+            `Below is the content extracted from the file "${file.name}". Please analyze and summarize it:\n\n${fileContent}`,
             'file',
             undefined,
             file.name
           );
-        } else if (data.error === "PDF_SUPPORT_INFO") {
-          // PDF文件特殊处理：显示友好提示
+        } else if (data.error === "PDF_PARSER_NOT_AVAILABLE") {
+          // PDF解析库未安装
           sendMessage(
-            data.message || "PDF文件需要特殊处理。请复制PDF中的文本内容后直接粘贴，或转换为TXT文件后上传。",
+            `PDF文件 "${file.name}" 需要安装pdf-parse库才能解析。\n\n请运行: npm install pdf-parse\n\n或者您可以：\n1. 复制PDF中的文本内容后直接粘贴\n2. 将PDF转换为TXT文件后上传`,
             'file',
             undefined,
             file.name
@@ -352,7 +350,7 @@ export default function NotraConsole() {
         setIsTranscribing(false);
       }
     } else {
-      alert(`不支持的文件类型: ${file.type || "未知"}。目前支持: PDF, TXT, MD, 图片, 音频, 视频文件。`);
+      alert(`不支持的文件类型: ${file.type || "未知"}。目前支持: PDF, TXT, MD, JSON, 图片, 音频, 视频文件。`);
     }
     
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -482,20 +480,9 @@ export default function NotraConsole() {
                            // 提取YouTube视频ID
                            const videoId = extractYouTubeId(l);
                            if (videoId) {
-                             // 尝试获取YouTube转录（通过第三方服务或提示用户）
-                             setIsTranscribing(true);
-                             try {
-                               // 注意：这里需要YouTube API或第三方服务
-                               // 目前先提示用户如何获取转录
-                               const message = `I'd like to analyze this YouTube video: ${l}\n\nTo analyze the video, I need the transcript. Here are ways to get it:\n\n1. **YouTube自动字幕**: Click the "..." menu below the video → "Show transcript" → Copy the text\n2. **第三方工具**: Use services like "downsub.com" or "youtubetranscript.com" to get the transcript\n3. **Describe the content**: Tell me what the video covers and I'll help create study materials\n\nOnce you have the transcript, paste it here and I'll analyze it for you!`;
-                               sendMessage(message, 'video_link');
-                             } catch (error) {
-                               console.error("YouTube processing error:", error);
-                             } finally {
-                               setIsTranscribing(false);
-                             }
+                             sendMessage(`Please analyze this YouTube video: ${l}\n\nNote: I cannot directly access YouTube videos. Please provide:\n1. The video transcript (if available)\n2. Key topics or sections you want analyzed\n3. Or describe what the video is about and I'll help you create study materials based on that.\n\nAlternatively, you can use tools like YouTube's auto-generated captions or transcript services to get the text content, then paste it here for analysis.`, 'video_link');
                            } else {
-                             alert("Invalid YouTube link. Please provide a valid YouTube URL (e.g., https://youtube.com/watch?v=... or https://youtu.be/...)");
+                             alert("Invalid YouTube link. Please provide a valid YouTube URL.");
                            }
                          }
                        }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors" title="Analyze Video Link"><Youtube size={20} /></button>

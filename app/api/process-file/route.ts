@@ -1,22 +1,14 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
-import fs from "fs";
+import { writeFile, readFile } from "fs/promises";
 import path from "path";
-import { writeFile } from "fs/promises";
 
+// 使用 Node.js Runtime 处理文件
 export const runtime = "nodejs";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 export async function POST(req: Request) {
-  if (!OPENAI_API_KEY) {
-    return NextResponse.json({ error: "Missing OPENAI_API_KEY" }, { status: 500 });
-  }
-
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
-    const fileType = formData.get("fileType") as string;
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -26,42 +18,80 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // 写入临时文件
+    const tempFilePath = path.join("/tmp", file.name);
+    await writeFile(tempFilePath, buffer);
+
     let extractedText = "";
 
-    try {
-      if (fileType === "application/pdf" || file.name.endsWith(".pdf")) {
-        // PDF文件处理：由于PDF解析需要专门的库且可能有兼容性问题
-        // 我们提供清晰的提示，引导用户使用替代方案
-        return NextResponse.json({ 
-          error: "PDF_SUPPORT_INFO",
-          message: "PDF文件需要特殊处理。请选择以下方式之一：\n\n1. **复制文本**：打开PDF，复制内容后直接粘贴到聊天框\n2. **转换为文本**：使用在线工具（如ilovepdf.com）将PDF转为TXT后上传\n3. **描述内容**：告诉我PDF的主要内容，我可以帮你整理成笔记\n\n目前系统支持直接处理：TXT、MD文本文件。"
-        }, { status: 200 }); // 返回200，让前端可以显示友好提示
-      } else if (fileType.startsWith("text/") || file.name.endsWith(".txt") || file.name.endsWith(".md")) {
-        // 处理文本文件 - 直接读取
-        extractedText = buffer.toString("utf-8");
-        
-        return NextResponse.json({ 
-          text: extractedText,
-          fileName: file.name,
-          fileType: fileType
-        });
-      } else {
-        return NextResponse.json({ 
-          error: `不支持的文件类型: ${fileType}。目前支持: PDF, TXT, MD文件。\n\n对于PDF文件，建议：\n1. 复制PDF中的文本内容直接粘贴\n2. 使用在线PDF转文本工具\n3. 将PDF转换为TXT文件后上传` 
-        }, { status: 400 });
+    // 根据文件类型处理
+    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      // PDF 处理 - 需要安装 pdf-parse 库
+      try {
+        // 动态导入 pdf-parse
+        const pdfParseModule = await import("pdf-parse");
+        // pdf-parse 的导入方式
+        const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+        const pdfData = await pdfParse(buffer);
+        extractedText = pdfData.text;
+      } catch (error: any) {
+        console.error("PDF parsing error:", error);
+        return NextResponse.json({
+          error: "PDF_PARSE_ERROR",
+          message: `PDF解析失败: ${error.message}`
+        }, { status: 500 });
       }
-
-    } catch (parseError: any) {
-      return NextResponse.json({ 
-        error: `文件处理失败: ${parseError.message || "未知错误"}` 
-      }, { status: 500 });
+    } else if (file.type.startsWith("text/") || 
+               file.name.endsWith(".txt") || 
+               file.name.endsWith(".md") ||
+               file.name.endsWith(".json")) {
+      // 文本文件直接读取
+      try {
+        extractedText = buffer.toString("utf-8");
+      } catch (error: any) {
+        return NextResponse.json({
+          error: "TEXT_READ_ERROR",
+          message: `文本读取失败: ${error.message}`
+        }, { status: 500 });
+      }
+    } else {
+      // 清理临时文件
+      try {
+        await import("fs").then(fs => fs.promises.unlink(tempFilePath));
+      } catch {}
+      
+      return NextResponse.json({
+        error: "UNSUPPORTED_FILE_TYPE",
+        message: `不支持的文件类型: ${file.type || "未知"}。目前支持: PDF, TXT, MD, JSON 文件。`
+      }, { status: 400 });
     }
+
+    // 清理临时文件
+    try {
+      await import("fs").then(fs => fs.promises.unlink(tempFilePath));
+    } catch (unlinkError) {
+      console.warn("Failed to delete temp file:", unlinkError);
+    }
+
+    // 限制文本长度，避免超出token限制
+    const maxLength = 100000; // 约10万字符
+    if (extractedText.length > maxLength) {
+      extractedText = extractedText.substring(0, maxLength) + "\n\n[内容已截断，仅显示前100000字符]";
+    }
+
+    return NextResponse.json({ 
+      text: extractedText,
+      fileName: file.name,
+      fileSize: file.size,
+      truncated: extractedText.length >= maxLength
+    });
 
   } catch (error: any) {
     console.error("File processing error:", error);
-    return NextResponse.json({ 
-      error: error.message || "Error processing file" 
-    }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message || "Error processing file" },
+      { status: 500 }
+    );
   }
 }
 
