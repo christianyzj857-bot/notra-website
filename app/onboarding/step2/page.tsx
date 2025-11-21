@@ -1,20 +1,27 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { FileText, Upload, Youtube, Mic } from 'lucide-react';
+import { FileText, Upload, Youtube, Mic, AlertCircle } from 'lucide-react';
+import { onboardingSamples, type OnboardingRole } from '../config';
 
 export default function OnboardingStep2() {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDraggingSample, setIsDraggingSample] = useState(false);
+  const [hasDroppedSample, setHasDroppedSample] = useState(false);
+  const [showClickHint, setShowClickHint] = useState(false);
+  const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
+  const [sampleFile, setSampleFile] = useState(onboardingSamples['other'].file);
 
-  // Check if user came from step1
+  // Check if user came from step1 and get role
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stage = localStorage.getItem('onboarding_stage');
+      const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
       if (!stage) {
         window.location.href = '/onboarding/step1';
+      } else {
+        setOnboardingRole(stage);
+        setSampleFile(onboardingSamples[stage]?.file || onboardingSamples['other'].file);
       }
     }
   }, []);
@@ -35,12 +42,12 @@ export default function OnboardingStep2() {
     
     // Check if this is the sample file being dragged
     const draggedElement = e.dataTransfer.getData('text/plain');
-    if (draggedElement === 'sample-calculus-file') {
+    if (draggedElement === `sample-file-${onboardingRole}`) {
       // This is the sample file - allow it
+      setHasDroppedSample(true);
       handleSampleFileUpload();
     } else {
       // User tried to drop their own file - ignore it
-      // Show a message or just do nothing
       return;
     }
   };
@@ -55,21 +62,28 @@ export default function OnboardingStep2() {
   };
 
   const handleSampleFileUpload = () => {
+    if (!hasDroppedSample) {
+      // This should only be called after successful drop
+      return;
+    }
+    
     // Store file info temporarily (client-side only)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('onboarding_file_name', 'Calculus Chapter 3.pdf');
+      localStorage.setItem('onboarding_file_name', sampleFile.fileName);
       localStorage.setItem('onboarding_file_type', 'application/pdf');
     }
     
-    // Navigate to Step 3 immediately
-    window.location.href = '/onboarding/step3';
+    // Navigate to Step 3 after a brief delay
+    setTimeout(() => {
+      window.location.href = '/onboarding/step3';
+    }, 300);
   };
 
   const handleSampleDragStart = (e: React.DragEvent) => {
     setIsDraggingSample(true);
     e.dataTransfer.effectAllowed = 'move';
-    // Mark this as the sample file
-    e.dataTransfer.setData('text/plain', 'sample-calculus-file');
+    // Mark this as the sample file with role identifier
+    e.dataTransfer.setData('text/plain', `sample-file-${onboardingRole}`);
   };
 
   const handleSampleDragEnd = () => {
@@ -77,8 +91,22 @@ export default function OnboardingStep2() {
   };
 
   const handleSampleClick = () => {
-    // Allow clicking the sample file to upload it
-    handleSampleFileUpload();
+    // Click only shows hint, doesn't upload
+    setShowClickHint(true);
+    
+    // Add animation effect
+    const card = document.getElementById('sample-file-card');
+    if (card) {
+      card.classList.add('animate-bounce');
+      setTimeout(() => {
+        card.classList.remove('animate-bounce');
+      }, 1000);
+    }
+    
+    // Hide hint after 3 seconds
+    setTimeout(() => {
+      setShowClickHint(false);
+    }, 3000);
   };
 
   return (
@@ -134,8 +162,14 @@ export default function OnboardingStep2() {
               Drop the sample file here
             </p>
             <p className="text-slate-500">
-              Drag the Calculus Chapter 3 file below
+              Drag the sample file below into this box
             </p>
+            {showClickHint && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 flex items-center gap-2 animate-in fade-in">
+                <AlertCircle className="w-4 h-4" />
+                <span>Drag this sample file into the box above to continue</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -146,6 +180,7 @@ export default function OnboardingStep2() {
           </h2>
           
           <div
+            id="sample-file-card"
             draggable
             onDragStart={handleSampleDragStart}
             onDragEnd={handleSampleDragEnd}
@@ -160,19 +195,19 @@ export default function OnboardingStep2() {
             `}
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${sampleFile.iconColor} flex items-center justify-center flex-shrink-0`}>
                 <FileText className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <h3 className="font-bold text-slate-900 mb-1">
-                  Calculus Chapter 3
+                  {sampleFile.title}
                 </h3>
                 <p className="text-slate-600 text-sm">
-                  Derivatives
+                  {sampleFile.subtitle}
                 </p>
               </div>
               <div className="text-slate-400 text-sm">
-                Drag me ↑ or click
+                Drag me ↑
               </div>
             </div>
           </div>

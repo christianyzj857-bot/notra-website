@@ -2,16 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { onboardingSamples, type OnboardingRole } from '../config';
 
 export default function OnboardingStep6() {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
+  const [flashcard, setFlashcard] = useState(onboardingSamples['other'].flashcards[0]);
 
   useEffect(() => {
-    // Check if user came from step5
+    // Check if user came from step5 and get role
     if (typeof window !== 'undefined') {
-      const stage = localStorage.getItem('onboarding_stage');
+      const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
       if (!stage) {
         window.location.href = '/onboarding/step1';
+      } else {
+        setOnboardingRole(stage);
+        const sampleData = onboardingSamples[stage] || onboardingSamples['other'];
+        setFlashcard(sampleData.flashcards[0]);
       }
     }
   }, []);
@@ -58,9 +65,9 @@ export default function OnboardingStep6() {
                 }}
               >
                 <div className="text-center">
-                  <div className="text-6xl mb-6">📐</div>
+                  <div className="text-6xl mb-6">{flashcard.icon}</div>
                   <h2 className="text-4xl font-bold text-slate-900">
-                    Limit Definition of Derivative
+                    {flashcard.front}
                   </h2>
                   {!isFlipped && (
                     <p className="text-slate-500 mt-4">Tap to flip</p>
@@ -82,10 +89,7 @@ export default function OnboardingStep6() {
                     Definition:
                   </h3>
                   <p className="text-lg text-slate-700 leading-relaxed">
-                    The derivative of a function f(x) at a point x is defined as the limit of the 
-                    difference quotient as h approaches zero: <span className="font-mono">f'(x) = lim(h→0) [f(x+h) - f(x)]/h</span>. 
-                    This limit represents the instantaneous rate of change of the function at that point, 
-                    which geometrically corresponds to the slope of the tangent line to the curve.
+                    {flashcard.back}
                   </p>
                 </div>
               </div>
@@ -109,4 +113,3 @@ export default function OnboardingStep6() {
     </div>
   );
 }
-

@@ -1,36 +1,34 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { onboardingSamples, type OnboardingRole } from '../config';
 
 export default function OnboardingStep5() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
+  const [quiz, setQuiz] = useState(onboardingSamples['other'].quiz[0]);
 
   useEffect(() => {
-    // Check if user came from step4
+    // Check if user came from step4 and get role
     if (typeof window !== 'undefined') {
-      const stage = localStorage.getItem('onboarding_stage');
+      const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
       if (!stage) {
         window.location.href = '/onboarding/step1';
+      } else {
+        setOnboardingRole(stage);
+        const sampleData = onboardingSamples[stage] || onboardingSamples['other'];
+        setQuiz(sampleData.quiz[0]);
       }
     }
   }, []);
-
-  const options = [
-    '2x',
-    'x',
-    '2',
-    'None of the above'
-  ];
-
-  const correctAnswer = 0; // First option (2x) is correct
 
   const handleAnswerClick = (index: number) => {
     if (selectedAnswer !== null) return; // Prevent multiple clicks
     
     setSelectedAnswer(index);
-    setIsCorrect(index === correctAnswer);
+    setIsCorrect(index === quiz.correctAnswer);
     setShowFeedback(true);
 
     // Auto navigate to Step 6 after 1 second
@@ -61,13 +59,13 @@ export default function OnboardingStep5() {
         {/* Question Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-6">
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-8">
-            What is the derivative of <span className="font-mono">f(x) = x²</span>?
+            {quiz.question}
           </h2>
 
           <div className="space-y-4">
-            {options.map((option, index) => {
+            {quiz.options.map((option, index) => {
               const isSelected = selectedAnswer === index;
-              const isCorrectOption = index === correctAnswer;
+              const isCorrectOption = index === quiz.correctAnswer;
               
               return (
                 <button
@@ -122,4 +120,3 @@ export default function OnboardingStep5() {
     </div>
   );
 }
-
