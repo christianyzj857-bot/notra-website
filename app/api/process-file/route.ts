@@ -41,6 +41,28 @@ export async function POST(req: Request) {
           message: `PDF解析失败: ${error.message}`
         }, { status: 500 });
       }
+    } else if (file.type === "application/msword" || 
+               file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+               file.name.endsWith(".doc") || 
+               file.name.endsWith(".docx")) {
+      // Word 文档处理 - 使用 mammoth 库
+      try {
+        const mammoth = await import("mammoth");
+        const mammothFn = (mammoth as any).default || mammoth;
+        const result = await mammothFn.extractRawText({ buffer });
+        extractedText = result.value;
+        
+        // 如果有警告，记录但不阻止处理
+        if (result.messages && result.messages.length > 0) {
+          console.warn("Word document warnings:", result.messages);
+        }
+      } catch (error: any) {
+        console.error("Word parsing error:", error);
+        return NextResponse.json({
+          error: "WORD_PARSE_ERROR",
+          message: `Word文档解析失败: ${error.message}。请尝试将文档转换为PDF或TXT格式。`
+        }, { status: 500 });
+      }
     } else if (file.type.startsWith("text/") || 
                file.name.endsWith(".txt") || 
                file.name.endsWith(".md") ||
@@ -62,7 +84,7 @@ export async function POST(req: Request) {
       
       return NextResponse.json({
         error: "UNSUPPORTED_FILE_TYPE",
-        message: `不支持的文件类型: ${file.type || "未知"}。目前支持: PDF, TXT, MD, JSON 文件。`
+        message: `不支持的文件类型: ${file.type || "未知"}。目前支持: PDF, Word (.doc, .docx), TXT, MD, JSON 文件。`
       }, { status: 400 });
     }
 

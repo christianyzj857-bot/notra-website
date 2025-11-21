@@ -34,12 +34,14 @@ export async function POST(req: Request) {
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
     // 调用 Whisper 模型，添加更好的配置以提高转录质量
+    // 支持音频和视频文件（Whisper可以处理视频中的音频轨道）
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
       model: "whisper-1",
-      language: "en", // 明确指定语言可以提高准确性
-      prompt: "This is a lecture or educational content. Please transcribe accurately with proper punctuation and capitalization.", // 提示词帮助提高质量
+      // 不强制指定语言，让Whisper自动检测（支持多语言）
+      prompt: "This is a lecture, educational content, or video audio. Please transcribe accurately with proper punctuation and capitalization.", // 提示词帮助提高质量
       temperature: 0, // 降低随机性，提高一致性
+      response_format: "text", // 明确指定返回格式
     });
 
     // 清理临时文件

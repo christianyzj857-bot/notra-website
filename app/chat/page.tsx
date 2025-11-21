@@ -227,23 +227,48 @@ export default function NotraConsole() {
   // --- Media & File Handlers ---
 
   const handleAudioUpload = async (blob: Blob) => {
+    console.log("Starting audio upload, blob size:", blob.size, "type:", blob.type);
     setIsTranscribing(true);
     const formData = new FormData();
-    formData.append("file", blob, "recording.webm");
+    
+    // 确保使用正确的文件名和类型
+    const fileName = blob.type.includes('webm') ? 'recording.webm' : 'recording.ogg';
+    formData.append("file", blob, fileName);
+    
     try {
+      console.log("Sending audio to transcribe API...");
       const res = await fetch("/api/transcribe", { method: "POST", body: formData });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Request failed with status ${res.status}`);
+      }
+      
       const data = await res.json();
+      console.log("Transcription response:", data);
+      
       // 优化提示词：告诉 AI 这是转录文本，让它总结
-      if (data.text) sendMessage(`Below is a text transcript of audio. Summarize it:\n\n"${data.text}"`, 'audio');
+      if (data.text && data.text.trim()) {
+        sendMessage(`Below is a text transcript of audio. Please summarize and analyze it:\n\n"${data.text}"`, 'audio');
+      } else {
+        alert("转录失败：没有获取到文本内容。请检查音频质量和API配置。");
+      }
     } catch (e: any) { 
       console.error("Audio transcription error:", e);
       const errorMsg = e.message?.includes("API key") 
-        ? "Audio processing failed. Please check your OPENAI_API_KEY."
-        : "Audio processing failed. Please try again.";
+        ? "音频处理失败。请检查 OPENAI_API_KEY 环境变量。"
+        : e.message?.includes("Missing") 
+        ? "音频处理失败：缺少必要的配置。"
+        : `音频处理失败: ${e.message || "未知错误"}`;
       alert(errorMsg);
     }
-    finally { setIsTranscribing(false); }
+    finally { 
+      setIsTranscribing(false);
+      console.log("Audio upload completed");
+    }
   };
+
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = async () => {
     try {
@@ -257,6 +282,9 @@ export default function NotraConsole() {
           channelCount: 1
         } 
       });
+      
+      // 保存stream引用，确保可以正确停止
+      streamRef.current = stream;
       
       // 使用更好的编码格式和配置
       const options = {
@@ -274,27 +302,65 @@ export default function NotraConsole() {
       
       audioChunksRef.current = [];
       mediaRecorderRef.current.ondataavailable = (e) => { 
-        if (e.data.size > 0) audioChunksRef.current.push(e.data); 
-      };
-      mediaRecorderRef.current.onstop = () => { 
-        // 确保所有音频块都被收集
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        if (audioBlob.size > 0) {
-          handleAudioUpload(audioBlob);
-        } else {
-          alert("录音失败，请重试。");
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data); 
         }
-        // 停止所有音频轨道
-        stream.getTracks().forEach(track => track.stop());
       };
+      mediaRecorderRef.current.onstop = async () => { 
+        try {
+          // 确保所有音频块都被收集
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          console.log("Audio blob size:", audioBlob.size, "chunks:", audioChunksRef.current.length);
+          
+          if (audioBlob.size > 0) {
+            await handleAudioUpload(audioBlob);
+          } else {
+            alert("录音失败：没有录制到音频数据，请重试。");
+            setIsTranscribing(false);
+          }
+        } catch (error: any) {
+          console.error("Error in onstop handler:", error);
+          alert("处理录音时出错: " + (error.message || "未知错误"));
+          setIsTranscribing(false);
+        } finally {
+          // 停止所有音频轨道
+          if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => {
+              track.stop();
+              console.log("Stopped track:", track.kind);
+            });
+            streamRef.current = null;
+          }
+        }
+      };
+      
+      // 监听错误
+      mediaRecorderRef.current.onerror = (event: any) => {
+        console.error("MediaRecorder error:", event);
+        alert("录音过程中出错，请重试。");
+        setIsRecording(false);
+        setIsTranscribing(false);
+      };
+      
       mediaRecorderRef.current.start(1000); // 每1秒收集一次数据，提高稳定性
       setIsRecording(true);
+      console.log("Recording started");
     } catch (err: any) { 
       console.error("Recording error:", err);
       alert(`麦克风访问失败: ${err.message || "请检查麦克风权限"}`); 
+      setIsRecording(false);
     }
   };
-  const stopRecording = () => { if (mediaRecorderRef.current) { mediaRecorderRef.current.stop(); setIsRecording(false); } };
+  const stopRecording = () => { 
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      console.log("Stopping recording, state:", mediaRecorderRef.current.state);
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    } else {
+      console.log("MediaRecorder not active");
+      setIsRecording(false);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -308,6 +374,8 @@ export default function NotraConsole() {
       // 视频和音频复用 transcribe 接口
       await handleAudioUpload(file);
     } else if (file.type === "application/pdf" || file.name.endsWith(".pdf") || 
+               file.type === "application/msword" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+               file.name.endsWith(".doc") || file.name.endsWith(".docx") ||
                file.type.startsWith("text/") || file.name.endsWith(".txt") || 
                file.name.endsWith(".md") || file.name.endsWith(".json")) {
       // 处理PDF和文本文件 - 实际提取内容
@@ -471,7 +539,7 @@ export default function NotraConsole() {
                   
                   <div className="flex items-center justify-between px-3 pb-2">
                     <div className="flex items-center gap-1">
-                       <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md" />
+                       <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.json" />
                        <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"><Plus size={20} /></button>
                        <button type="button" onClick={() => setInput(prev => prev + "Plot a bar chart for: ")} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="Generate Chart"><BarChart3 size={20} /></button>
                        <button type="button" onClick={async () => { 
