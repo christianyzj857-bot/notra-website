@@ -32,13 +32,21 @@ export async function POST(req: Request) {
         const pdfParseModule = await import("pdf-parse");
         // pdf-parse 的导入方式
         const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+        console.log("Parsing PDF, buffer size:", buffer.length);
         const pdfData = await pdfParse(buffer);
-        extractedText = pdfData.text;
+        extractedText = pdfData.text || "";
+        
+        if (!extractedText || extractedText.trim().length === 0) {
+          return NextResponse.json({
+            error: "PDF_EMPTY_CONTENT",
+            message: "PDF解析成功，但没有提取到文本内容。PDF可能只包含图片或扫描件。"
+          }, { status: 400 });
+        }
       } catch (error: any) {
         console.error("PDF parsing error:", error);
         return NextResponse.json({
           error: "PDF_PARSE_ERROR",
-          message: `PDF解析失败: ${error.message}`
+          message: `PDF解析失败: ${error.message || "未知错误"}。请确保PDF文件未损坏且包含文本内容。`
         }, { status: 500 });
       }
     } else if (file.type === "application/msword" || 
@@ -48,19 +56,39 @@ export async function POST(req: Request) {
       // Word 文档处理 - 使用 mammoth 库
       try {
         const mammoth = await import("mammoth");
-        const mammothFn = (mammoth as any).default || mammoth;
-        const result = await mammothFn.extractRawText({ buffer });
-        extractedText = result.value;
+        console.log("Parsing Word document, buffer size:", buffer.length);
+        
+        // mammoth需要ArrayBuffer，从Buffer转换为ArrayBuffer
+        const arrayBuffer = buffer.buffer.slice(
+          buffer.byteOffset, 
+          buffer.byteOffset + buffer.byteLength
+        );
+        
+        // 使用mammoth提取文本 - extractRawText是函数，不是对象方法
+        const mammothFn = mammoth.default || mammoth;
+        const result = await mammothFn.extractRawText({ arrayBuffer });
+        extractedText = result.value || "";
+        
+        console.log("Word extraction result, text length:", extractedText.length);
         
         // 如果有警告，记录但不阻止处理
         if (result.messages && result.messages.length > 0) {
           console.warn("Word document warnings:", result.messages);
         }
+        
+        if (!extractedText || extractedText.trim().length === 0) {
+          return NextResponse.json({
+            error: "WORD_EMPTY_CONTENT",
+            message: "Word文档解析成功，但没有提取到文本内容。文档可能只包含图片或格式化的内容。"
+          }, { status: 400 });
+        }
       } catch (error: any) {
         console.error("Word parsing error:", error);
+        // 提供更详细的错误信息
+        const errorMsg = error.message || "未知错误";
         return NextResponse.json({
           error: "WORD_PARSE_ERROR",
-          message: `Word文档解析失败: ${error.message}。请尝试将文档转换为PDF或TXT格式。`
+          message: `Word文档解析失败: ${errorMsg}。请尝试将文档转换为PDF或TXT格式后上传。`
         }, { status: 500 });
       }
     } else if (file.type.startsWith("text/") || 

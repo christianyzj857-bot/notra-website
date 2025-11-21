@@ -232,16 +232,30 @@ export default function NotraConsole() {
     const formData = new FormData();
     
     // 确保使用正确的文件名和类型
-    const fileName = blob.type.includes('webm') ? 'recording.webm' : 'recording.ogg';
+    // 根据blob类型确定文件扩展名
+    let fileName = 'recording.webm';
+    if (blob.type.includes('ogg')) {
+      fileName = 'recording.ogg';
+    } else if (blob.type.includes('mp4') || blob.type.includes('video')) {
+      fileName = 'recording.mp4';
+    } else if (blob.type.includes('mp3')) {
+      fileName = 'recording.mp3';
+    } else if (blob.type.includes('wav')) {
+      fileName = 'recording.wav';
+    }
+    
     formData.append("file", blob, fileName);
     
     try {
-      console.log("Sending audio to transcribe API...");
+      console.log("Sending audio/video to transcribe API, file:", fileName);
       const res = await fetch("/api/transcribe", { method: "POST", body: formData });
       
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Request failed with status ${res.status}`);
+        const errorMessage = errorData.error 
+          ? `${errorData.error}: ${errorData.message || "未知错误"}` 
+          : `请求失败，状态码: ${res.status}`;
+        throw new Error(errorMessage);
       }
       
       const data = await res.json();
@@ -249,15 +263,18 @@ export default function NotraConsole() {
       
       // 优化提示词：告诉 AI 这是转录文本，让它总结
       if (data.text && data.text.trim()) {
-        sendMessage(`Below is a text transcript of audio. Please summarize and analyze it:\n\n"${data.text}"`, 'audio');
+        sendMessage(`Below is a text transcript of audio/video. Please summarize and analyze it:\n\n"${data.text}"`, 'audio');
+      } else if (data.error) {
+        // 如果有错误信息，显示给用户
+        alert(`转录失败: ${data.error} - ${data.message || "请检查音频/视频文件格式和质量"}`);
       } else {
-        alert("转录失败：没有获取到文本内容。请检查音频质量和API配置。");
+        alert("转录失败：没有获取到文本内容。请检查音频/视频质量和API配置。");
       }
     } catch (e: any) { 
       console.error("Audio transcription error:", e);
-      const errorMsg = e.message?.includes("API key") 
-        ? "音频处理失败。请检查 OPENAI_API_KEY 环境变量。"
-        : e.message?.includes("Missing") 
+      const errorMsg = e.message?.includes("API key") || e.message?.includes("OPENAI_API_KEY")
+        ? "音频处理失败。请检查 OPENAI_API_KEY 环境变量是否已配置。"
+        : e.message?.includes("Missing")
         ? "音频处理失败：缺少必要的配置。"
         : `音频处理失败: ${e.message || "未知错误"}`;
       alert(errorMsg);
@@ -372,7 +389,16 @@ export default function NotraConsole() {
       reader.readAsDataURL(file);
     } else if (file.type.startsWith("video/") || file.type.startsWith("audio/")) {
       // 视频和音频复用 transcribe 接口
-      await handleAudioUpload(file);
+      console.log("Processing video/audio file:", file.name, file.type, file.size);
+      setIsTranscribing(true);
+      try {
+        await handleAudioUpload(file);
+      } catch (error: any) {
+        console.error("Video/audio upload error:", error);
+        alert(`视频/音频处理失败: ${error.message || "未知错误"}`);
+      } finally {
+        setIsTranscribing(false);
+      }
     } else if (file.type === "application/pdf" || file.name.endsWith(".pdf") || 
                file.type === "application/msword" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
                file.name.endsWith(".doc") || file.name.endsWith(".docx") ||
@@ -409,7 +435,11 @@ export default function NotraConsole() {
             file.name
           );
         } else {
-          alert(data.error || data.message || "文件处理失败，请重试。");
+          // 显示更详细的错误信息
+          const errorMessage = data.error 
+            ? `${data.error}: ${data.message || "未知错误"}` 
+            : data.message || "文件处理失败，请重试。";
+          alert(`文件处理失败: ${errorMessage}`);
         }
       } catch (error: any) {
         console.error("File processing error:", error);

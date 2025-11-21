@@ -35,6 +35,7 @@ export async function POST(req: Request) {
 
     // 调用 Whisper 模型，添加更好的配置以提高转录质量
     // 支持音频和视频文件（Whisper可以处理视频中的音频轨道）
+    console.log("Calling Whisper API, file size:", buffer.length, "bytes");
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
       model: "whisper-1",
@@ -44,6 +45,8 @@ export async function POST(req: Request) {
       // 不指定 response_format，默认返回对象格式
     });
 
+    console.log("Whisper API response:", transcription);
+
     // 清理临时文件
     try {
       fs.unlinkSync(tempFilePath);
@@ -52,7 +55,18 @@ export async function POST(req: Request) {
     }
 
     // transcription 返回的是对象，包含 text 属性
-    const transcriptionText = typeof transcription === 'string' ? transcription : transcription.text;
+    const transcriptionText = typeof transcription === 'string' 
+      ? transcription 
+      : (transcription as any)?.text || transcription?.text || "";
+    
+    if (!transcriptionText || transcriptionText.trim().length === 0) {
+      console.error("Transcription is empty:", transcription);
+      return NextResponse.json({ 
+        error: "EMPTY_TRANSCRIPTION",
+        message: "转录结果为空。可能是音频文件损坏、格式不支持、或内容太短。请检查音频文件。"
+      }, { status: 400 });
+    }
+    
     return NextResponse.json({ text: transcriptionText });
   } catch (error: any) {
     console.error("Transcription error:", error);
