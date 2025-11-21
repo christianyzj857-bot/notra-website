@@ -55,7 +55,7 @@ export async function POST(req: Request) {
                file.name.endsWith(".docx")) {
       // Word 文档处理 - 使用 mammoth 库
       try {
-        const mammoth = await import("mammoth");
+        const mammothModule = await import("mammoth");
         console.log("Parsing Word document, buffer size:", buffer.length);
         
         // mammoth需要ArrayBuffer，从Buffer转换为ArrayBuffer
@@ -64,9 +64,13 @@ export async function POST(req: Request) {
           buffer.byteOffset + buffer.byteLength
         );
         
-        // 使用mammoth提取文本 - extractRawText是函数，不是对象方法
-        const mammothFn = mammoth.default || mammoth;
-        const result = await mammothFn.extractRawText({ arrayBuffer });
+        // mammoth是CommonJS模块，直接使用extractRawText
+        // mammoth没有default导出，直接使用模块本身
+        const mammoth = (mammothModule as any).default || mammothModule;
+        if (!mammoth || typeof mammoth.extractRawText !== 'function') {
+          throw new Error("mammoth.extractRawText is not available");
+        }
+        const result = await mammoth.extractRawText({ arrayBuffer });
         extractedText = result.value || "";
         
         console.log("Word extraction result, text length:", extractedText.length);
@@ -84,6 +88,7 @@ export async function POST(req: Request) {
         }
       } catch (error: any) {
         console.error("Word parsing error:", error);
+        console.error("Error stack:", error.stack);
         // 提供更详细的错误信息
         const errorMsg = error.message || "未知错误";
         return NextResponse.json({

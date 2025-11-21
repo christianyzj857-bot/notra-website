@@ -410,16 +410,25 @@ export default function NotraConsole() {
         const formData = new FormData();
         formData.append("file", file);
         
+        console.log("Sending file to process-file API:", file.name, file.type, file.size);
         const res = await fetch("/api/process-file", { 
           method: "POST", 
           body: formData 
         });
         
+        console.log("Process-file API response status:", res.status);
         const data = await res.json();
+        console.log("Process-file API response data:", { 
+          hasText: !!data.text, 
+          textLength: data.text?.length, 
+          error: data.error,
+          message: data.message 
+        });
         
-        if (res.ok && data.text) {
+        if (res.ok && data.text && data.text.trim()) {
           // 文件内容提取成功，发送给AI分析
           const fileContent = data.text;
+          console.log("File content extracted successfully, length:", fileContent.length);
           sendMessage(
             `Below is the content extracted from the file "${file.name}". Please analyze and summarize it:\n\n${fileContent}`,
             'file',
@@ -439,6 +448,7 @@ export default function NotraConsole() {
           const errorMessage = data.error 
             ? `${data.error}: ${data.message || "未知错误"}` 
             : data.message || "文件处理失败，请重试。";
+          console.error("File processing failed:", errorMessage);
           alert(`文件处理失败: ${errorMessage}`);
         }
       } catch (error: any) {

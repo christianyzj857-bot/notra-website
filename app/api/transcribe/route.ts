@@ -35,7 +35,16 @@ export async function POST(req: Request) {
 
     // 调用 Whisper 模型，添加更好的配置以提高转录质量
     // 支持音频和视频文件（Whisper可以处理视频中的音频轨道）
-    console.log("Calling Whisper API, file size:", buffer.length, "bytes");
+    console.log("Calling Whisper API, file size:", buffer.length, "bytes, file name:", file.name);
+    
+    // 检查文件大小（Whisper限制25MB）
+    if (buffer.length > 25 * 1024 * 1024) {
+      return NextResponse.json({ 
+        error: "FILE_TOO_LARGE",
+        message: "文件太大（超过25MB）。请压缩文件或使用更短的音频/视频。"
+      }, { status: 400 });
+    }
+    
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
       model: "whisper-1",
@@ -45,7 +54,8 @@ export async function POST(req: Request) {
       // 不指定 response_format，默认返回对象格式
     });
 
-    console.log("Whisper API response:", transcription);
+    console.log("Whisper API response type:", typeof transcription);
+    console.log("Whisper API response keys:", Object.keys(transcription || {}));
 
     // 清理临时文件
     try {
@@ -55,12 +65,17 @@ export async function POST(req: Request) {
     }
 
     // transcription 返回的是对象，包含 text 属性
-    const transcriptionText = typeof transcription === 'string' 
-      ? transcription 
-      : (transcription as any)?.text || transcription?.text || "";
+    let transcriptionText = "";
+    if (typeof transcription === 'string') {
+      transcriptionText = transcription;
+    } else if (transcription && typeof transcription === 'object') {
+      transcriptionText = (transcription as any).text || "";
+    }
+    
+    console.log("Extracted transcription text length:", transcriptionText.length);
     
     if (!transcriptionText || transcriptionText.trim().length === 0) {
-      console.error("Transcription is empty:", transcription);
+      console.error("Transcription is empty. Full response:", JSON.stringify(transcription, null, 2));
       return NextResponse.json({ 
         error: "EMPTY_TRANSCRIPTION",
         message: "转录结果为空。可能是音频文件损坏、格式不支持、或内容太短。请检查音频文件。"
