@@ -164,8 +164,16 @@ export default function OnboardingStep4() {
             <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
               <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Main Formula</h4>
               <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-blue-100">
-                <div className="math-block text-slate-900 text-center">
-                  f'(x) = lim<sub className="text-xl">h→0</sub> [f(x+h) - f(x)] / h
+                <div className="math-display text-slate-900 text-center">
+                  <span>f'(x) = </span>
+                  <span className="math-limit">
+                    <span className="math-limit-main">lim</span>
+                    <span className="math-limit-sub">h→0</span>
+                  </span>
+                  <span className="math-fraction">
+                    <span className="math-numerator">f(x + h) - f(x)</span>
+                    <span className="math-denominator">h</span>
+                  </span>
                 </div>
               </div>
               <p className="text-sm text-slate-600 mt-4 text-center">

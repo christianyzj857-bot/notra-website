@@ -133,7 +133,17 @@ export default function OnboardingStep2Country() {
                       ${isAnimating && !isSelected ? 'opacity-50' : ''}
                     `}
                   >
-                    <div className="text-3xl mb-2">{country.flag}</div>
+                    <div className="text-3xl mb-2">
+                      {country.id === 'china-hongkong' ? (
+                        <span className="text-2xl">🏴</span> // Hong Kong regional flag (red with white flower)
+                      ) : country.id === 'china-macao' ? (
+                        <span className="text-2xl">🏴</span> // Macao regional flag (green with white flower) 
+                      ) : country.id === 'china-taiwan' ? (
+                        <span className="text-2xl">📍</span> // Neutral icon for Taiwan
+                      ) : (
+                        country.flag
+                      )}
+                    </div>
                     <div className="font-semibold text-slate-900 text-sm">{country.label}</div>
                     {isSelected && (
                       <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">

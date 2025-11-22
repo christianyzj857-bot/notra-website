@@ -18,23 +18,27 @@ export default function WelcomeUser() {
     }
   }, []);
 
-  if (!isLoggedIn || !displayName) {
-    return null; // Don't show anything if not logged in
+  // Show "Welcome, Student" if not logged in, or nothing if no name
+  if (!displayName) {
+    return null;
   }
 
   return (
-    <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-500">
-      <span className="text-sm md:text-base font-medium text-slate-600">
-        Welcome,
-      </span>
-      <span 
-        className="text-sm md:text-base font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 animate-welcomeGlow"
-        style={{
-          animation: 'welcomeGlow 3s ease-in-out infinite',
-        }}
-      >
-        {displayName}
-      </span>
+    <div className="flex flex-col items-start animate-in fade-in slide-in-from-top-2 duration-700">
+      <div className="flex items-center gap-2">
+        <span className="text-base md:text-lg font-medium text-slate-700">
+          Welcome,
+        </span>
+        <span 
+          className="text-base md:text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600"
+          style={{
+            textShadow: '0 0 12px rgba(139, 92, 246, 0.4)',
+            animation: 'welcomeGlow 3s ease-in-out infinite',
+          }}
+        >
+          {displayName}
+        </span>
+      </div>
     </div>
   );
 }

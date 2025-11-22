@@ -175,6 +175,21 @@ export default function SignupPage() {
           <button
             type="button"
             disabled={isLoading}
+            onClick={async () => {
+              // TODO: Implement actual Google OAuth logic
+              // For now, simulate Google login and redirect to HOME
+              setIsLoading(true);
+              setTimeout(() => {
+                if (typeof window !== 'undefined') {
+                  // Mock: Set user info from Google (in real app, get from OAuth response)
+                  localStorage.setItem('user_email', 'user@example.com');
+                  localStorage.setItem('user_display_name', 'Google User');
+                  localStorage.setItem('user_logged_in', 'true');
+                  // Redirect to HOME page (not chat or dashboard)
+                  window.location.href = '/';
+                }
+              }, 1000);
+            }}
             className="w-full py-3 border-2 border-slate-200 rounded-xl font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Continue with Google

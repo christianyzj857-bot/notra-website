@@ -68,6 +68,58 @@ body {
   font-style: normal;
 }
 
+/* Math display for complex formulas with fractions */
+.math-display {
+  font-family: "STIX Two Math", "Latin Modern Math", "Cambria Math", "Times New Roman", serif;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  line-height: 1.8;
+  font-size: 1.5rem;
+  font-style: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Fraction styling */
+.math-fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 0 0.25rem;
+}
+
+.math-numerator {
+  border-bottom: 1.5px solid currentColor;
+  padding-bottom: 0.1rem;
+  margin-bottom: 0.1rem;
+}
+
+.math-denominator {
+  padding-top: 0.1rem;
+}
+
+/* Limit with subscript below */
+.math-limit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.25rem;
+}
+
+.math-limit-main {
+  font-size: 1.5rem;
+}
+
+.math-limit-sub {
+  font-size: 0.9rem;
+  margin-top: -0.2rem;
+}
+
 /* Welcome text animation */
 @keyframes welcomeGlow {
   0%, 100% {

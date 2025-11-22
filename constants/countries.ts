@@ -17,11 +17,12 @@ export const COUNTRIES: Country[] = [
   
   // Asia-Pacific
   { id: 'china', label: 'China', flag: '🇨🇳', code: 'CN' },
+  { id: 'china-hongkong', label: 'China · Hong Kong', flag: '🏴', code: 'HK' }, // Hong Kong regional flag (red with white flower)
+  { id: 'china-macao', label: 'China · Macao', flag: '🏴', code: 'MO' }, // Macao regional flag (green with white flower)
+  { id: 'china-taiwan', label: 'China · Taiwan', flag: '📍', code: 'TW' }, // Neutral icon instead of flag
   { id: 'japan', label: 'Japan', flag: '🇯🇵', code: 'JP' },
   { id: 'southkorea', label: 'South Korea', flag: '🇰🇷', code: 'KR' },
   { id: 'singapore', label: 'Singapore', flag: '🇸🇬', code: 'SG' },
-  { id: 'hongkong', label: 'Hong Kong', flag: '🇭🇰', code: 'HK' },
-  { id: 'taiwan', label: 'Taiwan', flag: '🇹🇼', code: 'TW' },
   { id: 'india', label: 'India', flag: '🇮🇳', code: 'IN' },
   { id: 'malaysia', label: 'Malaysia', flag: '🇲🇾', code: 'MY' },
   { id: 'thailand', label: 'Thailand', flag: '🇹🇭', code: 'TH' },
