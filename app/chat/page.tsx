@@ -564,7 +564,7 @@ function NotraConsoleContent() {
             setTimeout(() => setShowProModelHint(false), 5000);
           }
         }}
-        className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${active ? 'bg-slate-900 text-white border-slate-900 shadow-md' : (locked) ? 'bg-white/50 text-slate-400 border-transparent cursor-not-allowed' : 'bg-white text-slate-600 border-white/50 hover:border-blue-300 hover:text-blue-600'}`}>
+        className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${active ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500/50 shadow-md shadow-purple-500/30' : (locked) ? 'bg-white/5 text-slate-500 border-white/10 cursor-not-allowed' : 'bg-white/5 text-slate-300 border-white/10 hover:border-purple-500/30 hover:text-purple-300 hover:bg-white/10'}`}>
         {label}
         {isProReq && !isPro && <Lock size={12} className="text-amber-500" />}
       </button>
@@ -572,24 +572,37 @@ function NotraConsoleContent() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F0F4F8] font-sans overflow-hidden relative">
+    <div className="flex h-screen bg-[#0B0C15] font-sans overflow-hidden relative">
       {/* Enhanced Sci-Fi Background with Dynamic Effects */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Animated gradient orbs */}
         <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-gradient-to-br from-blue-400/40 via-indigo-400/30 to-cyan-400/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{animationDuration: '8s'}}/>
-        <div className="absolute top-[20%] -right-[10%] w-[60vw] h-[60vw] bg-gradient-to-br from-indigo-400/40 via-purple-400/30 to-pink-400/40 rounded-full blur-[100px] mix-blend-multiply animate-pulse" style={{animationDuration: '12s', animationDelay: '2s'}} />
-        <div className="absolute -bottom-[20%] left-[20%] w-[60vw] h-[60vw] bg-gradient-to-br from-purple-400/40 via-blue-400/30 to-indigo-400/40 rounded-full blur-[110px] mix-blend-multiply animate-pulse" style={{animationDuration: '10s', animationDelay: '4s'}} />
+        {/* Dark Purple-Tinted Background - Academic & Futuristic */}
+        <div className="absolute inset-0 -z-20 bg-[#0B0C15]" />
         
-        {/* Grid pattern overlay for tech feel */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
-        }}></div>
+        {/* Purple-tinted Glowing Gradients */}
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-600/25 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/15 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '12s' }} />
         
-        {/* Floating particles effect */}
-        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400/30 rounded-full blur-sm animate-ping" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
-        <div className="absolute top-1/3 right-1/4 w-1.5 h-1.5 bg-indigo-400/40 rounded-full blur-sm animate-ping" style={{animationDuration: '4s', animationDelay: '1s'}}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-purple-400/30 rounded-full blur-sm animate-ping" style={{animationDuration: '5s', animationDelay: '2s'}}></div>
+        {/* Grid pattern overlay for academic tech feel */}
+        <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.04] bg-center"></div>
+        
+        {/* Floating academic particles - subtle purple glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          {[...Array(12)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `particle-float ${10 + Math.random() * 20}s infinite linear`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <Sidebar 
@@ -603,15 +616,15 @@ function NotraConsoleContent() {
 
       <div className="flex-1 flex flex-col h-full relative min-w-0 z-10">
         
-        <header className="h-auto min-h-[80px] flex flex-col gap-3 px-6 md:px-8 py-3 bg-white/80 backdrop-blur-xl border-b border-white/60 shadow-sm relative">
-          {/* Subtle animated border glow */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+        <header className="h-auto min-h-[80px] flex flex-col gap-3 px-6 md:px-8 py-3 bg-[#0F111A]/90 backdrop-blur-xl border-b border-white/10 shadow-sm relative">
+          {/* Subtle animated border glow - purple tinted */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 via-indigo-500/50 to-transparent"></div>
           
           {/* Top row: Logo and Model Selection */}
           <div className="flex items-center justify-between">
            <div className="flex items-center gap-4">
-             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 bg-white/50 rounded-lg">
-               <Menu size={20} />
+             <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 bg-white/10 rounded-lg border border-white/10">
+               <Menu size={20} className="text-white" />
              </button>
              <div className="flex flex-col">
                <div className="flex items-center gap-2">
@@ -621,16 +634,16 @@ function NotraConsoleContent() {
            </div>
            
            <div className="flex items-center gap-4">
-             <div className="hidden md:flex items-center gap-2 text-xs font-medium bg-white/40 px-3 py-1.5 rounded-full border border-white/50">
+             <div className="hidden md:flex items-center gap-2 text-xs font-medium bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
                  {isPro ? 
-                   <span className="text-amber-500 flex items-center gap-1"><Sparkles className="w-3 h-3" /> PRO Active</span> : 
-                   <span className="text-slate-500">Free Plan</span>
+                   <span className="text-amber-400 flex items-center gap-1"><Sparkles className="w-3 h-3" /> PRO Active</span> : 
+                   <span className="text-slate-400">Free Plan</span>
                  }
                  {/* 升级按钮，点击跳转到 Pricing */}
-                 {!isPro && <Link href="/pricing" className="text-blue-600 underline hover:text-blue-700 ml-2">Upgrade</Link>}
+                 {!isPro && <Link href="/pricing" className="text-purple-400 underline hover:text-purple-300 ml-2">Upgrade</Link>}
              </div>
 
-             <div className="flex gap-2 bg-slate-200/50 p-1 rounded-2xl backdrop-blur-sm">
+             <div className="flex gap-2 bg-white/5 p-1 rounded-2xl backdrop-blur-sm border border-white/10">
                <ModelBtn id="openai-mini" label="4o-Mini" /><ModelBtn id="openai" label="GPT-4o" isProReq /><ModelBtn id="openai-5" label="GPT-5.1" isProReq />
              </div>
            </div>
@@ -639,7 +652,7 @@ function NotraConsoleContent() {
           {/* Bottom row: Mode Selection & Plan Info */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex gap-2 bg-slate-200/50 p-1 rounded-xl backdrop-blur-sm">
+              <div className="flex gap-2 bg-white/5 p-1 rounded-xl backdrop-blur-sm border border-white/10">
                 <button
                   onClick={() => {
                     if (mode === "note" && !urlSessionId) {
@@ -650,8 +663,8 @@ function NotraConsoleContent() {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     mode === "general"
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-white/50'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30'
+                      : 'text-slate-300 hover:bg-white/10'
                   }`}
                 >
                   <MessageSquare className="w-4 h-4 inline-block mr-2" />
@@ -667,8 +680,8 @@ function NotraConsoleContent() {
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     mode === "note"
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-slate-600 hover:bg-white/50'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30'
+                      : 'text-slate-300 hover:bg-white/10'
                   }`}
                 >
                   <BookOpen className="w-4 h-4 inline-block mr-2" />
@@ -677,20 +690,20 @@ function NotraConsoleContent() {
               </div>
               
               {mode === "note" && sessionTitle && (
-                <div className="px-3 py-1 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-700">
+                <div className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-purple-300">
                   From: {sessionTitle}
                 </div>
               )}
             </div>
 
-            {/* Plan & Model Info */}
+            {/* Plan & Model Info - Dark Theme */}
             <div className="flex items-center gap-4 flex-wrap">
               {userPlan === 'free' ? (
-                <p className="text-sm text-slate-600">
-                  Free plan – Using GPT-4o-mini. <NextLink href="/pricing" className="text-indigo-600 hover:underline">Upgrade</NextLink> to unlock GPT-4o & GPT-5.1.
+                <p className="text-sm text-slate-400">
+                  Free plan – Using GPT-4o-mini. <NextLink href="/pricing" className="text-purple-400 hover:text-purple-300 hover:underline">Upgrade</NextLink> to unlock GPT-4o & GPT-5.1.
                 </p>
               ) : (
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-400">
                   Pro plan – You have access to GPT-4o & GPT-5.1.
                 </p>
               )}
@@ -707,20 +720,20 @@ function NotraConsoleContent() {
               )}
             </div>
 
-            {/* Pro Model Upgrade Hint */}
+            {/* Pro Model Upgrade Hint - Dark Theme */}
             {showProModelHint && (
-              <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-lg animate-in slide-in-from-top-2">
-                <p className="text-sm text-indigo-900 mb-3">{proModelHintMessage}</p>
+              <div className="bg-purple-500/10 border-l-4 border-purple-500/50 p-4 rounded-lg animate-in slide-in-from-top-2 backdrop-blur-sm">
+                <p className="text-sm text-purple-200 mb-3">{proModelHintMessage}</p>
                 <div className="flex items-center gap-3">
                   <NextLink
                     href="/pricing"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-sm font-semibold hover:from-purple-500 hover:to-indigo-500 transition-colors shadow-lg shadow-purple-500/30"
                   >
                     View Pro plans
                   </NextLink>
                   <button
                     onClick={() => setShowProModelHint(false)}
-                    className="px-4 py-2 text-indigo-600 text-sm font-semibold hover:text-indigo-700 transition-colors"
+                    className="px-4 py-2 text-purple-400 text-sm font-semibold hover:text-purple-300 transition-colors"
                   >
                     Maybe later
                   </button>
@@ -734,8 +747,8 @@ function NotraConsoleContent() {
           <div className="max-w-4xl mx-auto pb-4">
              {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
              
-             {isThinking && <div className="flex justify-start mb-6"><div className="bg-white/80 backdrop-blur-sm border border-white/60 rounded-[2rem] shadow-sm"><ThinkingIndicator /></div></div>}
-             {isTranscribing && <div className="flex justify-center my-4"><div className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-3 shadow-lg animate-pulse"><Loader2 size={16} className="animate-spin" /> Processing Audio...</div></div>}
+             {isThinking && <div className="flex justify-start mb-6"><div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-[2rem] shadow-sm"><ThinkingIndicator /></div></div>}
+             {isTranscribing && <div className="flex justify-center my-4"><div className="bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 text-purple-200 px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-3 shadow-lg shadow-purple-500/20 animate-pulse"><Loader2 size={16} className="animate-spin" /> Processing Audio...</div></div>}
              
              <div ref={messagesEndRef} />
           </div>
@@ -744,17 +757,17 @@ function NotraConsoleContent() {
         <div className="p-6 pb-8">
           <div className="max-w-4xl mx-auto relative">
              {(pendingImage || pendingFile) && (
-               <div className="absolute bottom-full left-0 mb-4 p-2 bg-white rounded-2xl shadow-xl border border-white/50 flex items-center gap-3 animate-in slide-in-from-bottom-2">
+               <div className="absolute bottom-full left-0 mb-4 p-2 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 flex items-center gap-3 animate-in slide-in-from-bottom-2">
                   {pendingImage && <img src={pendingImage} alt="Preview" className="h-14 w-14 object-cover rounded-xl" />}
-                  {pendingFile && <div className="h-14 w-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><FileText size={24} /></div>}
-                  <button onClick={() => {setPendingImage(null); setPendingFile(null)}} className="bg-slate-100 rounded-full p-1 hover:bg-red-100 hover:text-red-500"><X size={14} /></button>
+                  {pendingFile && <div className="h-14 w-14 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-xl flex items-center justify-center"><FileText size={24} /></div>}
+                  <button onClick={() => {setPendingImage(null); setPendingFile(null)}} className="bg-white/10 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-full p-1 transition-colors"><X size={14} /></button>
                </div>
              )}
 
-             <div className="bg-white/90 backdrop-blur-xl border border-white/80 rounded-[2rem] shadow-2xl shadow-blue-900/10 p-2 transition-all focus-within:ring-2 focus-within:ring-blue-500/30 focus-within:scale-[1.01] focus-within:shadow-blue-500/20 relative overflow-hidden">
-               {/* Subtle animated gradient border */}
+             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl shadow-purple-900/10 p-2 transition-all focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:scale-[1.01] focus-within:shadow-purple-500/20 relative overflow-hidden">
+               {/* Subtle animated gradient border - purple tinted */}
                <div className="absolute inset-0 rounded-[2rem] opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
-                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-[2rem] blur-xl"></div>
+                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-violet-500/20 rounded-[2rem] blur-xl"></div>
                </div>
                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex flex-col relative z-10">
                   <textarea 
@@ -764,14 +777,14 @@ function NotraConsoleContent() {
                     placeholder={isRecording ? "🎤 Listening to your lecture..." : "Upload lecture audio, paste a video link, or ask about your notes..."}
                     disabled={isRecording || isTranscribing || isThinking}
                     rows={1}
-                    className="w-full max-h-48 min-h-[56px] bg-transparent border-none focus:ring-0 text-base text-slate-800 placeholder:text-slate-400 resize-none py-4 px-5 leading-relaxed"
+                    className="w-full max-h-48 min-h-[56px] bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-slate-500 resize-none py-4 px-5 leading-relaxed"
                   />
                   
                   <div className="flex items-center justify-between px-3 pb-2">
                     <div className="flex items-center gap-1">
                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.json" />
-                       <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"><Plus size={20} /></button>
-                       <button type="button" onClick={() => setInput(prev => prev + "Plot a bar chart for: ")} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="Generate Chart"><BarChart3 size={20} /></button>
+                       <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-xl transition-colors"><Plus size={20} /></button>
+                       <button type="button" onClick={() => setInput(prev => prev + "Plot a bar chart for: ")} className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/20 rounded-xl transition-colors" title="Generate Chart"><BarChart3 size={20} /></button>
                        <button type="button" onClick={async () => { 
                          const l = prompt("YouTube Link:");
                          if (l) {
@@ -783,11 +796,11 @@ function NotraConsoleContent() {
                              alert("Invalid YouTube link. Please provide a valid YouTube URL.");
                            }
                          }
-                       }} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors" title="Analyze Video Link"><Youtube size={20} /></button>
+                       }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-colors" title="Analyze Video Link"><Youtube size={20} /></button>
                     </div>
                     <div className="flex items-center gap-3">
-                       <button type="button" onClick={isRecording ? stopRecording : startRecording} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${isRecording ? "bg-red-500 text-white animate-pulse" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>{isRecording ? <><StopCircle size={16} /> Stop</> : <><Mic size={16} /></>}</button>
-                       <button type="submit" disabled={(!input.trim() && !pendingImage && !pendingFile) || isSending} className={`p-3 rounded-full transition-all shadow-sm ${(!input.trim() && !pendingImage && !pendingFile) ? "bg-slate-200 text-slate-400" : "bg-slate-900 text-white hover:scale-105"}`}><Send size={18} /></button>
+                       <button type="button" onClick={isRecording ? stopRecording : startRecording} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${isRecording ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30" : "bg-white/10 text-slate-300 hover:bg-white/20 border border-white/10"}`}>{isRecording ? <><StopCircle size={16} /> Stop</> : <><Mic size={16} /></>}</button>
+                       <button type="submit" disabled={(!input.trim() && !pendingImage && !pendingFile) || isSending} className={`p-3 rounded-full transition-all shadow-sm ${(!input.trim() && !pendingImage && !pendingFile) ? "bg-white/10 text-slate-500" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:scale-105 shadow-lg shadow-purple-500/30"}`}><Send size={18} /></button>
                     </div>
                   </div>
                </form>

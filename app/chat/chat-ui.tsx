@@ -77,12 +77,12 @@ export const AIChart = ({ data }: { data: any }) => {
   
   // Pie Chart 特殊处理
   if (data.type === 'pie') {
-    return (
-      <div className="my-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm w-full max-w-lg">
-        <h4 className="text-sm font-bold text-slate-700 mb-4 text-center">{data.title || "Data Visualization"}</h4>
-        <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+  return (
+    <div className="my-4 p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-sm w-full max-w-lg">
+      <h4 className="text-sm font-bold text-white mb-4 text-center">{data.title || "Data Visualization"}</h4>
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
               <Pie
                 data={data.data}
                 cx="50%"
@@ -110,17 +110,17 @@ export const AIChart = ({ data }: { data: any }) => {
   const color = colors[0];
 
   return (
-    <div className="my-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm w-full max-w-lg">
-      <h4 className="text-sm font-bold text-slate-700 mb-4 text-center">{data.title || "Data Visualization"}</h4>
+    <div className="my-4 p-4 bg-white/5 backdrop-blur-lg rounded-2xl border border-white/10 shadow-sm w-full max-w-lg">
+      <h4 className="text-sm font-bold text-white mb-4 text-center">{data.title || "Data Visualization"}</h4>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ChartComponent data={data.data}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
             <XAxis dataKey="name" fontSize={12} stroke="#94A3B8" tickLine={false} axisLine={false} />
             <YAxis fontSize={12} stroke="#94A3B8" tickLine={false} axisLine={false} label={{ value: data.yLabel, angle: -90, position: 'insideLeft' }}/>
             <Tooltip 
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-              cursor={{ fill: '#F1F5F9' }}
+              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.3)', background: 'rgba(15, 17, 26, 0.95)', color: '#fff' }}
+              cursor={{ fill: 'rgba(255,255,255,0.05)' }}
             />
             <DataComponent 
               type="monotone" 
@@ -210,13 +210,13 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
                 remarkPlugins={[remarkGfm]}
                 components={{
                   p: ({ children }) => (
-                    <p className="mb-3 leading-relaxed text-slate-700">{children}</p>
+                    <p className="mb-3 leading-relaxed text-slate-200">{children}</p>
                   ),
                   strong: ({ children }) => (
-                    <strong className="font-semibold text-slate-900">{children}</strong>
+                    <strong className="font-semibold text-white">{children}</strong>
                   ),
                   hr: () => (
-                    <hr className="my-4 border-slate-200" />
+                    <hr className="my-4 border-white/10" />
                   ),
                   ul: ({ children }) => (
                     <ul className="list-none space-y-3 my-4">{children}</ul>
@@ -228,12 +228,12 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
                       const parts = text.split(/\s{2,}/); // 按两个或更多空格分割
                       return (
                         <li className="flex flex-col gap-1 py-1">
-                          <span className="font-semibold text-slate-900">{parts[0]}</span>
-                          {parts[1] && <span className="text-slate-600 text-sm ml-6">{parts[1]}</span>}
+                          <span className="font-semibold text-white">{parts[0]}</span>
+                          {parts[1] && <span className="text-slate-300 text-sm ml-6">{parts[1]}</span>}
                         </li>
                       );
                     }
-                    return <li className="text-slate-700">{children}</li>;
+                    return <li className="text-slate-200">{children}</li>;
                   },
                 }}
               >
@@ -250,11 +250,11 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
     <div className={`flex gap-4 mb-6 animate-in fade-in slide-in-from-bottom-2 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Enhanced Avatar with glow effect */}
       <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center relative group ${
-        isUser ? 'bg-slate-900 shadow-lg shadow-slate-900/30' : 'bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 shadow-lg shadow-blue-500/30'
+        isUser ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30' : 'bg-gradient-to-br from-purple-500 via-indigo-600 to-violet-600 shadow-lg shadow-purple-500/30'
       }`}>
-        {/* Animated ring */}
+        {/* Animated ring - Purple tinted */}
         <div className={`absolute inset-0 rounded-full border-2 ${
-          isUser ? 'border-slate-700' : 'border-blue-400/50'
+          isUser ? 'border-purple-400/50' : 'border-purple-400/50'
         } opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity`}></div>
         
         {isUser ? (
@@ -263,7 +263,7 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
           <div className="relative z-10">
             <Zap className="w-4 h-4 text-white fill-current" />
             {/* Sparkle effect */}
-            <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-cyan-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse"></div>
+            <div className="absolute -top-1 -right-1 w-1.5 h-1.5 bg-purple-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse"></div>
           </div>
         )}
       </div>
@@ -283,14 +283,14 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
           <div className="relative z-10">
             {/* 用户消息：显示图片或文件 */}
             {isUser && msg.imageUrl && (
-              <div className="mb-3 rounded-xl overflow-hidden ring-2 ring-slate-700/50 shadow-lg">
+              <div className="mb-3 rounded-xl overflow-hidden ring-2 ring-white/20 shadow-lg">
                 <img src={msg.imageUrl} alt="Uploaded" className="max-w-full h-auto max-h-64 object-contain" />
               </div>
             )}
             
             {isUser && msg.fileName && (
-              <div className="mb-3 flex items-center gap-2 text-sm bg-slate-800/60 px-3 py-2 rounded-lg border border-slate-700/50">
-                <FileText size={16} className="text-blue-300" />
+              <div className="mb-3 flex items-center gap-2 text-sm bg-white/5 px-3 py-2 rounded-lg border border-white/10">
+                <FileText size={16} className="text-purple-300" />
                 <span>{msg.fileName}</span>
               </div>
             )}
@@ -307,9 +307,9 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
             )}
           </div>
           
-          {/* Decorative corner accent for AI messages */}
+          {/* Decorative corner accent for AI messages - Purple tinted */}
           {!isUser && (
-            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-blue-400/10 to-transparent rounded-bl-2xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-2xl pointer-events-none"></div>
           )}
         </div>
       </div>
@@ -335,43 +335,43 @@ export const Sidebar = ({
 }) => {
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - Dark Theme */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
           onClick={toggle}
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar - Dark Theme */}
       <aside className={`
         fixed md:static inset-y-0 left-0 z-50
-        w-80 bg-white/95 backdrop-blur-xl border-r border-slate-200/50
+        w-80 bg-[#0F111A]/90 backdrop-blur-xl border-r border-white/10
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         flex flex-col
       `}>
         {/* Header */}
-        <div className="h-20 flex items-center justify-between px-6 border-b border-slate-200/50">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-white/10">
           <button
             onClick={onNewChat}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all text-sm font-semibold shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all text-sm font-semibold shadow-lg shadow-purple-500/30"
           >
             <Plus size={18} />
             New Chat
           </button>
           <button
             onClick={toggle}
-            className="md:hidden p-2 hover:bg-slate-100 rounded-lg"
+            className="md:hidden p-2 hover:bg-white/10 rounded-lg"
           >
-            <X size={20} className="text-slate-600" />
+            <X size={20} className="text-white" />
           </button>
         </div>
         
-        {/* History List */}
+        {/* History List - Dark Theme */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {history.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-slate-500">
               <History size={32} className="mx-auto mb-3 opacity-50" />
               <p className="text-sm">No chat history yet</p>
             </div>
@@ -383,8 +383,8 @@ export const Sidebar = ({
                 className={`
                   w-full text-left px-4 py-3 rounded-xl transition-all
                   ${currentSessionId === session.id
-                    ? 'bg-slate-900 text-white shadow-md'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700'
+                    ? 'bg-gradient-to-r from-purple-600/30 to-indigo-600/30 text-white border border-purple-500/30 shadow-md shadow-purple-500/20'
+                    : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
                   }
                 `}
               >
@@ -394,7 +394,7 @@ export const Sidebar = ({
                     {session.title || "New Chat"}
                   </span>
                 </div>
-                <div className={`text-xs ${currentSessionId === session.id ? 'text-slate-300' : 'text-slate-400'}`}>
+                <div className={`text-xs ${currentSessionId === session.id ? 'text-slate-300' : 'text-slate-500'}`}>
                   {new Date(session.timestamp).toLocaleDateString()}
                 </div>
               </button>
@@ -402,11 +402,11 @@ export const Sidebar = ({
           )}
         </div>
         
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-200/50">
+        {/* Footer - Dark Theme */}
+        <div className="p-4 border-t border-white/10">
           <Link
             href="/pricing"
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-400 hover:bg-purple-500/20 rounded-xl transition-colors border border-purple-500/20"
           >
             <Sparkles size={16} />
             Upgrade to Pro

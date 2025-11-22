@@ -355,7 +355,7 @@ const Features = () => {
       desc: "Paste a video link from platforms like YouTube, Bilibili or classroom recordings, and Notra will generate summaries, key concepts, quizzes and flashcards from the content.",
       icon: Video,
       bullets: ["YouTube & Bilibili Support", "Key Moment Extraction", "Auto-generated Quizzes"],
-      image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=2874&auto=format&fit=crop"
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop"
     },
     {
       title: "Context-Aware Tutor",
