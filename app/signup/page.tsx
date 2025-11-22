@@ -28,14 +28,16 @@ export default function SignupPage() {
     setError('');
 
     // TODO: Implement actual signup logic with backend
-    // For now, just simulate signup and redirect to dashboard
+    // For now, just simulate signup and redirect to HOME (not dashboard)
     setTimeout(() => {
       setIsLoading(false);
       // Store user info (mock for now)
       if (typeof window !== 'undefined') {
         localStorage.setItem('user_email', email);
         localStorage.setItem('user_name', name || 'Notra Learner');
-        window.location.href = '/dashboard';
+        localStorage.setItem('user_logged_in', 'true');
+        // Redirect to HOME page (not dashboard) - user can access Dashboard from Home
+        window.location.href = '/';
       }
     }, 1000);
   };

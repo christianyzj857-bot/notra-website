@@ -1,40 +1,57 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { onboardingSamples, type OnboardingRole } from '../config';
+import { type OnboardingRole } from '@/types/notra';
+import { type QuizItem } from '@/types/notra';
+import { type OnboardingSampleBundle } from '@/types/notra';
 
 export default function OnboardingStep5() {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
-  const [quiz, setQuiz] = useState(onboardingSamples['other'].quiz[0]);
+  const [quiz, setQuiz] = useState<QuizItem | null>(null);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
 
   useEffect(() => {
-    // Check if user came from step4 and get role
+    // Check if user came from step4 and get sample data from localStorage
     if (typeof window !== 'undefined') {
       const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
       if (!stage) {
         window.location.href = '/onboarding/step1';
-      } else {
-        setOnboardingRole(stage);
-        const sampleData = onboardingSamples[stage] || onboardingSamples['other'];
-        setQuiz(sampleData.quiz[0]);
+        return;
+      }
+      
+      setOnboardingRole(stage);
+      
+      // Get sample data from localStorage (stored during drag-and-drop)
+      const sampleDataStr = localStorage.getItem('onboarding_sample_data');
+      if (sampleDataStr) {
+        try {
+          const sampleBundle: OnboardingSampleBundle = JSON.parse(sampleDataStr);
+          if (sampleBundle.quizzes && sampleBundle.quizzes.length > 0) {
+            // Show first quiz
+            setQuiz(sampleBundle.quizzes[0]);
+          }
+        } catch (e) {
+          console.error('Failed to parse sample data:', e);
+        }
       }
     }
   }, []);
 
   const handleAnswerClick = (index: number) => {
-    if (selectedAnswer !== null) return; // Prevent multiple clicks
+    if (!quiz || selectedAnswer !== null) return; // Prevent multiple clicks
     
     setSelectedAnswer(index);
-    setIsCorrect(index === quiz.correctAnswer);
+    const correct = index === quiz.correctIndex;
+    setIsCorrect(correct);
     setShowFeedback(true);
 
-    // Auto navigate to Step 6 after 1 second
+    // Auto navigate to Step 6 after showing feedback (2 seconds)
     setTimeout(() => {
       window.location.href = '/onboarding/step6';
-    }, 1000);
+    }, 2000);
   };
 
   return (
@@ -57,63 +74,90 @@ export default function OnboardingStep5() {
         </div>
 
         {/* Question Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-6">
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-8">
-            {quiz.question}
-          </h2>
+        {quiz && (
+          <div className={`bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-6 transition-all duration-300 ${
+            showFeedback 
+              ? (isCorrect ? 'border-2 border-green-500' : 'border-2 border-red-300')
+              : 'border border-slate-200'
+          }`}>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-8">
+              {quiz.question}
+            </h2>
 
-          <div className="space-y-4">
-            {quiz.options.map((option, index) => {
-              const isSelected = selectedAnswer === index;
-              const isCorrectOption = index === quiz.correctAnswer;
-              
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleAnswerClick(index)}
-                  disabled={selectedAnswer !== null}
-                  className={`
-                    w-full p-6 rounded-2xl border-2 text-left transition-all duration-300
-                    ${isSelected
-                      ? isCorrectOption
-                        ? 'border-green-500 bg-green-50 shadow-lg'
-                        : 'border-red-300 bg-red-50'
-                      : 'border-slate-200 hover:border-[#9F6BFF] hover:shadow-md bg-white'
-                    }
-                    ${selectedAnswer !== null && !isSelected ? 'opacity-50' : ''}
-                    ${selectedAnswer === null ? 'hover:scale-[1.02] cursor-pointer' : 'cursor-default'}
-                  `}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`
-                      w-10 h-10 rounded-xl flex items-center justify-center font-bold
-                      transition-colors duration-300
+            <div className="space-y-4">
+              {quiz.options.map((option, index) => {
+                const isSelected = selectedAnswer === index;
+                const isCorrectOption = index === quiz.correctIndex;
+                
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerClick(index)}
+                    disabled={selectedAnswer !== null}
+                    className={`
+                      w-full p-6 rounded-2xl border-2 text-left transition-all duration-300
                       ${isSelected
                         ? isCorrectOption
-                          ? 'bg-green-500 text-white'
-                          : 'bg-red-400 text-white'
-                        : 'bg-slate-100 text-slate-600'
+                          ? 'border-green-500 bg-green-50 shadow-lg scale-[1.02]'
+                          : 'border-red-300 bg-red-50 animate-[shake_0.5s_ease-in-out]'
+                        : 'border-slate-200 hover:border-[#9F6BFF] hover:shadow-md bg-white'
                       }
-                    `}>
-                      {String.fromCharCode(65 + index)}
+                      ${selectedAnswer !== null && !isSelected && !isCorrectOption ? 'opacity-60' : ''}
+                      ${selectedAnswer === null ? 'hover:scale-[1.02] cursor-pointer' : 'cursor-default'}
+                    `}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`
+                        w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg
+                        transition-all duration-300
+                        ${isSelected
+                          ? isCorrectOption
+                            ? 'bg-green-500 text-white shadow-lg'
+                            : 'bg-red-400 text-white'
+                          : 'bg-slate-100 text-slate-600'
+                        }
+                        ${isSelected && isCorrectOption ? 'scale-110' : ''}
+                      `}>
+                        {isSelected && isCorrectOption ? '✓' : isSelected ? '✗' : option.label}
+                      </div>
+                      <span className="text-lg font-medium text-slate-900 flex-1">
+                        {option.text}
+                      </span>
+                      {isSelected && isCorrectOption && (
+                        <span className="text-2xl">✅</span>
+                      )}
+                      {isSelected && !isCorrectOption && (
+                        <span className="text-2xl">❌</span>
+                      )}
                     </div>
-                    <span className="text-lg font-medium text-slate-900 flex-1">
-                      {option}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+                  </button>
+                );
+              })}
+            </div>
 
-        {/* Feedback Message */}
-        {showFeedback && (
-          <div className={`
-            text-center p-4 rounded-xl font-semibold text-lg animate-in fade-in slide-in-from-bottom-4
-            ${isCorrect ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}
-          `}>
-            {isCorrect ? 'Correct! ✅' : 'Good try! 💪'}
+            {/* Explanation (shown after answer) */}
+            {showFeedback && quiz.explanation && (
+              <div className={`mt-6 p-4 rounded-xl border-l-4 ${
+                isCorrect ? 'bg-green-50 border-green-500' : 'bg-orange-50 border-orange-500'
+              } animate-in fade-in slide-in-from-bottom-2`}>
+                <p className={`font-semibold mb-2 ${
+                  isCorrect ? 'text-green-800' : 'text-orange-800'
+                }`}>
+                  {isCorrect ? '✅ Correct!' : '❌ Try again'}
+                </p>
+                <p className={`text-sm leading-relaxed ${
+                  isCorrect ? 'text-green-700' : 'text-orange-700'
+                }`}>
+                  {quiz.explanation}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!quiz && (
+          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center">
+            <p className="text-slate-600">Loading quiz...</p>
           </div>
         )}
       </div>

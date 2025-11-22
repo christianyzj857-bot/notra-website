@@ -14,15 +14,34 @@ export default function OnboardingStep2() {
   const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
   const [sampleFile, setSampleFile] = useState(ONBOARDING_SAMPLES.find(s => s.role === 'other')?.file || ONBOARDING_SAMPLES[0].file);
 
-  // Check if user came from step1 and get role
+  // Check if user came from step2-location and get role
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
+      const country = localStorage.getItem('onboarding_country');
+      const contentLanguage = localStorage.getItem('onboarding_content_language');
+      
+      // Must have completed step1 and step2-location
       if (!stage) {
         window.location.href = '/onboarding/step1';
-      } else {
-        setOnboardingRole(stage as OnboardingRole);
-        const sample = ONBOARDING_SAMPLES.find(s => s.role === stage) || ONBOARDING_SAMPLES.find(s => s.role === 'other') || ONBOARDING_SAMPLES[0];
+        return;
+      }
+      
+      // Optional: Check country and language are set
+      if (!country || !contentLanguage) {
+        // If missing, go back to step2-location
+        window.location.href = '/onboarding/step2-location';
+        return;
+      }
+      
+      setOnboardingRole(stage as OnboardingRole);
+      
+      // Use sample mapping to get the correct sample for this role
+      const sample = ONBOARDING_SAMPLES.find(s => s.role === stage) || 
+                     ONBOARDING_SAMPLES.find(s => s.role === 'other') || 
+                     ONBOARDING_SAMPLES[0];
+      
+      if (sample) {
         setSampleFile(sample.file);
       }
     }
@@ -40,18 +59,38 @@ export default function OnboardingStep2() {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsDragging(false);
     
     // Check if this is the sample file being dragged
-    const draggedElement = e.dataTransfer.getData('text/plain');
-    if (draggedElement === `sample-file-${onboardingRole}`) {
-      // This is the sample file - allow it
-      setHasDroppedSample(true);
-      handleSampleFileUpload();
-    } else {
-      // User tried to drop their own file - ignore it
+    const draggedData = e.dataTransfer.getData('text/plain');
+    const isSampleFile = draggedData === `sample-file-${onboardingRole}` || draggedData.includes('sample-file');
+    
+    if (!isSampleFile) {
+      // User tried to drop their own file - ignore it completely
       return;
     }
+    
+    // FIX: First drop should work immediately - set all state and navigate in one go
+    setHasDroppedSample(true);
+    
+    // Store file info and sample data immediately (before navigation)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('onboarding_file_name', sampleFile.title);
+      localStorage.setItem('onboarding_file_type', 'application/pdf');
+      
+      // Store the full sample bundle for later use in notes/quiz/flashcards
+      const sampleBundle = ONBOARDING_SAMPLES.find(s => s.role === onboardingRole) || 
+                          ONBOARDING_SAMPLES.find(s => s.role === 'other') || 
+                          ONBOARDING_SAMPLES[0];
+      if (sampleBundle) {
+        localStorage.setItem('onboarding_sample_data', JSON.stringify(sampleBundle));
+      }
+    }
+    
+    // Navigate to Step 3 immediately (no delay, no setTimeout)
+    // This ensures first drop works immediately
+    window.location.href = '/onboarding/step3';
   };
 
   // Disable file input - users cannot upload their own files
@@ -64,15 +103,16 @@ export default function OnboardingStep2() {
   };
 
   const handleSampleFileUpload = () => {
-    if (!hasDroppedSample) {
-      // This should only be called after successful drop
-      return;
-    }
-    
-    // Store file info temporarily (client-side only)
+    // Store file info and sample data temporarily (client-side only)
     if (typeof window !== 'undefined') {
       localStorage.setItem('onboarding_file_name', sampleFile.title);
       localStorage.setItem('onboarding_file_type', 'application/pdf');
+      
+      // Store the full sample bundle for later use in notes/quiz/flashcards
+      const sampleBundle = ONBOARDING_SAMPLES.find(s => s.role === onboardingRole) || 
+                          ONBOARDING_SAMPLES.find(s => s.role === 'other') || 
+                          ONBOARDING_SAMPLES[0];
+      localStorage.setItem('onboarding_sample_data', JSON.stringify(sampleBundle));
     }
     
     // Navigate to Step 3 after a brief delay
@@ -92,17 +132,24 @@ export default function OnboardingStep2() {
     setIsDraggingSample(false);
   };
 
-  const handleSampleClick = () => {
-    // Click only shows hint, doesn't upload
+  const handleSampleClick = (e: React.MouseEvent) => {
+    // Prevent any navigation or upload on click - ONLY drag is allowed
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Click only shows hint and animation, NEVER uploads or navigates
     setShowClickHint(true);
     
-    // Add animation effect
+    // Add shake animation to indicate "wrong action"
     const card = document.getElementById('sample-file-card');
     if (card) {
-      card.classList.add('animate-bounce');
+      // Remove any existing animation classes
+      card.classList.remove('animate-bounce');
+      // Add shake effect
+      card.style.animation = 'shake 0.5s ease-in-out';
       setTimeout(() => {
-        card.classList.remove('animate-bounce');
-      }, 1000);
+        card.style.animation = '';
+      }, 500);
     }
     
     // Hide hint after 3 seconds
@@ -183,10 +230,14 @@ export default function OnboardingStep2() {
           
           <div
             id="sample-file-card"
-            draggable
+            draggable={true}
             onDragStart={handleSampleDragStart}
             onDragEnd={handleSampleDragEnd}
             onClick={handleSampleClick}
+            onMouseDown={(e) => {
+              // Prevent any default click behavior
+              e.stopPropagation();
+            }}
             className={`
               bg-white rounded-2xl p-6 border-2 border-slate-200 cursor-move
               transition-all duration-300
@@ -195,6 +246,9 @@ export default function OnboardingStep2() {
                 : 'hover:border-[#9F6BFF]/50 hover:shadow-lg hover:scale-105'
               }
             `}
+            style={{
+              userSelect: 'none', // Prevent text selection
+            } as React.CSSProperties}
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0">
