@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="60" height="40">
+  <!-- Green background -->
+  <rect width="900" height="600" fill="#006847"/>
+  <!-- Lotus flower (simplified) -->
+  <g transform="translate(450,300)">
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="35" fill="#FFFFFF"/>
+    <!-- 5 petals around -->
+    <ellipse cx="0" cy="-50" rx="25" ry="35" fill="#FFFFFF" transform="rotate(0)"/>
+    <ellipse cx="42" cy="-25" rx="25" ry="35" fill="#FFFFFF" transform="rotate(72)"/>
+    <ellipse cx="42" cy="25" rx="25" ry="35" fill="#FFFFFF" transform="rotate(144)"/>
+    <ellipse cx="0" cy="50" rx="25" ry="35" fill="#FFFFFF" transform="rotate(216)"/>
+    <ellipse cx="-42" cy="25" rx="25" ry="35" fill="#FFFFFF" transform="rotate(288)"/>
+    <!-- Bridge symbol (simplified) -->
+    <path d="M -80,20 Q 0,0 80,20" stroke="#FFD700" stroke-width="8" fill="none"/>
+  </g>
+</svg>
+

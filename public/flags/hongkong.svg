@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="60" height="40">
+  <!-- Red background -->
+  <rect width="900" height="600" fill="#DE2910"/>
+  <!-- Bauhinia flower (simplified) -->
+  <g transform="translate(450,300)">
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="40" fill="#FFFFFF"/>
+    <!-- 5 petals -->
+    <path d="M 0,-60 L 15,-45 L 0,-30 L -15,-45 Z" fill="#FF0000"/>
+    <path d="M 60,0 L 45,15 L 30,0 L 45,-15 Z" fill="#FF0000"/>
+    <path d="M 0,60 L -15,45 L 0,30 L 15,45 Z" fill="#FF0000"/>
+    <path d="M -60,0 L -45,-15 L -30,0 L -45,15 Z" fill="#FF0000"/>
+    <path d="M 42,-42 L 52,-32 L 42,-22 L 32,-32 Z" fill="#FF0000"/>
+  </g>
+</svg>
+

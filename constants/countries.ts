@@ -16,10 +16,10 @@ export const COUNTRIES: Country[] = [
   { id: 'ireland', label: 'Ireland', flag: '🇮🇪', code: 'IE' },
   
   // Asia-Pacific
-  { id: 'china', label: 'China', flag: '🇨🇳', code: 'CN' },
-  { id: 'china-hongkong', label: 'China · Hong Kong', flag: '🏴', code: 'HK' }, // Hong Kong regional flag (red with white flower)
-  { id: 'china-macao', label: 'China · Macao', flag: '🏴', code: 'MO' }, // Macao regional flag (green with white flower)
-  { id: 'china-taiwan', label: 'China · Taiwan', flag: '📍', code: 'TW' }, // Neutral icon instead of flag
+  { id: 'china', label: 'China', flag: '/flags/china.svg', code: 'CN' },
+  { id: 'china-hongkong', label: 'China · Hong Kong', flag: '/flags/hongkong.svg', code: 'HK' },
+  { id: 'china-macao', label: 'China · Macao', flag: '/flags/macao.svg', code: 'MO' },
+  { id: 'china-taiwan', label: 'China · Taiwan (Taipei)', flag: '/flags/taiwan-blossom.svg', code: 'TW' },
   { id: 'japan', label: 'Japan', flag: '🇯🇵', code: 'JP' },
   { id: 'southkorea', label: 'South Korea', flag: '🇰🇷', code: 'KR' },
   { id: 'singapore', label: 'Singapore', flag: '🇸🇬', code: 'SG' },

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Globe, Check, Search } from 'lucide-react';
+import Image from 'next/image';
 import { COUNTRIES, searchCountries, type Country } from '@/constants/countries';
 
 // Custom Link component (matching existing pattern)
@@ -133,15 +134,17 @@ export default function OnboardingStep2Country() {
                       ${isAnimating && !isSelected ? 'opacity-50' : ''}
                     `}
                   >
-                    <div className="text-3xl mb-2">
-                      {country.id === 'china-hongkong' ? (
-                        <span className="text-2xl">🏴</span> // Hong Kong regional flag (red with white flower)
-                      ) : country.id === 'china-macao' ? (
-                        <span className="text-2xl">🏴</span> // Macao regional flag (green with white flower) 
-                      ) : country.id === 'china-taiwan' ? (
-                        <span className="text-2xl">📍</span> // Neutral icon for Taiwan
+                    <div className="flex items-center justify-center mb-2 h-10">
+                      {country.id === 'china' || country.id === 'china-hongkong' || country.id === 'china-macao' || country.id === 'china-taiwan' ? (
+                        <Image
+                          src={country.flag}
+                          alt={country.id === 'china' ? 'Flag of China' : country.id === 'china-hongkong' ? 'Flag of China · Hong Kong' : country.id === 'china-macao' ? 'Flag of China · Macao' : 'Flag of China · Taiwan (Taipei)'}
+                          width={60}
+                          height={40}
+                          className="object-contain rounded-sm"
+                        />
                       ) : (
-                        country.flag
+                        <span className="text-3xl">{country.flag}</span>
                       )}
                     </div>
                     <div className="font-semibold text-slate-900 text-sm">{country.label}</div>

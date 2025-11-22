@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="60" height="40">
+  <!-- Blue background -->
+  <rect width="900" height="600" fill="#1C4A8C"/>
+  <!-- White sun (simplified) -->
+  <circle cx="450" cy="300" r="80" fill="#FFFFFF"/>
+  <!-- Red plum blossom (simplified) -->
+  <g transform="translate(450,300)">
+    <!-- 5 petals -->
+    <ellipse cx="0" cy="-50" rx="20" ry="30" fill="#FF0000" transform="rotate(0)"/>
+    <ellipse cx="38" cy="-15" rx="20" ry="30" fill="#FF0000" transform="rotate(72)"/>
+    <ellipse cx="38" cy="15" rx="20" ry="30" fill="#FF0000" transform="rotate(144)"/>
+    <ellipse cx="0" cy="50" rx="20" ry="30" fill="#FF0000" transform="rotate(216)"/>
+    <ellipse cx="-38" cy="15" rx="20" ry="30" fill="#FF0000" transform="rotate(288)"/>
+    <!-- Center circle -->
+    <circle cx="0" cy="0" r="25" fill="#FFFFFF"/>
+  </g>
+</svg>
+
