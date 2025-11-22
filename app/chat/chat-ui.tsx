@@ -250,7 +250,7 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
     <div className={`flex gap-4 mb-6 animate-in fade-in slide-in-from-bottom-2 ${isUser ? 'flex-row-reverse' : ''}`}>
       {/* Enhanced Avatar with glow effect */}
       <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center relative group ${
-        isUser ? 'bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30' : 'bg-gradient-to-br from-purple-500 via-indigo-600 to-violet-600 shadow-lg shadow-purple-500/30'
+        isUser ? 'bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/40' : 'bg-gradient-to-br from-purple-500 via-indigo-600 to-violet-600 shadow-lg shadow-purple-500/30'
       }`}>
         {/* Animated ring - Purple tinted */}
         <div className={`absolute inset-0 rounded-full border-2 ${
@@ -272,26 +272,26 @@ export const MessageBubble = ({ msg }: { msg: ChatMessage }) => {
       <div className={`flex-1 max-w-[85%] md:max-w-[75%] ${isUser ? 'text-right' : ''}`}>
         <div className={`inline-block rounded-2xl px-5 py-4 relative transition-all duration-300 hover:scale-[1.02] ${
           isUser 
-            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' 
-            : 'bg-white/95 backdrop-blur-md border border-white/80 text-slate-800 shadow-lg shadow-blue-900/5'
+            ? 'bg-gradient-to-r from-blue-700 to-indigo-700 text-white shadow-lg shadow-blue-500/40 border border-blue-500/30' 
+            : 'bg-slate-800/80 backdrop-blur-lg border border-slate-700/50 text-slate-200 shadow-lg shadow-slate-900/20'
         }`}>
           {/* Subtle gradient overlay for AI messages */}
           {!isUser && (
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/30 via-transparent to-indigo-50/20 pointer-events-none"></div>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-slate-700/20 via-transparent to-slate-600/10 pointer-events-none"></div>
           )}
           {/* Content wrapper with relative positioning */}
           <div className="relative z-10">
             {/* 用户消息：显示图片或文件 */}
             {isUser && msg.imageUrl && (
-              <div className="mb-3 rounded-xl overflow-hidden ring-2 ring-white/20 shadow-lg">
+              <div className="mb-3 rounded-xl overflow-hidden ring-2 ring-blue-500/30 shadow-lg">
                 <img src={msg.imageUrl} alt="Uploaded" className="max-w-full h-auto max-h-64 object-contain" />
               </div>
             )}
             
             {isUser && msg.fileName && (
-              <div className="mb-3 flex items-center gap-2 text-sm bg-white/5 px-3 py-2 rounded-lg border border-white/10">
-                <FileText size={16} className="text-purple-300" />
-                <span>{msg.fileName}</span>
+              <div className="mb-3 flex items-center gap-2 text-sm bg-blue-500/20 px-3 py-2 rounded-lg border border-blue-500/30">
+                <FileText size={16} className="text-blue-300" />
+                <span className="text-white">{msg.fileName}</span>
               </div>
             )}
             

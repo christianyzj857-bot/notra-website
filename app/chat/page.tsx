@@ -757,17 +757,17 @@ function NotraConsoleContent() {
         <div className="p-6 pb-8">
           <div className="max-w-4xl mx-auto relative">
              {(pendingImage || pendingFile) && (
-               <div className="absolute bottom-full left-0 mb-4 p-2 bg-white/5 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 flex items-center gap-3 animate-in slide-in-from-bottom-2">
+               <div className="absolute bottom-full left-0 mb-4 p-2 bg-slate-800/90 backdrop-blur-lg rounded-2xl shadow-xl border border-slate-600/50 flex items-center gap-3 animate-in slide-in-from-bottom-2">
                   {pendingImage && <img src={pendingImage} alt="Preview" className="h-14 w-14 object-cover rounded-xl" />}
-                  {pendingFile && <div className="h-14 w-14 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-xl flex items-center justify-center"><FileText size={24} /></div>}
-                  <button onClick={() => {setPendingImage(null); setPendingFile(null)}} className="bg-white/10 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-full p-1 transition-colors"><X size={14} /></button>
+                  {pendingFile && <div className="h-14 w-14 bg-blue-500/20 border border-blue-500/30 text-blue-300 rounded-xl flex items-center justify-center"><FileText size={24} /></div>}
+                  <button onClick={() => {setPendingImage(null); setPendingFile(null)}} className="bg-slate-700/50 hover:bg-red-500/20 hover:text-red-400 text-slate-400 rounded-full p-1 transition-colors border border-slate-600/50"><X size={14} /></button>
                </div>
              )}
 
-             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl shadow-purple-900/10 p-2 transition-all focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:scale-[1.01] focus-within:shadow-purple-500/20 relative overflow-hidden">
-               {/* Subtle animated gradient border - purple tinted */}
+             <div className="bg-slate-800/90 backdrop-blur-xl border border-slate-600/50 rounded-[2rem] shadow-2xl shadow-blue-900/20 p-2 transition-all focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:scale-[1.01] focus-within:shadow-blue-500/30 focus-within:border-blue-500/50 relative overflow-hidden">
+               {/* Subtle animated gradient border - blue tinted */}
                <div className="absolute inset-0 rounded-[2rem] opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
-                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-violet-500/20 rounded-[2rem] blur-xl"></div>
+                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-blue-600/20 rounded-[2rem] blur-xl"></div>
                </div>
                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex flex-col relative z-10">
                   <textarea 
@@ -777,14 +777,14 @@ function NotraConsoleContent() {
                     placeholder={isRecording ? "🎤 Listening to your lecture..." : "Upload lecture audio, paste a video link, or ask about your notes..."}
                     disabled={isRecording || isTranscribing || isThinking}
                     rows={1}
-                    className="w-full max-h-48 min-h-[56px] bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-slate-500 resize-none py-4 px-5 leading-relaxed"
+                    className="w-full max-h-48 min-h-[56px] bg-transparent border-none focus:ring-0 text-base text-white placeholder:text-slate-400 resize-none py-4 px-5 leading-relaxed"
                   />
                   
                   <div className="flex items-center justify-between px-3 pb-2">
                     <div className="flex items-center gap-1">
                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.json" />
-                       <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-xl transition-colors"><Plus size={20} /></button>
-                       <button type="button" onClick={() => setInput(prev => prev + "Plot a bar chart for: ")} className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/20 rounded-xl transition-colors" title="Generate Chart"><BarChart3 size={20} /></button>
+                       <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/20 rounded-xl transition-colors border border-transparent hover:border-blue-500/30"><Plus size={20} /></button>
+                       <button type="button" onClick={() => setInput(prev => prev + "Plot a bar chart for: ")} className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/20 rounded-xl transition-colors border border-transparent hover:border-indigo-500/30" title="Generate Chart"><BarChart3 size={20} /></button>
                        <button type="button" onClick={async () => { 
                          const l = prompt("YouTube Link:");
                          if (l) {
@@ -796,11 +796,11 @@ function NotraConsoleContent() {
                              alert("Invalid YouTube link. Please provide a valid YouTube URL.");
                            }
                          }
-                       }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-colors" title="Analyze Video Link"><Youtube size={20} /></button>
+                       }} className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/20 rounded-xl transition-colors border border-transparent hover:border-red-500/30" title="Analyze Video Link"><Youtube size={20} /></button>
                     </div>
                     <div className="flex items-center gap-3">
-                       <button type="button" onClick={isRecording ? stopRecording : startRecording} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${isRecording ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30" : "bg-white/10 text-slate-300 hover:bg-white/20 border border-white/10"}`}>{isRecording ? <><StopCircle size={16} /> Stop</> : <><Mic size={16} /></>}</button>
-                       <button type="submit" disabled={(!input.trim() && !pendingImage && !pendingFile) || isSending} className={`p-3 rounded-full transition-all shadow-sm ${(!input.trim() && !pendingImage && !pendingFile) ? "bg-white/10 text-slate-500" : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:scale-105 shadow-lg shadow-purple-500/30"}`}><Send size={18} /></button>
+                       <button type="button" onClick={isRecording ? stopRecording : startRecording} className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${isRecording ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30" : "bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50"}`}>{isRecording ? <><StopCircle size={16} /> Stop</> : <><Mic size={16} /></>}</button>
+                       <button type="submit" disabled={(!input.trim() && !pendingImage && !pendingFile) || isSending} className={`p-3 rounded-full transition-all shadow-sm ${(!input.trim() && !pendingImage && !pendingFile) ? "bg-slate-700/50 text-slate-500 border border-slate-600/50" : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-105 shadow-lg shadow-blue-500/40 border border-blue-500/30"}`}><Send size={18} /></button>
                     </div>
                   </div>
                </form>
