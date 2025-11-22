@@ -127,7 +127,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           <div className="flex flex-col items-start">
             <Link href="/" className="flex items-center cursor-pointer group">
-              <NotraLogo size="sm" showText={true} variant="default" />
+              <NotraLogo size="lg" showText={true} variant="hero" />
             </Link>
             <div className="mt-1 ml-12">
               <WelcomeUser />

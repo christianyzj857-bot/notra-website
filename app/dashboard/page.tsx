@@ -209,13 +209,13 @@ export default function Dashboard() {
   const getTypeBadgeColor = (type: ProjectType) => {
     switch (type) {
       case 'document':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'audio':
-        return 'bg-purple-100 text-purple-700 border-purple-200';
+        return 'bg-purple-500/20 text-purple-300 border-purple-500/30';
       case 'video':
-        return 'bg-pink-100 text-pink-700 border-pink-200';
+        return 'bg-pink-500/20 text-pink-300 border-pink-500/30';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200';
+        return 'bg-white/10 text-slate-300 border-white/10';
     }
   };
 
@@ -231,19 +231,95 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-blue-200/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '8s' }}></div>
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-200/15 rounded-full blur-[80px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '4s' }}></div>
+    <div className="min-h-screen bg-[#0B0C15] relative overflow-hidden">
+      {/* Sci-fi Dark Background with Particles */}
+      <div className="absolute inset-0 -z-20 bg-[#0B0C15]" />
+      
+      {/* Glowing Gradients */}
+      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[120px] mix-blend-screen" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '12s' }} />
+      
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.03] bg-center"></div>
+      
+      {/* 3D Floating Notebooks - Decorative Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {/* Notebook 1 - Top Right */}
+        <div 
+          className="absolute top-[10%] right-[5%] w-32 h-40 opacity-20"
+          style={{
+            animation: 'notebook-float-3d 8s ease-in-out infinite',
+            animationDelay: '0s',
+          }}
+        >
+          <div className="relative w-full h-full transform-gpu" style={{
+            transformStyle: 'preserve-3d',
+            perspective: '1000px',
+          }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 to-purple-500/30 rounded-xl border border-white/20 backdrop-blur-sm"
+                 style={{
+                   transform: 'rotateY(-15deg) rotateX(10deg)',
+                   boxShadow: '0 10px 40px rgba(99, 102, 241, 0.3)',
+                 }}>
+              <div className="absolute inset-2 rounded-lg bg-slate-900/50"></div>
+              <div className="absolute top-3 left-3 right-3 h-0.5 bg-white/20"></div>
+              <div className="absolute top-6 left-3 right-3 h-0.5 bg-white/10"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Notebook 2 - Bottom Left */}
+        <div 
+          className="absolute bottom-[15%] left-[8%] w-28 h-36 opacity-15"
+          style={{
+            animation: 'notebook-float-3d 10s ease-in-out infinite',
+            animationDelay: '2s',
+          }}
+        >
+          <div className="relative w-full h-full transform-gpu" style={{
+            transformStyle: 'preserve-3d',
+            perspective: '1000px',
+          }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-cyan-500/30 rounded-xl border border-white/20 backdrop-blur-sm"
+                 style={{
+                   transform: 'rotateY(20deg) rotateX(-8deg)',
+                   boxShadow: '0 10px 40px rgba(96, 165, 250, 0.3)',
+                 }}>
+              <div className="absolute inset-2 rounded-lg bg-slate-900/50"></div>
+              <div className="absolute top-3 left-3 right-3 h-0.5 bg-white/20"></div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Notebook 3 - Center Right */}
+        <div 
+          className="absolute top-[50%] right-[15%] w-24 h-32 opacity-10"
+          style={{
+            animation: 'notebook-float-3d 12s ease-in-out infinite',
+            animationDelay: '4s',
+          }}
+        >
+          <div className="relative w-full h-full transform-gpu" style={{
+            transformStyle: 'preserve-3d',
+            perspective: '1000px',
+          }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-xl border border-white/20 backdrop-blur-sm"
+                 style={{
+                   transform: 'rotateY(-10deg) rotateX(5deg)',
+                   boxShadow: '0 10px 40px rgba(139, 92, 246, 0.3)',
+                 }}>
+              <div className="absolute inset-2 rounded-lg bg-slate-900/50"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="flex h-screen overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-        {/* Sidebar */}
+        {/* Sidebar - Dark Theme */}
         <aside className={`
           fixed md:static inset-y-0 left-0 z-40
-          w-64 bg-white/60 backdrop-blur-xl border-r border-slate-200/50
+          w-64 bg-[#0F111A]/90 backdrop-blur-xl border-r border-white/10
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}>
@@ -258,7 +334,7 @@ export default function Dashboard() {
             {/* New Note Button */}
             <button
               onClick={handleNewNote}
-              className="w-full mb-8 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-2"
+              className="w-full mb-8 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               New Note
@@ -266,7 +342,7 @@ export default function Dashboard() {
 
             {/* My Notes Section */}
             <div className="flex-1 overflow-y-auto">
-              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+              <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
                 My Notes
               </h2>
               
@@ -284,20 +360,20 @@ export default function Dashboard() {
                       className={`
                         w-full text-left p-4 rounded-xl border-2 transition-all duration-200
                         ${selectedProject?.id === project.id
-                          ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                          : 'border-slate-200 bg-white/50 hover:border-indigo-300 hover:bg-indigo-50/50'
+                          ? 'border-indigo-500/50 bg-indigo-500/10 shadow-md shadow-indigo-500/20'
+                          : 'border-white/10 bg-white/5 hover:border-indigo-500/30 hover:bg-white/10'
                         }
                       `}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-slate-900 text-sm truncate flex-1">
+                        <h3 className="font-semibold text-white text-sm truncate flex-1">
                           {project.title}
                         </h3>
                         <span className={`ml-2 px-2 py-0.5 rounded-md text-xs font-medium border flex items-center gap-1 ${getTypeBadgeColor(project.type)}`}>
                           {getTypeIcon(project.type)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                      <div className="flex items-center gap-1 text-xs text-slate-400">
                         <Clock className="w-3 h-3" />
                         {formatRelativeTime(project.createdAt)}
                       </div>
@@ -312,9 +388,9 @@ export default function Dashboard() {
           {sidebarOpen && (
             <button
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden absolute top-4 right-4 p-2 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200"
+              className="md:hidden absolute top-4 right-4 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
             >
-              <X className="w-5 h-5 text-slate-600" />
+              <X className="w-5 h-5 text-white" />
             </button>
           )}
         </aside>
@@ -322,52 +398,52 @@ export default function Dashboard() {
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
-            className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+            className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12">
+        {/* Main Content - Dark Theme */}
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-12 relative z-10">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-2">
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                     Dashboard
                   </h1>
-                  <p className="text-lg text-slate-600">
+                  <p className="text-lg text-slate-400">
                     Upload files, record audio, or paste video links to create your notes
                   </p>
                 </div>
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="md:hidden p-2 rounded-lg bg-white/80 backdrop-blur-sm border border-slate-200"
+                  className="md:hidden p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
                 >
-                  <Menu className="w-6 h-6 text-slate-600" />
+                  <Menu className="w-6 h-6 text-white" />
                 </button>
               </div>
 
-              {/* User Plan & Usage Display */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-slate-200 mb-6">
+              {/* User Plan & Usage Display - Dark Theme */}
+              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 mb-6 shadow-xl">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     {userPlan === 'pro' ? (
                       <>
-                        <div className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg font-semibold text-sm flex items-center gap-2">
+                        <div className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-lg shadow-amber-500/30">
                           <Crown className="w-4 h-4" />
                           Pro Plan
                         </div>
                       </>
                     ) : (
                       <>
-                        <div className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-semibold text-sm">
+                        <div className="px-3 py-1.5 bg-white/10 text-slate-300 rounded-lg font-semibold text-sm border border-white/10">
                           Free Plan
                         </div>
                         <NextLink
                           href="/pricing"
-                          className="px-4 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-indigo-700 hover:to-purple-700 transition-all flex items-center gap-2"
+                          className="px-4 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-indigo-400 hover:to-purple-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/30"
                         >
                           <Sparkles className="w-4 h-4" />
                           Upgrade
@@ -377,24 +453,24 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Usage Stats */}
+                {/* Usage Stats - Dark Theme */}
                 {usage && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <p className="text-slate-600 mb-1">File uploads</p>
-                      <p className="font-semibold text-slate-900">
+                      <p className="text-slate-400 mb-1">File uploads</p>
+                      <p className="font-semibold text-white">
                         {usage.fileThisMonth} / {limits.maxFileSessionsPerMonth === 9999 ? '∞' : limits.maxFileSessionsPerMonth}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-600 mb-1">Audio transcriptions</p>
-                      <p className="font-semibold text-slate-900">
+                      <p className="text-slate-400 mb-1">Audio transcriptions</p>
+                      <p className="font-semibold text-white">
                         {usage.audioThisMonth} / {limits.maxAudioSessionsPerMonth === 9999 ? '∞' : limits.maxAudioSessionsPerMonth}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-600 mb-1">Chat messages today</p>
-                      <p className="font-semibold text-slate-900">
+                      <p className="text-slate-400 mb-1">Chat messages today</p>
+                      <p className="font-semibold text-white">
                         {usage.chatToday} / {limits.maxChatMessagesPerDay === 9999 ? '∞' : limits.maxChatMessagesPerDay}
                       </p>
                     </div>
@@ -403,7 +479,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Three Core Function Cards */}
+            {/* Three Core Function Cards - Dark Theme */}
             <div className="grid md:grid-cols-3 gap-6 mb-12">
               {/* Document Upload Card */}
               <div
@@ -412,11 +488,11 @@ export default function Dashboard() {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
                 className={`
-                  bg-white/80 backdrop-blur-sm rounded-3xl p-8 border-2 border-dashed cursor-pointer
+                  bg-white/5 backdrop-blur-lg rounded-3xl p-8 border-2 border-dashed cursor-pointer
                   transition-all duration-300 hover:scale-105 hover:shadow-xl
                   ${isDragging 
-                    ? 'border-indigo-500 bg-indigo-50/80 shadow-lg' 
-                    : 'border-slate-200 hover:border-indigo-300'
+                    ? 'border-indigo-500/50 bg-indigo-500/10 shadow-lg shadow-indigo-500/30' 
+                    : 'border-white/10 hover:border-indigo-500/50'
                   }
                 `}
               >
@@ -431,48 +507,48 @@ export default function Dashboard() {
                   }}
                 />
                 <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 mb-4">
-                    <FileText className="w-8 h-8 text-blue-600" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-500/30 mb-4">
+                    <FileText className="w-8 h-8 text-blue-400" />
                   </div>
-                  <div className="inline-block px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold mb-3">
+                  <div className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-3 border border-blue-500/30">
                     Document
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     Upload a document
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-400">
                     PDFs, PPT, Word, lecture slides, and more
                   </p>
                 </div>
               </div>
 
               {/* Audio Card */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border-2 border-slate-200 hover:border-purple-300 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-100 mb-4">
-                    <Mic className="w-8 h-8 text-purple-600" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-purple-500/20 border border-purple-500/30 mb-4">
+                    <Mic className="w-8 h-8 text-purple-400" />
                   </div>
-                  <div className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold mb-3">
+                  <div className="inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold mb-3 border border-purple-500/30">
                     Audio
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     Record or upload audio
                   </h3>
-                  <p className="text-sm text-slate-600 mb-4">
+                  <p className="text-sm text-slate-400 mb-4">
                     Lecture recordings, podcasts, meeting audio
                   </p>
                 </div>
                 <div className="space-y-3">
                   <button
                     onClick={() => alert('Recording coming soon')}
-                    className="w-full px-4 py-2.5 bg-purple-600 text-white font-semibold rounded-xl hover:bg-purple-700 transition-all flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-400 hover:to-pink-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30"
                   >
                     <Play className="w-4 h-4" />
                     Record audio
                   </button>
                   <button
                     onClick={() => audioInputRef.current?.click()}
-                    className="w-full px-4 py-2.5 bg-white border-2 border-purple-200 text-purple-700 font-semibold rounded-xl hover:bg-purple-50 transition-all flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-white/5 border-2 border-purple-500/30 text-purple-300 font-semibold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <Upload className="w-4 h-4" />
                     Upload audio file
@@ -491,18 +567,18 @@ export default function Dashboard() {
               </div>
 
               {/* Video Link Card */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border-2 border-slate-200 hover:border-pink-300 transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border-2 border-white/10 hover:border-pink-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl">
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-pink-100 mb-4">
-                    <Video className="w-8 h-8 text-pink-600" />
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-pink-500/20 border border-pink-500/30 mb-4">
+                    <Video className="w-8 h-8 text-pink-400" />
                   </div>
-                  <div className="inline-block px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-xs font-semibold mb-3">
+                  <div className="inline-block px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-semibold mb-3 border border-pink-500/30">
                     Video
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  <h3 className="text-xl font-bold text-white mb-2">
                     Video link
                   </h3>
-                  <p className="text-sm text-slate-600 mb-4">
+                  <p className="text-sm text-slate-400 mb-4">
                     Paste a link from YouTube, Bilibili, TikTok, or others
                   </p>
                 </div>
@@ -512,7 +588,7 @@ export default function Dashboard() {
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-pink-400 transition-colors"
+                    className="w-full px-4 py-2.5 bg-white/5 border-2 border-white/10 rounded-xl focus:outline-none focus:border-pink-500/50 transition-colors text-white placeholder:text-slate-500"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
                         handleVideoLink();
@@ -521,7 +597,7 @@ export default function Dashboard() {
                   />
                   <button
                     onClick={handleVideoLink}
-                    className="w-full px-4 py-2.5 bg-pink-600 text-white font-semibold rounded-xl hover:bg-pink-700 transition-all"
+                    className="w-full px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-semibold rounded-xl hover:from-pink-400 hover:to-rose-500 transition-all shadow-lg shadow-pink-500/30"
                   >
                     Process Video
                   </button>
@@ -529,9 +605,9 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Latest Note Preview */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border-2 border-slate-200 shadow-xl">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">
+            {/* Latest Note Preview - Dark Theme */}
+            <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-xl">
+              <h2 className="text-2xl font-bold text-white mb-6">
                 Latest note
               </h2>
 
@@ -540,7 +616,7 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-slate-900">
+                        <h3 className="text-xl font-bold text-white">
                           {selectedProject.title}
                         </h3>
                         <span className={`px-3 py-1 rounded-md text-xs font-medium border flex items-center gap-1 ${getTypeBadgeColor(selectedProject.type)}`}>
@@ -548,7 +624,7 @@ export default function Dashboard() {
                           {selectedProject.type}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-slate-500 mb-4">
+                      <div className="flex items-center gap-1 text-sm text-slate-400 mb-4">
                         <Clock className="w-4 h-4" />
                         {formatRelativeTime(selectedProject.createdAt)}
                       </div>
@@ -556,14 +632,14 @@ export default function Dashboard() {
                   </div>
 
                   <div className="prose prose-sm max-w-none">
-                    <pre className="whitespace-pre-wrap text-slate-700 leading-relaxed font-sans">
+                    <pre className="whitespace-pre-wrap text-slate-300 leading-relaxed font-sans">
                       {selectedProject.summary}
                     </pre>
                   </div>
 
                   <button
                     onClick={() => window.location.href = `/dashboard/${selectedProject.id}`}
-                    className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center gap-2"
                   >
                     Open in full view
                     <ExternalLink className="w-4 h-4" />
@@ -571,10 +647,10 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-slate-500 text-lg mb-2">
+                  <p className="text-slate-400 text-lg mb-2">
                     No notes yet.
                   </p>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-slate-500 text-sm">
                     Upload a file or record audio to see your first note.
                   </p>
                 </div>

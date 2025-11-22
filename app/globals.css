@@ -183,3 +183,22 @@ body {
   }
 }
 
+/* 3D Notebook Animation for Dashboard */
+@keyframes notebook-float-3d {
+  0%, 100% { 
+    transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) translateY(0) translateZ(0);
+  }
+  50% { 
+    transform: perspective(1000px) rotateX(-5deg) rotateY(5deg) translateY(-10px) translateZ(20px);
+  }
+}
+
+@keyframes notebook-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 40px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5), 0 0 60px rgba(139, 92, 246, 0.3);
+  }
+}
+

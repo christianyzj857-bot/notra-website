@@ -79,10 +79,10 @@ export default function NotraLogo({
           }}
         />
         
-        {/* Logo SVG - 根据图2设计：NOTRA文字+文档+电路板 */}
+        {/* Logo SVG - N 字型笔记设计 */}
         <div 
           className={`
-            relative w-full h-full rounded-lg overflow-hidden
+            relative w-full h-full rounded-lg overflow-visible
             ${currentStyle.glow}
             transition-all duration-300
           `}
@@ -94,16 +94,16 @@ export default function NotraLogo({
             className="w-full h-full"
           >
             <defs>
-              {/* 背景渐变：深蓝紫色到亮蓝色（上下渐变） */}
-              <linearGradient id="notra-bg-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#5B21B6" /> {/* 深蓝紫色顶部 */}
-                <stop offset="50%" stopColor="#6366F1" /> {/* 亮蓝色中心 */}
-                <stop offset="100%" stopColor="#5B21B6" /> {/* 深蓝紫色底部 */}
+              {/* 背景渐变：indigo 到 purple 到 blue */}
+              <linearGradient id="notra-bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6366F1" /> {/* Indigo */}
+                <stop offset="50%" stopColor="#8B5CF6" /> {/* Purple */}
+                <stop offset="100%" stopColor="#60A5FA" /> {/* Blue */}
               </linearGradient>
               
-              {/* 白色元素的内发光效果 */}
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+              {/* 发光效果 */}
+              <filter id="logo-glow">
+                <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
                 <feMerge>
                   <feMergeNode in="coloredBlur"/>
                   <feMergeNode in="SourceGraphic"/>
@@ -113,131 +113,75 @@ export default function NotraLogo({
 
             {/* 背景：圆角方形，渐变填充 */}
             <rect
-              x="3"
-              y="3"
-              width="94"
-              height="94"
-              rx="14"
+              x="5"
+              y="5"
+              width="90"
+              height="90"
+              rx="18"
               fill="url(#notra-bg-gradient)"
             />
 
-            {/* 白色外边框（粗线） */}
-            <rect
-              x="3"
-              y="3"
-              width="94"
-              height="94"
-              rx="14"
-              fill="none"
+            {/* N 字型笔记设计 */}
+            {/* 左侧竖线（N 的第一笔） */}
+            <path
+              d="M 25 20 L 25 80"
               stroke="white"
-              strokeWidth="3.5"
-              filter="url(#glow)"
-            />
-
-            {/* 左侧：文档/笔记本形状 */}
-            {/* 垂直文档边缘线（左侧） */}
-            <line
-              x1="18"
-              y1="22"
-              x2="18"
-              y2="78"
-              stroke="white"
-              strokeWidth="3"
+              strokeWidth="6"
               strokeLinecap="round"
-              filter="url(#glow)"
+              filter="url(#logo-glow)"
             />
             
-            {/* 文档底部：笔尖/倒V形（向下指向） */}
+            {/* 对角线（N 的中间斜线） */}
             <path
-              d="M 18 78 L 13 88 L 18 88 Z"
-              fill="white"
-              filter="url(#glow)"
+              d="M 25 20 L 75 80"
+              stroke="white"
+              strokeWidth="6"
+              strokeLinecap="round"
+              filter="url(#logo-glow)"
+            />
+            
+            {/* 右侧竖线（N 的第二笔） */}
+            <path
+              d="M 75 20 L 75 80"
+              stroke="white"
+              strokeWidth="6"
+              strokeLinecap="round"
+              filter="url(#logo-glow)"
             />
 
-            {/* 文档内容：三条横线（文本行） */}
+            {/* 笔记装饰：左侧装订线 */}
             <line
-              x1="24"
-              y1="32"
-              x2="38"
-              y2="32"
+              x1="20"
+              y1="30"
+              x2="20"
+              y2="70"
               stroke="white"
               strokeWidth="2"
+              strokeOpacity="0.6"
               strokeLinecap="round"
-              filter="url(#glow)"
+            />
+            
+            {/* 笔记装饰：页面线条（在 N 内部） */}
+            <line
+              x1="30"
+              y1="45"
+              x2="70"
+              y2="55"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
+              strokeLinecap="round"
             />
             <line
-              x1="24"
-              y1="42"
-              x2="38"
-              y2="42"
+              x1="30"
+              y1="55"
+              x2="70"
+              y2="65"
               stroke="white"
-              strokeWidth="2"
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
               strokeLinecap="round"
-              filter="url(#glow)"
             />
-            <line
-              x1="24"
-              y1="52"
-              x2="38"
-              y2="52"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              filter="url(#glow)"
-            />
-
-            {/* 右侧：电路板线条 */}
-            {/* 从文档顶部延伸的电路线（向右上） */}
-            <path
-              d="M 38 32 L 48 32 L 48 26 L 58 26"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-              filter="url(#glow)"
-            />
-            <circle
-              cx="58"
-              cy="26"
-              r="3.5"
-              fill="white"
-              filter="url(#glow)"
-            />
-
-            {/* 从右上角延伸的电路线（向下再向左） */}
-            <path
-              d="M 97 3 L 87 3 L 87 12 L 77 12"
-              stroke="white"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-              filter="url(#glow)"
-            />
-            <circle
-              cx="77"
-              cy="12"
-              r="3.5"
-              fill="white"
-              filter="url(#glow)"
-            />
-
-            {/* 中心：NOTRA 文字（白色，粗体，大写） */}
-            <text
-              x="50"
-              y="62"
-              textAnchor="middle"
-              fill="white"
-              fontSize="24"
-              fontWeight="700"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              letterSpacing="3"
-              filter="url(#glow)"
-              style={{ textRendering: 'optimizeLegibility' }}
-            >
-              NOTRA
-            </text>
           </svg>
         </div>
 
