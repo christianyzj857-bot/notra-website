@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import NotraLogo from '@/components/NotraLogo';
 import { 
   Globe, 
   Languages,
@@ -71,22 +72,7 @@ export default function OnboardingStep2Location() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link href="/" className="flex items-center cursor-pointer group">
-              <div className="relative flex h-9 w-9 items-center justify-center mr-3">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl shadow-lg shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-all duration-300 group-hover:scale-110 animate-pulse" style={{ animationDuration: '3s' }}></div>
-                <div className="absolute inset-0 rounded-2xl border-2 border-white/30 group-hover:border-white/50 transition-all duration-300 group-hover:rotate-180"></div>
-                <span className="relative z-10 text-sm font-extrabold text-white tracking-tight transform group-hover:scale-110 transition-transform duration-300" style={{
-                  textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  letterSpacing: '-0.05em'
-                }}>
-                  N
-                </span>
-                <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white/60 rounded-full blur-sm group-hover:bg-white/80 transition-all z-10"></div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity"></div>
-                <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-indigo-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
-                Notra
-              </span>
+              <NotraLogo size="sm" showText={true} variant="minimal" />
             </Link>
           </div>
         </div>
