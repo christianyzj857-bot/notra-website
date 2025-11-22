@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 
 interface NotraLogoProps {
   className?: string;
@@ -80,7 +79,7 @@ export default function NotraLogo({
           }}
         />
         
-        {/* Logo 图片 */}
+        {/* Logo SVG - 根据图2设计：NOTRA文字+文档+电路板 */}
         <div 
           className={`
             relative w-full h-full rounded-lg overflow-hidden
@@ -88,18 +87,158 @@ export default function NotraLogo({
             transition-all duration-300
           `}
         >
-          <Image
-            src="/notra-logo-v4.png"
-            alt="Notra Logo"
-            fill
-            className="object-contain"
-            priority
-            sizes="(max-width: 768px) 32px, 40px"
-            onError={(e) => {
-              // 如果图片加载失败，显示占位符
-              console.warn('Logo image not found: /notra-logo-v4.png');
-            }}
-          />
+          <svg
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full"
+          >
+            <defs>
+              {/* 背景渐变：深蓝紫色到亮蓝色（上下渐变） */}
+              <linearGradient id="notra-bg-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#5B21B6" /> {/* 深蓝紫色顶部 */}
+                <stop offset="50%" stopColor="#6366F1" /> {/* 亮蓝色中心 */}
+                <stop offset="100%" stopColor="#5B21B6" /> {/* 深蓝紫色底部 */}
+              </linearGradient>
+              
+              {/* 白色元素的内发光效果 */}
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="0.8" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* 背景：圆角方形，渐变填充 */}
+            <rect
+              x="3"
+              y="3"
+              width="94"
+              height="94"
+              rx="14"
+              fill="url(#notra-bg-gradient)"
+            />
+
+            {/* 白色外边框（粗线） */}
+            <rect
+              x="3"
+              y="3"
+              width="94"
+              height="94"
+              rx="14"
+              fill="none"
+              stroke="white"
+              strokeWidth="3.5"
+              filter="url(#glow)"
+            />
+
+            {/* 左侧：文档/笔记本形状 */}
+            {/* 垂直文档边缘线（左侧） */}
+            <line
+              x1="18"
+              y1="22"
+              x2="18"
+              y2="78"
+              stroke="white"
+              strokeWidth="3"
+              strokeLinecap="round"
+              filter="url(#glow)"
+            />
+            
+            {/* 文档底部：笔尖/倒V形（向下指向） */}
+            <path
+              d="M 18 78 L 13 88 L 18 88 Z"
+              fill="white"
+              filter="url(#glow)"
+            />
+
+            {/* 文档内容：三条横线（文本行） */}
+            <line
+              x1="24"
+              y1="32"
+              x2="38"
+              y2="32"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              filter="url(#glow)"
+            />
+            <line
+              x1="24"
+              y1="42"
+              x2="38"
+              y2="42"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              filter="url(#glow)"
+            />
+            <line
+              x1="24"
+              y1="52"
+              x2="38"
+              y2="52"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              filter="url(#glow)"
+            />
+
+            {/* 右侧：电路板线条 */}
+            {/* 从文档顶部延伸的电路线（向右上） */}
+            <path
+              d="M 38 32 L 48 32 L 48 26 L 58 26"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              filter="url(#glow)"
+            />
+            <circle
+              cx="58"
+              cy="26"
+              r="3.5"
+              fill="white"
+              filter="url(#glow)"
+            />
+
+            {/* 从右上角延伸的电路线（向下再向左） */}
+            <path
+              d="M 97 3 L 87 3 L 87 12 L 77 12"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              filter="url(#glow)"
+            />
+            <circle
+              cx="77"
+              cy="12"
+              r="3.5"
+              fill="white"
+              filter="url(#glow)"
+            />
+
+            {/* 中心：NOTRA 文字（白色，粗体，大写） */}
+            <text
+              x="50"
+              y="62"
+              textAnchor="middle"
+              fill="white"
+              fontSize="24"
+              fontWeight="700"
+              fontFamily="system-ui, -apple-system, sans-serif"
+              letterSpacing="3"
+              filter="url(#glow)"
+              style={{ textRendering: 'optimizeLegibility' }}
+            >
+              NOTRA
+            </text>
+          </svg>
         </div>
 
         {/* 内部发光效果 */}
