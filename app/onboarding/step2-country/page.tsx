@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Globe, Check, Search } from 'lucide-react';
-import Image from 'next/image';
 import { COUNTRIES, searchCountries, type Country } from '@/constants/countries';
 
 // Custom Link component (matching existing pattern)
@@ -92,7 +91,7 @@ export default function OnboardingStep2Country() {
               Where are you studying now?
             </h1>
             <p className="text-xl text-slate-600">
-              你目前主要在哪个国家学习或工作？
+              Select your country or region
             </p>
           </div>
 
@@ -102,7 +101,7 @@ export default function OnboardingStep2Country() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search countries..."
+                placeholder="Search your country or region..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none text-lg"
@@ -110,13 +109,13 @@ export default function OnboardingStep2Country() {
             </div>
           </div>
 
-          {/* Country Selection Grid */}
+          {/* Country Selection List */}
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-6">
               <Globe className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Select Country / 选择国家</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Country / Region</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-2">
               {filteredCountries.map((country) => {
                 const isSelected = selectedCountry === country.id;
                 
@@ -126,31 +125,18 @@ export default function OnboardingStep2Country() {
                     onClick={() => setSelectedCountry(country.id)}
                     disabled={isAnimating}
                     className={`
-                      relative p-4 rounded-2xl border-2 transition-all duration-300 text-center
+                      relative p-5 rounded-xl border-2 transition-all duration-200 text-left flex items-center justify-between
                       ${isSelected 
-                        ? 'border-indigo-500 bg-indigo-50 shadow-lg scale-105' 
-                        : 'border-slate-200 hover:border-indigo-300 hover:shadow-md bg-white'
+                        ? 'border-indigo-500 bg-indigo-50 shadow-md z-10' 
+                        : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50 bg-white'
                       }
                       ${isAnimating && !isSelected ? 'opacity-50' : ''}
                     `}
                   >
-                    <div className="flex items-center justify-center mb-2 h-10">
-                      {country.id === 'china' || country.id === 'china-hongkong' || country.id === 'china-macao' || country.id === 'china-taiwan' ? (
-                        <Image
-                          src={country.flag}
-                          alt={country.id === 'china' ? 'Flag of China' : country.id === 'china-hongkong' ? 'Flag of China · Hong Kong' : country.id === 'china-macao' ? 'Flag of China · Macao' : 'Flag of China · Taiwan (Taipei)'}
-                          width={60}
-                          height={40}
-                          className="object-contain rounded-sm"
-                        />
-                      ) : (
-                        <span className="text-3xl">{country.flag}</span>
-                      )}
-                    </div>
-                    <div className="font-semibold text-slate-900 text-sm">{country.label}</div>
+                    <div className="font-semibold text-slate-900 text-lg">{country.label}</div>
                     {isSelected && (
-                      <div className="absolute top-2 right-2 w-5 h-5 bg-indigo-500 rounded-full flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
+                      <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
                       </div>
                     )}
                   </button>
@@ -159,7 +145,7 @@ export default function OnboardingStep2Country() {
             </div>
             {filteredCountries.length === 0 && (
               <div className="text-center py-8 text-slate-500">
-                No countries found matching "{searchQuery}"
+                No results found for "{searchQuery}"
               </div>
             )}
           </div>
@@ -186,4 +172,3 @@ export default function OnboardingStep2Country() {
     </div>
   );
 }
-

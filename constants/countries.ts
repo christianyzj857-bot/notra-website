@@ -2,73 +2,72 @@
 export interface Country {
   id: string;
   label: string;
-  flag: string;
   code?: string; // ISO country code if needed
 }
 
 export const COUNTRIES: Country[] = [
   // Major English-speaking countries (prioritized)
-  { id: 'uk', label: 'United Kingdom', flag: '🇬🇧', code: 'GB' },
-  { id: 'us', label: 'United States', flag: '🇺🇸', code: 'US' },
-  { id: 'canada', label: 'Canada', flag: '🇨🇦', code: 'CA' },
-  { id: 'australia', label: 'Australia', flag: '🇦🇺', code: 'AU' },
-  { id: 'newzealand', label: 'New Zealand', flag: '🇳🇿', code: 'NZ' },
-  { id: 'ireland', label: 'Ireland', flag: '🇮🇪', code: 'IE' },
+  { id: 'uk', label: 'United Kingdom', code: 'GB' },
+  { id: 'us', label: 'United States', code: 'US' },
+  { id: 'canada', label: 'Canada', code: 'CA' },
+  { id: 'australia', label: 'Australia', code: 'AU' },
+  { id: 'newzealand', label: 'New Zealand', code: 'NZ' },
+  { id: 'ireland', label: 'Ireland', code: 'IE' },
   
   // Asia-Pacific
-  { id: 'china', label: 'China', flag: '/flags/china.svg', code: 'CN' },
-  { id: 'china-hongkong', label: 'China · Hong Kong', flag: '/flags/hongkong.svg', code: 'HK' },
-  { id: 'china-macao', label: 'China · Macao', flag: '/flags/macao.svg', code: 'MO' },
-  { id: 'china-taiwan', label: 'China · Taiwan (Taipei)', flag: '/flags/taiwan-blossom.svg', code: 'TW' },
-  { id: 'japan', label: 'Japan', flag: '🇯🇵', code: 'JP' },
-  { id: 'southkorea', label: 'South Korea', flag: '🇰🇷', code: 'KR' },
-  { id: 'singapore', label: 'Singapore', flag: '🇸🇬', code: 'SG' },
-  { id: 'india', label: 'India', flag: '🇮🇳', code: 'IN' },
-  { id: 'malaysia', label: 'Malaysia', flag: '🇲🇾', code: 'MY' },
-  { id: 'thailand', label: 'Thailand', flag: '🇹🇭', code: 'TH' },
-  { id: 'vietnam', label: 'Vietnam', flag: '🇻🇳', code: 'VN' },
-  { id: 'indonesia', label: 'Indonesia', flag: '🇮🇩', code: 'ID' },
-  { id: 'philippines', label: 'Philippines', flag: '🇵🇭', code: 'PH' },
+  { id: 'china', label: 'China', code: 'CN' },
+  { id: 'china-hongkong', label: 'China · Hong Kong', code: 'HK' },
+  { id: 'china-macao', label: 'China · Macao', code: 'MO' },
+  { id: 'china-taiwan', label: 'China · Taiwan (Taipei)', code: 'TW' },
+  { id: 'japan', label: 'Japan', code: 'JP' },
+  { id: 'southkorea', label: 'South Korea', code: 'KR' },
+  { id: 'singapore', label: 'Singapore', code: 'SG' },
+  { id: 'india', label: 'India', code: 'IN' },
+  { id: 'malaysia', label: 'Malaysia', code: 'MY' },
+  { id: 'thailand', label: 'Thailand', code: 'TH' },
+  { id: 'vietnam', label: 'Vietnam', code: 'VN' },
+  { id: 'indonesia', label: 'Indonesia', code: 'ID' },
+  { id: 'philippines', label: 'Philippines', code: 'PH' },
   
   // Europe
-  { id: 'germany', label: 'Germany', flag: '🇩🇪', code: 'DE' },
-  { id: 'france', label: 'France', flag: '🇫🇷', code: 'FR' },
-  { id: 'italy', label: 'Italy', flag: '🇮🇹', code: 'IT' },
-  { id: 'spain', label: 'Spain', flag: '🇪🇸', code: 'ES' },
-  { id: 'netherlands', label: 'Netherlands', flag: '🇳🇱', code: 'NL' },
-  { id: 'belgium', label: 'Belgium', flag: '🇧🇪', code: 'BE' },
-  { id: 'switzerland', label: 'Switzerland', flag: '🇨🇭', code: 'CH' },
-  { id: 'austria', label: 'Austria', flag: '🇦🇹', code: 'AT' },
-  { id: 'sweden', label: 'Sweden', flag: '🇸🇪', code: 'SE' },
-  { id: 'norway', label: 'Norway', flag: '🇳🇴', code: 'NO' },
-  { id: 'denmark', label: 'Denmark', flag: '🇩🇰', code: 'DK' },
-  { id: 'finland', label: 'Finland', flag: '🇫🇮', code: 'FI' },
-  { id: 'poland', label: 'Poland', flag: '🇵🇱', code: 'PL' },
-  { id: 'portugal', label: 'Portugal', flag: '🇵🇹', code: 'PT' },
-  { id: 'greece', label: 'Greece', flag: '🇬🇷', code: 'GR' },
-  { id: 'russia', label: 'Russia', flag: '🇷🇺', code: 'RU' },
-  { id: 'turkey', label: 'Turkey', flag: '🇹🇷', code: 'TR' },
+  { id: 'germany', label: 'Germany', code: 'DE' },
+  { id: 'france', label: 'France', code: 'FR' },
+  { id: 'italy', label: 'Italy', code: 'IT' },
+  { id: 'spain', label: 'Spain', code: 'ES' },
+  { id: 'netherlands', label: 'Netherlands', code: 'NL' },
+  { id: 'belgium', label: 'Belgium', code: 'BE' },
+  { id: 'switzerland', label: 'Switzerland', code: 'CH' },
+  { id: 'austria', label: 'Austria', code: 'AT' },
+  { id: 'sweden', label: 'Sweden', code: 'SE' },
+  { id: 'norway', label: 'Norway', code: 'NO' },
+  { id: 'denmark', label: 'Denmark', code: 'DK' },
+  { id: 'finland', label: 'Finland', code: 'FI' },
+  { id: 'poland', label: 'Poland', code: 'PL' },
+  { id: 'portugal', label: 'Portugal', code: 'PT' },
+  { id: 'greece', label: 'Greece', code: 'GR' },
+  { id: 'russia', label: 'Russia', code: 'RU' },
+  { id: 'turkey', label: 'Turkey', code: 'TR' },
   
   // Middle East
-  { id: 'uae', label: 'United Arab Emirates', flag: '🇦🇪', code: 'AE' },
-  { id: 'saudiarabia', label: 'Saudi Arabia', flag: '🇸🇦', code: 'SA' },
-  { id: 'israel', label: 'Israel', flag: '🇮🇱', code: 'IL' },
+  { id: 'uae', label: 'United Arab Emirates', code: 'AE' },
+  { id: 'saudiarabia', label: 'Saudi Arabia', code: 'SA' },
+  { id: 'israel', label: 'Israel', code: 'IL' },
   
   // Americas
-  { id: 'mexico', label: 'Mexico', flag: '🇲🇽', code: 'MX' },
-  { id: 'brazil', label: 'Brazil', flag: '🇧🇷', code: 'BR' },
-  { id: 'argentina', label: 'Argentina', flag: '🇦🇷', code: 'AR' },
-  { id: 'chile', label: 'Chile', flag: '🇨🇱', code: 'CL' },
-  { id: 'colombia', label: 'Colombia', flag: '🇨🇴', code: 'CO' },
+  { id: 'mexico', label: 'Mexico', code: 'MX' },
+  { id: 'brazil', label: 'Brazil', code: 'BR' },
+  { id: 'argentina', label: 'Argentina', code: 'AR' },
+  { id: 'chile', label: 'Chile', code: 'CL' },
+  { id: 'colombia', label: 'Colombia', code: 'CO' },
   
   // Africa
-  { id: 'southafrica', label: 'South Africa', flag: '🇿🇦', code: 'ZA' },
-  { id: 'egypt', label: 'Egypt', flag: '🇪🇬', code: 'EG' },
-  { id: 'nigeria', label: 'Nigeria', flag: '🇳🇬', code: 'NG' },
-  { id: 'kenya', label: 'Kenya', flag: '🇰🇪', code: 'KE' },
+  { id: 'southafrica', label: 'South Africa', code: 'ZA' },
+  { id: 'egypt', label: 'Egypt', code: 'EG' },
+  { id: 'nigeria', label: 'Nigeria', code: 'NG' },
+  { id: 'kenya', label: 'Kenya', code: 'KE' },
   
   // Other
-  { id: 'other', label: 'Other', flag: '🌍', code: 'XX' },
+  { id: 'other', label: 'Other', code: 'XX' },
 ];
 
 // Helper function to search countries
