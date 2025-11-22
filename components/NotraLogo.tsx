@@ -95,6 +95,10 @@ export default function NotraLogo({
             className="object-contain"
             priority
             sizes="(max-width: 768px) 32px, 40px"
+            onError={(e) => {
+              // 如果图片加载失败，显示占位符
+              console.warn('Logo image not found: /notra-logo-v4.png');
+            }}
           />
         </div>
 

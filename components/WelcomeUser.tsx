@@ -26,11 +26,11 @@ export default function WelcomeUser() {
   return (
     <div className="flex flex-col items-start animate-in fade-in slide-in-from-top-2 duration-700">
       <div className="flex items-center gap-2">
-        <span className="text-base md:text-lg font-medium text-slate-700">
+        <span className="text-base md:text-lg font-medium text-slate-300 dark:text-slate-300">
           Welcome,
         </span>
         <span 
-          className="text-base md:text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600"
+          className="text-base md:text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 dark:from-purple-300 dark:via-indigo-300 dark:to-blue-300"
           style={{
             textShadow: '0 0 12px rgba(139, 92, 246, 0.4)',
             animation: 'welcomeGlow 3s ease-in-out infinite',
