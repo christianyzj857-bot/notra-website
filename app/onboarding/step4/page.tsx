@@ -31,20 +31,20 @@ const getAcademicImage = (role: OnboardingRole | null): string => {
 };
 
 // Math inline component using KaTeX
-const MathInline = ({ children }: { children: string }) => {
+const MathInline = ({ math }: { math: string }) => {
   try {
-    return <InlineMath math={children} />;
+    return <InlineMath>{math}</InlineMath>;
   } catch (e) {
-    return <span className="math-text text-slate-800">{children}</span>;
+    return <span className="math-text text-slate-800">{math}</span>;
   }
 };
 
 // Math block component using KaTeX
-const MathBlock = ({ children }: { children: string }) => {
+const MathBlock = ({ math }: { math: string }) => {
   try {
-    return <BlockMath math={children} />;
+    return <BlockMath>{math}</BlockMath>;
   } catch (e) {
-    return <div className="math-block text-slate-900">{children}</div>;
+    return <div className="math-block text-slate-900">{math}</div>;
   }
 };
 
