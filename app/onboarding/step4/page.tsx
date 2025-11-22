@@ -4,13 +4,49 @@ import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { onboardingSamples } from '../config';
 import { type OnboardingRole, type OnboardingSampleBundle } from '@/types/notra';
+import { InlineMath, BlockMath } from 'react-katex';
+import Image from 'next/image';
 
-// Math inline component for consistent mathematical notation rendering
-const MathInline = ({ children }: { children: React.ReactNode }) => (
-  <span className="math-text text-slate-800">
-    {children}
-  </span>
-);
+// Academic images for different roles
+const getAcademicImage = (role: OnboardingRole | null): string => {
+  switch (role) {
+    case 'middle_school':
+      // Basic STEM - Algebra/Geometry
+      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2940&auto=format&fit=crop';
+    case 'undergraduate':
+      // Textbook style - Linear Algebra/Calculus
+      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=2940&auto=format&fit=crop';
+    case 'graduate':
+      // Advanced research - Complex formulas and graphs
+      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop';
+    case 'working_professional':
+      // Business reports and data charts
+      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop';
+    case 'educator':
+      // Course structure and lesson plans
+      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=2940&auto=format&fit=crop';
+    default:
+      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2940&auto=format&fit=crop';
+  }
+};
+
+// Math inline component using KaTeX
+const MathInline = ({ children }: { children: string }) => {
+  try {
+    return <InlineMath math={children} />;
+  } catch (e) {
+    return <span className="math-text text-slate-800">{children}</span>;
+  }
+};
+
+// Math block component using KaTeX
+const MathBlock = ({ children }: { children: string }) => {
+  try {
+    return <BlockMath math={children} />;
+  } catch (e) {
+    return <div className="math-block text-slate-900">{children}</div>;
+  }
+};
 
 export default function OnboardingStep4() {
   const [onboardingRole, setOnboardingRole] = useState<OnboardingRole | null>(null);
@@ -158,41 +194,39 @@ export default function OnboardingStep4() {
             <p className="text-xl text-slate-500">{noteContent.mainSubtitle}</p>
           </div>
 
-          {/* Top Visual Area: Formula Cards (Fancy Style) */}
+          {/* Top Visual Area: Academic Image + Formula Card */}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {/* Left: Main Formula Card */}
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-8 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+            {/* Left: Academic Image (Role-specific) */}
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+              <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 px-4">Academic Content</h4>
+              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-blue-100">
+                <Image
+                  src={getAcademicImage(onboardingRole)}
+                  alt={`${roleLabels[onboardingRole || 'other']} academic content`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-white text-sm font-semibold drop-shadow-lg">
+                    {roleLabels[onboardingRole || 'other']} Level Content
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right: Main Formula Card with KaTeX */}
+            <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
               <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Main Formula</h4>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 border border-blue-100">
-                <div className="math-display text-slate-900 text-center">
-                  <span>f'(x) = </span>
-                  <span className="math-limit">
-                    <span className="math-limit-main">lim</span>
-                    <span className="math-limit-sub">h→0</span>
-                  </span>
-                  <span className="math-fraction">
-                    <span className="math-numerator">f(x + h) - f(x)</span>
-                    <span className="math-denominator">h</span>
-                  </span>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100">
+                <div className="text-center">
+                  <MathBlock math="f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}" />
                 </div>
               </div>
               <p className="text-sm text-slate-600 mt-4 text-center">
                 Limit definition of derivative
               </p>
-            </div>
-            
-            {/* Right: Concept Illustration Card */}
-            <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
-              <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Concept Visualization</h4>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100 flex flex-col items-center justify-center min-h-[120px]">
-                <div className="text-5xl mb-3">📈</div>
-                <p className="text-sm text-slate-700 text-center font-medium">
-                  Tangent Line & Curve
-                </p>
-                <p className="text-xs text-slate-500 mt-2 text-center">
-                  Slope visualization
-                </p>
-              </div>
             </div>
           </div>
 
@@ -251,9 +285,11 @@ export default function OnboardingStep4() {
               {sections.formalDefinition.title}
             </h3>
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-indigo-100">
-              <p className="math-text text-lg text-slate-900 leading-relaxed">
-                {sections?.formalDefinition?.definition}
-              </p>
+              {sections?.formalDefinition?.definition && (
+                <div className="text-lg text-slate-900 leading-relaxed">
+                  <MathBlock math={sections.formalDefinition.definition} />
+                </div>
+              )}
             </div>
             <p className="text-base text-slate-700 leading-relaxed">
               {sections.formalDefinition.explanation}
@@ -274,9 +310,9 @@ export default function OnboardingStep4() {
                   <div className="flex items-start gap-3">
                     <span className="text-[#9F6BFF] font-bold mt-1">•</span>
                     <div className="flex-1">
-                      <MathInline>{item.function}</MathInline>
+                      <MathInline math={item.function} />
                       <span className="text-slate-600 mx-2">→</span>
-                      <MathInline>{item.derivative}</MathInline>
+                      <MathInline math={item.derivative} />
                     </div>
                   </div>
                 </div>
@@ -305,15 +341,19 @@ export default function OnboardingStep4() {
               {sections.workedExample.title}
             </h3>
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-blue-100 mb-4">
-              <p className="math-text text-lg text-slate-900 leading-relaxed">
-                {sections.workedExample.problem}
-              </p>
+              {sections.workedExample.problem && (
+                <div className="text-lg text-slate-900 leading-relaxed">
+                  <MathBlock math={sections.workedExample.problem} />
+                </div>
+              )}
             </div>
             <ol className="space-y-3">
               {sections?.workedExample?.steps?.map((step: string, idx: number) => (
                 <li key={idx} className="flex items-start gap-3">
                   <span className="text-[#9F6BFF] font-bold mt-1">{idx + 1}.</span>
-                  <span className="math-text text-slate-700 text-base leading-relaxed">{step}</span>
+                  <span className="text-slate-700 text-base leading-relaxed">
+                    {step.includes('\\') ? <MathInline math={step} /> : step}
+                  </span>
                 </li>
               ))}
             </ol>
@@ -342,10 +382,18 @@ export default function OnboardingStep4() {
                       } hover:bg-indigo-50/50 transition-colors`}
                     >
                       <td className="px-6 py-4">
-                        <span className="math-text">{row.function}</span>
+                        {row.function?.includes('\\') ? (
+                          <MathInline math={row.function} />
+                        ) : (
+                          <span className="math-text">{row.function}</span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="math-text">{row.derivative}</span>
+                        {row.derivative?.includes('\\') ? (
+                          <MathInline math={row.derivative} />
+                        ) : (
+                          <span className="math-text">{row.derivative}</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-slate-600">{row.notes}</td>
                     </tr>

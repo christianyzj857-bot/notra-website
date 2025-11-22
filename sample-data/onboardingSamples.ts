@@ -22,7 +22,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "It measures instantaneous rate of change",
           "Common notation: f'(x), dy/dx, or Df(x)"
         ],
-        example: "For f(x) = x², the derivative f'(x) = 2x means that at any point x, the function is changing at a rate of 2x units per unit change in x."
+        conceptExplanation: "The derivative is one of the most fundamental concepts in calculus. Think of it as a 'speedometer' for functions - it tells you exactly how fast the function is changing at any moment. Unlike average rate of change (which uses two points), the derivative gives you the instantaneous rate of change at a single point. This is crucial because many real-world phenomena (like velocity, growth rates, optimization) require knowing the exact rate of change at a specific instant.",
+        formulaDerivation: "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}",
+        applications: [
+          "Physics: Velocity is the derivative of position with respect to time",
+          "Economics: Marginal cost is the derivative of the cost function",
+          "Biology: Population growth rate is the derivative of population size",
+          "Engineering: Rate of temperature change in heat transfer problems"
+        ],
+        commonMistakes: [
+          "Confusing average rate of change with instantaneous rate of change",
+          "Forgetting that the derivative at a point is a number, not a function",
+          "Mixing up f'(x) notation with dy/dx notation",
+          "Assuming all functions have derivatives everywhere (some functions are not differentiable)"
+        ],
+        example: "For f(x) = x², the derivative f'(x) = 2x means that at any point x, the function is changing at a rate of 2x units per unit change in x.",
+        summaryTable: [
+          { concept: "Derivative Definition", formula: "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h}", notes: "Limit definition" },
+          { concept: "Geometric Meaning", formula: "Slope of tangent line", notes: "At point (x, f(x))" },
+          { concept: "Physical Meaning", formula: "Instantaneous rate of change", notes: "Velocity, acceleration, etc." }
+        ]
       },
       {
         id: "note-2",
@@ -35,11 +54,31 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Product Rule: (fg)' = f'g + fg'",
           "Quotient Rule: (f/g)' = (f'g - fg')/g²"
         ],
+        conceptExplanation: "These rules form the foundation of differential calculus. Instead of always using the limit definition, we can apply these rules to quickly find derivatives of common functions. Each rule has a specific use case: Power Rule for polynomials, Product Rule for multiplication, Quotient Rule for division, and Chain Rule (covered separately) for composition.",
+        formulaDerivation: "Power Rule: \\frac{d}{dx}(x^n) = nx^{n-1} \\\\ Product Rule: \\frac{d}{dx}[f(x)g(x)] = f'(x)g(x) + f(x)g'(x) \\\\ Quotient Rule: \\frac{d}{dx}\\left[\\frac{f(x)}{g(x)}\\right] = \\frac{f'(x)g(x) - f(x)g'(x)}{[g(x)]^2}",
+        applications: [
+          "Power Rule: Used in polynomial functions, root functions (x^(1/2), x^(1/3))",
+          "Product Rule: Essential for functions like x²sin(x) or eˣcos(x)",
+          "Quotient Rule: Needed for rational functions like (x+1)/(x-1)",
+          "Sum Rule: Allows breaking complex functions into simpler parts"
+        ],
+        commonMistakes: [
+          "Applying Product Rule incorrectly: (fg)' ≠ f'g' (this is wrong!)",
+          "Forgetting to square the denominator in Quotient Rule",
+          "Mixing up the order in Product Rule: must be f'g + fg'",
+          "Not recognizing when to use Chain Rule vs Product Rule"
+        ],
         tableSummary: [
           { label: "f(x) = x²", value: "f'(x) = 2x" },
           { label: "f(x) = x³", value: "f'(x) = 3x²" },
           { label: "f(x) = sin(x)", value: "f'(x) = cos(x)" },
           { label: "f(x) = eˣ", value: "f'(x) = eˣ" }
+        ],
+        summaryTable: [
+          { concept: "Power Rule", formula: "\\frac{d}{dx}(x^n) = nx^{n-1}", notes: "For any real number n" },
+          { concept: "Product Rule", formula: "(fg)' = f'g + fg'", notes: "Order matters!" },
+          { concept: "Quotient Rule", formula: "\\left(\\frac{f}{g}\\right)' = \\frac{f'g - fg'}{g^2}", notes: "Don't forget g²" },
+          { concept: "Sum Rule", formula: "(f + g)' = f' + g'", notes: "Derivative of sum is sum of derivatives" }
         ]
       },
       {
@@ -52,7 +91,28 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Analyzing rates of change in economics and biology",
           "Solving related rates problems"
         ],
-        example: "If a ball is thrown upward, its position function is s(t) = -16t² + 64t. The derivative s'(t) = -32t + 64 gives the velocity, and s''(t) = -32 gives the acceleration (gravity)."
+        conceptExplanation: "Derivatives are not just abstract mathematical concepts - they are powerful tools for solving real-world problems. Optimization problems use derivatives to find maximum profit, minimum cost, or optimal dimensions. In physics, derivatives describe motion: position → velocity → acceleration. In economics, marginal analysis uses derivatives to make business decisions. Understanding these applications helps you see why derivatives matter beyond the classroom.",
+        formulaDerivation: "For position s(t): \\\\ Velocity: v(t) = s'(t) = \\frac{ds}{dt} \\\\ Acceleration: a(t) = v'(t) = s''(t) = \\frac{d^2s}{dt^2}",
+        applications: [
+          "Optimization: Finding the dimensions that minimize material cost for a box with fixed volume",
+          "Physics: Calculating when a projectile reaches maximum height (derivative = 0)",
+          "Economics: Determining the production level that maximizes profit (marginal cost = marginal revenue)",
+          "Biology: Modeling population growth rates and finding when growth is fastest",
+          "Engineering: Designing structures to minimize stress or maximize efficiency"
+        ],
+        commonMistakes: [
+          "Setting the function equal to zero instead of its derivative for optimization",
+          "Confusing velocity and acceleration (acceleration is derivative of velocity, not position)",
+          "Forgetting to check endpoints when finding absolute max/min on a closed interval",
+          "Not considering physical constraints in optimization problems"
+        ],
+        example: "If a ball is thrown upward, its position function is s(t) = -16t² + 64t. The derivative s'(t) = -32t + 64 gives the velocity, and s''(t) = -32 gives the acceleration (gravity).",
+        summaryTable: [
+          { concept: "Optimization", formula: "f'(x) = 0", notes: "Find critical points" },
+          { concept: "Velocity", formula: "v(t) = s'(t)", notes: "First derivative of position" },
+          { concept: "Acceleration", formula: "a(t) = s''(t)", notes: "Second derivative of position" },
+          { concept: "Marginal Analysis", formula: "MC = C'(x)", notes: "Derivative of cost function" }
+        ]
       },
       {
         id: "note-4",
@@ -63,7 +123,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Differentiate the outer function, keeping the inner function unchanged",
           "Multiply by the derivative of the inner function"
         ],
-        example: "For y = (x² + 1)³, let u = x² + 1, then y = u³. So dy/dx = 3u² × 2x = 3(x² + 1)² × 2x = 6x(x² + 1)²."
+        conceptExplanation: "The Chain Rule is essential for differentiating composite functions - functions within functions. It tells us that when we have f(g(x)), we must differentiate the outer function f (treating g(x) as a variable) and then multiply by the derivative of the inner function g. This is one of the most important rules in calculus because most real-world functions are compositions of simpler functions.",
+        formulaDerivation: "If y = f(g(x)), then: \\\\ \\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx} \\\\ where u = g(x) \\\\ This gives: \\frac{d}{dx}[f(g(x))] = f'(g(x)) \\cdot g'(x)",
+        applications: [
+          "Differentiating trigonometric functions: sin(x²), cos(3x+1)",
+          "Exponential functions: e^(2x+3), 2^(x²)",
+          "Logarithmic functions: ln(x²+1), log(3x-2)",
+          "Nested functions: (x²+1)⁵, √(x³+2x)"
+        ],
+        commonMistakes: [
+          "Forgetting to multiply by the derivative of the inner function",
+          "Differentiating the inner function first instead of the outer function",
+          "Not recognizing when a function is composite (e.g., sin(2x) needs Chain Rule)",
+          "Confusing Chain Rule with Product Rule when both might apply"
+        ],
+        example: "For y = (x² + 1)³, let u = x² + 1, then y = u³. Outer function: u³, derivative is 3u². Inner function: x² + 1, derivative is 2x. So dy/dx = 3u² × 2x = 3(x² + 1)² × 2x = 6x(x² + 1)².",
+        summaryTable: [
+          { concept: "Chain Rule Formula", formula: "\\frac{d}{dx}[f(g(x))] = f'(g(x)) \\cdot g'(x)", notes: "Derivative of outer × derivative of inner" },
+          { concept: "Substitution Method", formula: "Let u = g(x), then \\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}", notes: "Often easier to understand" },
+          { concept: "Multiple Compositions", formula: "[f(g(h(x)))]' = f'(g(h(x))) \\cdot g'(h(x)) \\cdot h'(x)", notes: "Extend to nested functions" }
+        ]
       }
     ],
     quizzes: [
@@ -153,6 +232,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "An eigenvector is a nonzero vector that, when transformed by a matrix, only gets scaled (not rotated)",
           "The eigenvalue is the scalar factor by which the eigenvector is scaled",
           "The equation Av = λv defines the relationship, where A is a matrix, v is an eigenvector, and λ is an eigenvalue"
+        ],
+        conceptExplanation: "Eigenvalues and eigenvectors reveal the 'natural directions' of a linear transformation. When a matrix transforms space, most vectors get both stretched and rotated. However, eigenvectors are special - they only get stretched (or compressed) by their corresponding eigenvalue, maintaining their direction. This makes them incredibly useful for understanding the fundamental behavior of linear systems, from quantum mechanics to data compression.",
+        formulaDerivation: "The eigenvalue equation: Av = \\lambda v \\\\ Rearranging: (A - \\lambda I)v = 0 \\\\ For nontrivial solutions, we require: \\det(A - \\lambda I) = 0 \\\\ This is the characteristic equation, whose roots are the eigenvalues.",
+        applications: [
+          "Principal Component Analysis (PCA): Finding directions of maximum variance in data",
+          "Quantum Mechanics: Energy levels correspond to eigenvalues of the Hamiltonian operator",
+          "Vibration Analysis: Natural frequencies of mechanical systems",
+          "Google PageRank: Eigenvalues determine importance of web pages",
+          "Image Compression: Using eigenvectors to reduce dimensionality"
+        ],
+        commonMistakes: [
+          "Confusing eigenvectors with the null space (eigenvectors are not necessarily in null space)",
+          "Forgetting that eigenvectors are only defined up to scalar multiples",
+          "Not checking that Av = λv after finding eigenvalues and eigenvectors",
+          "Assuming all matrices have real eigenvalues (some have complex eigenvalues)"
+        ],
+        summaryTable: [
+          { concept: "Eigenvalue Equation", formula: "Av = \\lambda v", notes: "Fundamental relationship" },
+          { concept: "Characteristic Equation", formula: "\\det(A - \\lambda I) = 0", notes: "Used to find eigenvalues" },
+          { concept: "Eigenvector", formula: "v \\neq 0 such that Av = \\lambda v", notes: "Direction preserved by transformation" }
         ]
       },
       {
@@ -165,7 +264,27 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Set the determinant equal to zero and solve for λ",
           "The solutions are the eigenvalues"
         ],
-        example: "For a 2×2 matrix A = [[2, 1], [0, 3]], we find det(A - λI) = (2-λ)(3-λ) = 0, giving eigenvalues λ₁ = 2 and λ₂ = 3."
+        conceptExplanation: "The characteristic equation transforms the eigenvalue problem into a polynomial equation. The degree of this polynomial equals the size of the matrix, so an n×n matrix has at most n eigenvalues (counting multiplicities). The process involves creating a matrix where λ is subtracted from diagonal elements, then finding when this matrix becomes singular (determinant = 0).",
+        formulaDerivation: "For matrix A = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}: \\\\ A - \\lambda I = \\begin{pmatrix} a-\\lambda & b \\\\ c & d-\\lambda \\end{pmatrix} \\\\ \\det(A - \\lambda I) = (a-\\lambda)(d-\\lambda) - bc = 0 \\\\ This gives: \\lambda^2 - (a+d)\\lambda + (ad-bc) = 0",
+        applications: [
+          "Stability Analysis: Negative eigenvalues indicate stable systems",
+          "Spectral Decomposition: Breaking matrices into simpler components",
+          "Matrix Powers: Computing Aⁿ efficiently using eigenvalues",
+          "Differential Equations: Finding solutions to systems of ODEs"
+        ],
+        commonMistakes: [
+          "Forgetting to subtract λ from diagonal elements correctly",
+          "Making arithmetic errors when calculating the determinant",
+          "Not finding all eigenvalues (missing complex or repeated eigenvalues)",
+          "Confusing algebraic multiplicity with geometric multiplicity"
+        ],
+        example: "For a 2×2 matrix A = [[2, 1], [0, 3]], we find det(A - λI) = (2-λ)(3-λ) = 0, giving eigenvalues λ₁ = 2 and λ₂ = 3.",
+        summaryTable: [
+          { concept: "2×2 Matrix", formula: "\\lambda^2 - \\text{tr}(A)\\lambda + \\det(A) = 0", notes: "Trace and determinant method" },
+          { concept: "Characteristic Polynomial", formula: "p(\\lambda) = \\det(A - \\lambda I)", notes: "Degree equals matrix size" },
+          { concept: "Eigenvalue Sum", formula: "\\sum \\lambda_i = \\text{tr}(A)", notes: "Sum equals trace" },
+          { concept: "Eigenvalue Product", formula: "\\prod \\lambda_i = \\det(A)", notes: "Product equals determinant" }
+        ]
       },
       {
         id: "note-3",
@@ -176,9 +295,28 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Solve the resulting homogeneous system of equations",
           "The solution space gives the eigenvectors (there may be multiple linearly independent eigenvectors for one eigenvalue)"
         ],
+        conceptExplanation: "Finding eigenvectors is essentially finding the null space of (A - λI). For each eigenvalue, we solve a homogeneous system, which always has at least one nonzero solution (since det(A - λI) = 0). The eigenspace (set of all eigenvectors for an eigenvalue) is a vector space, and its dimension is the geometric multiplicity.",
+        formulaDerivation: "For eigenvalue \\lambda: \\\\ (A - \\lambda I)\\mathbf{v} = \\mathbf{0} \\\\ This is a homogeneous system. \\\\ The eigenspace E_\\lambda = \\{\\mathbf{v} : (A - \\lambda I)\\mathbf{v} = \\mathbf{0}\\} \\\\ Geometric multiplicity = \\dim(E_\\lambda)",
+        applications: [
+          "Diagonalization: Eigenvectors form the columns of P in A = PDP⁻¹",
+          "Principal Component Analysis: Eigenvectors are principal directions",
+          "Dynamical Systems: Eigenvectors determine stable/unstable directions",
+          "Quantum Mechanics: Eigenvectors represent quantum states"
+        ],
+        commonMistakes: [
+          "Not checking that Av = λv after finding eigenvectors",
+          "Forgetting that eigenvectors are only defined up to scalar multiples",
+          "Confusing geometric multiplicity with algebraic multiplicity",
+          "Not finding all linearly independent eigenvectors for repeated eigenvalues"
+        ],
         tableSummary: [
           { label: "Eigenvalue λ₁ = 2", value: "Eigenvector v₁ = [1, 0]" },
           { label: "Eigenvalue λ₂ = 3", value: "Eigenvector v₂ = [1, 1]" }
+        ],
+        summaryTable: [
+          { concept: "Eigenvector Equation", formula: "(A - \\lambda I)\\mathbf{v} = \\mathbf{0}", notes: "Homogeneous system" },
+          { concept: "Eigenspace", formula: "E_\\lambda = \\ker(A - \\lambda I)", notes: "Null space of (A - λI)" },
+          { concept: "Geometric Multiplicity", formula: "\\dim(E_\\lambda)", notes: "Dimension of eigenspace" }
         ]
       },
       {
@@ -191,6 +329,27 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Vibration analysis in mechanical systems",
           "Google PageRank algorithm",
           "Stability analysis in differential equations"
+        ],
+        conceptExplanation: "Eigenvalues and eigenvectors are not just abstract mathematical concepts - they reveal the fundamental structure of linear transformations. In data science, they identify the most important directions of variation. In physics, they represent energy states and natural frequencies. In algorithms, they determine convergence rates and stability. Understanding these applications shows why eigenvalues/eigenvectors are among the most important concepts in applied mathematics.",
+        applications: [
+          "Data Science: PCA reduces dimensionality while preserving variance",
+          "Quantum Mechanics: Energy eigenvalues, wave functions as eigenvectors",
+          "Vibration Analysis: Natural frequencies and mode shapes",
+          "PageRank: Web page importance determined by dominant eigenvector",
+          "Image Processing: Eigenfaces for facial recognition",
+          "Control Systems: Stability determined by eigenvalue signs",
+          "Markov Chains: Steady-state distributions are eigenvectors"
+        ],
+        commonMistakes: [
+          "Not understanding the physical/geometric meaning of eigenvalues",
+          "Confusing eigenvectors with other special vectors",
+          "Not recognizing when a problem can be solved using eigenvalues",
+          "Forgetting that eigenvalues can be complex even for real matrices"
+        ],
+        summaryTable: [
+          { concept: "PCA", formula: "\\text{Principal Components} = \\text{Eigenvectors of } \\Sigma", notes: "Covariance matrix" },
+          { concept: "PageRank", formula: "\\mathbf{p} = A\\mathbf{p}", notes: "Dominant eigenvector" },
+          { concept: "Quantum States", formula: "H|\\psi\\rangle = E|\\psi\\rangle", notes: "Energy eigenvalues" }
         ]
       },
       {
@@ -201,6 +360,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Not all matrices are diagonalizable",
           "A matrix is diagonalizable if it has n linearly independent eigenvectors (for an n×n matrix)",
           "Diagonalization simplifies matrix operations like computing powers"
+        ],
+        conceptExplanation: "Diagonalization is the process of finding a basis in which a linear transformation acts simply by scaling. When A = PDP⁻¹, the matrix P changes coordinates to the eigenvector basis, where the transformation becomes diagonal (just scaling). This makes many operations trivial: computing powers, exponentials, and solving differential equations become much easier.",
+        formulaDerivation: "A = PDP^{-1} \\\\ where: \\\\ P = [\\mathbf{v}_1 | \\mathbf{v}_2 | \\ldots | \\mathbf{v}_n] \\text{ (eigenvectors)} \\\\ D = \\begin{pmatrix} \\lambda_1 & 0 & \\ldots & 0 \\\\ 0 & \\lambda_2 & \\ldots & 0 \\\\ \\vdots & \\vdots & \\ddots & \\vdots \\\\ 0 & 0 & \\ldots & \\lambda_n \\end{pmatrix} \\\\ Matrix powers: A^k = PD^kP^{-1}",
+        applications: [
+          "Matrix Powers: Computing Aⁿ efficiently",
+          "Matrix Exponential: e^A = Pe^DP⁻¹",
+          "Differential Equations: Solving d𝐱/dt = A𝐱",
+          "Decoupling Systems: Transforming coupled equations into independent ones",
+          "Spectral Decomposition: Understanding matrix structure"
+        ],
+        commonMistakes: [
+          "Assuming all matrices are diagonalizable (not true!)",
+          "Confusing diagonalizable with diagonal (different concepts)",
+          "Not checking that eigenvectors are linearly independent",
+          "Forgetting the order: eigenvalues in D must match eigenvector order in P"
+        ],
+        summaryTable: [
+          { concept: "Diagonalization", formula: "A = PDP^{-1}", notes: "P has eigenvectors, D has eigenvalues" },
+          { concept: "Matrix Powers", formula: "A^k = PD^kP^{-1}", notes: "Much easier than direct computation" },
+          { concept: "Condition", formula: "n \\text{ linearly independent eigenvectors}", notes: "For n×n matrix" }
         ]
       }
     ],
@@ -311,7 +490,28 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "The magnitude ||∇f|| gives the maximum rate of change",
           "At any point, the gradient is perpendicular to the level curve/surface"
         ],
-        example: "For f(x,y) = x²y + 3y, we have ∇f = (2xy, x² + 3). At point (2,1), ∇f(2,1) = (4, 7)."
+        conceptExplanation: "The gradient is the multidimensional generalization of the derivative. While a derivative gives the slope in one direction, the gradient captures how a function changes in all directions simultaneously. It's a vector field that points in the direction of maximum increase, making it fundamental for optimization, physics (fields), and machine learning (backpropagation).",
+        formulaDerivation: "For f(x,y): \\\\ \\nabla f = \\left(\\frac{\\partial f}{\\partial x}, \\frac{\\partial f}{\\partial y}\\right) \\\\ Magnitude: ||\\nabla f|| = \\sqrt{\\left(\\frac{\\partial f}{\\partial x}\\right)^2 + \\left(\\frac{\\partial f}{\\partial y}\\right)^2} \\\\ Directional derivative: D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u}",
+        applications: [
+          "Machine Learning: Gradient descent uses -∇f to find minima",
+          "Physics: Electric field E = -∇V, gravitational field",
+          "Optimization: Finding maximum/minimum of multivariable functions",
+          "Image Processing: Edge detection using gradient magnitude",
+          "Fluid Dynamics: Pressure gradients drive fluid flow"
+        ],
+        commonMistakes: [
+          "Confusing gradient direction (steepest ascent) with -∇f (steepest descent)",
+          "Not normalizing the direction vector when computing directional derivative",
+          "Forgetting that gradient is a vector, not a scalar",
+          "Mixing up partial derivatives when computing gradient components"
+        ],
+        example: "For f(x,y) = x²y + 3y, we have ∇f = (2xy, x² + 3). At point (2,1), ∇f(2,1) = (4, 7).",
+        summaryTable: [
+          { concept: "Gradient Definition", formula: "\\nabla f = \\left(\\frac{\\partial f}{\\partial x_1}, \\ldots, \\frac{\\partial f}{\\partial x_n}\\right)", notes: "Vector of partial derivatives" },
+          { concept: "Steepest Ascent", formula: "\\text{Direction} = \\frac{\\nabla f}{||\\nabla f||}", notes: "Normalized gradient" },
+          { concept: "Maximum Rate of Change", formula: "||\\nabla f||", notes: "Magnitude of gradient" },
+          { concept: "Directional Derivative", formula: "D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u}", notes: "Rate of change in direction u" }
+        ]
       },
       {
         id: "note-2",
@@ -321,6 +521,25 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "It generalizes the concept of partial derivatives to arbitrary directions",
           "Maximum directional derivative occurs when u points in the direction of ∇f",
           "The value equals ||∇f|| when u = ∇f/||∇f||"
+        ],
+        conceptExplanation: "The directional derivative extends the concept of partial derivatives (which measure change along coordinate axes) to any direction in space. It answers the question: 'If I move in direction u, how fast does the function change?' This is crucial for optimization, as it tells us not just how steep a function is, but in which direction it's steepest.",
+        formulaDerivation: "D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u} = ||\\nabla f|| \\cdot ||\\mathbf{u}|| \\cos\\theta \\\\ Since \\mathbf{u} is a unit vector: ||\\mathbf{u}|| = 1 \\\\ Maximum when \\cos\\theta = 1, i.e., when \\mathbf{u} = \\frac{\\nabla f}{||\\nabla f||}",
+        applications: [
+          "Optimization: Finding the best direction to move for fastest increase/decrease",
+          "Weather Modeling: Predicting temperature change in specific wind directions",
+          "Economics: Analyzing how utility changes with consumption bundles",
+          "Engineering: Determining stress changes in different material directions"
+        ],
+        commonMistakes: [
+          "Forgetting to normalize the direction vector (must be unit vector)",
+          "Using the wrong sign (positive vs negative directional derivative)",
+          "Confusing directional derivative with gradient magnitude",
+          "Not recognizing that directional derivative is a scalar, not a vector"
+        ],
+        summaryTable: [
+          { concept: "Directional Derivative", formula: "D_{\\mathbf{u}} f = \\nabla f \\cdot \\mathbf{u}", notes: "u must be unit vector" },
+          { concept: "Maximum Value", formula: "\\max D_{\\mathbf{u}} f = ||\\nabla f||", notes: "When u points in gradient direction" },
+          { concept: "Minimum Value", formula: "\\min D_{\\mathbf{u}} f = -||\\nabla f||", notes: "When u points opposite to gradient" }
         ]
       },
       {
@@ -333,10 +552,31 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Iterate until convergence or maximum iterations",
           "Widely used in machine learning for training neural networks"
         ],
+        conceptExplanation: "Gradient descent is the workhorse of modern machine learning. The algorithm iteratively moves in the direction of steepest descent (negative gradient) to find local minima. The learning rate α controls step size - too small and convergence is slow, too large and the algorithm may overshoot or diverge. Variants like Adam, RMSprop, and momentum address these limitations.",
+        formulaDerivation: "Update rule: \\mathbf{x}_{n+1} = \\mathbf{x}_n - \\alpha \\nabla f(\\mathbf{x}_n) \\\\ Convergence criterion: ||\\nabla f(\\mathbf{x}_n)|| < \\epsilon \\\\ With momentum: \\mathbf{v}_{n+1} = \\beta\\mathbf{v}_n + \\alpha\\nabla f(\\mathbf{x}_n), \\quad \\mathbf{x}_{n+1} = \\mathbf{x}_n - \\mathbf{v}_{n+1}",
+        applications: [
+          "Neural Network Training: Backpropagation uses gradient descent",
+          "Linear Regression: Finding optimal weights to minimize cost function",
+          "Logistic Regression: Optimizing likelihood function",
+          "Support Vector Machines: Finding optimal hyperplane",
+          "Deep Learning: Training complex models with millions of parameters"
+        ],
+        commonMistakes: [
+          "Choosing learning rate too large (causes divergence) or too small (slow convergence)",
+          "Not checking convergence properly (may stop too early or too late)",
+          "Forgetting that gradient descent finds local, not necessarily global, minima",
+          "Not normalizing features, causing slow convergence in some dimensions"
+        ],
         tableSummary: [
           { label: "Learning Rate α", value: "Controls step size, must be chosen carefully" },
           { label: "Convergence", value: "Stops when ||∇f|| < ε or after max iterations" },
           { label: "Local Minimum", value: "May not find global minimum" }
+        ],
+        summaryTable: [
+          { concept: "Basic Update", formula: "\\mathbf{x}_{n+1} = \\mathbf{x}_n - \\alpha \\nabla f(\\mathbf{x}_n)", notes: "Step in negative gradient direction" },
+          { concept: "Convergence", formula: "||\\nabla f(\\mathbf{x}_n)|| < \\epsilon", notes: "Gradient becomes small" },
+          { concept: "Learning Rate", formula: "\\alpha \\in (0, 1)", notes: "Typically 0.001 to 0.1" },
+          { concept: "Momentum", formula: "\\mathbf{v}_{n+1} = \\beta\\mathbf{v}_n + \\alpha\\nabla f", notes: "Accelerates convergence" }
         ]
       },
       {
@@ -347,6 +587,27 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Used in second-order optimization methods (Newton's method)",
           "Determinant helps classify critical points (max, min, saddle)",
           "Eigenvalues indicate curvature in different directions"
+        ],
+        conceptExplanation: "The Hessian matrix captures second-order information about a function's curvature. While the gradient tells us the direction of steepest change, the Hessian tells us how the function curves in different directions. This is essential for understanding the nature of critical points and for second-order optimization methods that converge much faster than gradient descent.",
+        formulaDerivation: "For f(x,y): \\\\ H = \\begin{pmatrix} \\frac{\\partial^2 f}{\\partial x^2} & \\frac{\\partial^2 f}{\\partial x \\partial y} \\\\ \\frac{\\partial^2 f}{\\partial y \\partial x} & \\frac{\\partial^2 f}{\\partial y^2} \\end{pmatrix} \\\\ Second derivative test: \\\\ \\det(H) > 0, \\frac{\\partial^2 f}{\\partial x^2} > 0 \\Rightarrow \\text{local minimum} \\\\ \\det(H) > 0, \\frac{\\partial^2 f}{\\partial x^2} < 0 \\Rightarrow \\text{local maximum} \\\\ \\det(H) < 0 \\Rightarrow \\text{saddle point}",
+        applications: [
+          "Newton's Method: Uses Hessian inverse for faster convergence",
+          "Critical Point Classification: Determining if a point is max, min, or saddle",
+          "Convexity Testing: Positive definite Hessian implies convex function",
+          "Curvature Analysis: Understanding function shape near critical points",
+          "Machine Learning: Second-order optimization in deep learning"
+        ],
+        commonMistakes: [
+          "Forgetting that Hessian is symmetric (mixed partials are equal)",
+          "Not checking all conditions in second derivative test",
+          "Confusing positive definite with positive entries (different concepts)",
+          "Computing Hessian incorrectly (wrong order of partial derivatives)"
+        ],
+        summaryTable: [
+          { concept: "Hessian Definition", formula: "H_{ij} = \\frac{\\partial^2 f}{\\partial x_i \\partial x_j}", notes: "Matrix of second partials" },
+          { concept: "Local Minimum", formula: "\\det(H) > 0, H_{11} > 0", notes: "Positive definite" },
+          { concept: "Local Maximum", formula: "\\det(H) > 0, H_{11} < 0", notes: "Negative definite" },
+          { concept: "Saddle Point", formula: "\\det(H) < 0", notes: "Indefinite" }
         ]
       },
       {
@@ -358,6 +619,27 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Physics: Electric and gravitational fields are gradient fields",
           "Economics: Gradient helps find optimal production levels",
           "Engineering: Heat flow and fluid dynamics use gradient concepts"
+        ],
+        conceptExplanation: "The gradient concept extends far beyond mathematics into virtually every field that deals with optimization, fields, or rates of change. In machine learning, gradients enable training of neural networks with millions of parameters. In physics, gradients describe force fields. In economics, they optimize production. Understanding gradients opens doors to advanced applications across disciplines.",
+        applications: [
+          "Deep Learning: Training neural networks with backpropagation",
+          "Computer Vision: Image processing and edge detection",
+          "Natural Language Processing: Word embeddings and language models",
+          "Physics: Maxwell's equations, quantum mechanics",
+          "Economics: Utility maximization, production optimization",
+          "Engineering: Finite element analysis, computational fluid dynamics",
+          "Robotics: Path planning and control systems"
+        ],
+        commonMistakes: [
+          "Not understanding when to use gradient vs other optimization methods",
+          "Confusing gradient with other vector fields",
+          "Not recognizing gradient's role in chain rule for multivariable functions",
+          "Forgetting that gradient is only defined for differentiable functions"
+        ],
+        summaryTable: [
+          { concept: "Machine Learning", formula: "\\theta_{n+1} = \\theta_n - \\alpha \\nabla_\\theta L", notes: "Parameter update" },
+          { concept: "Physics Fields", formula: "\\mathbf{E} = -\\nabla V", notes: "Electric field from potential" },
+          { concept: "Optimization", formula: "\\min f(\\mathbf{x})", notes: "Find where \\nabla f = 0" }
         ]
       }
     ],
@@ -450,11 +732,30 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Customer retention: 92% (up from 87% in Q1)",
           "Net Promoter Score: 72 (industry-leading)"
         ],
+        conceptExplanation: "The executive summary provides a high-level overview of business performance, highlighting key achievements and trends. This quarter demonstrates exceptional growth driven by enterprise expansion and improved customer success initiatives. The 23% YoY growth significantly outpaces industry averages, while the 92% retention rate indicates strong product-market fit and customer satisfaction.",
+        applications: [
+          "Strategic Planning: Informing Q3 and annual planning decisions",
+          "Investor Relations: Communicating performance to stakeholders",
+          "Resource Allocation: Directing investment toward high-growth segments",
+          "Competitive Analysis: Benchmarking against industry standards",
+          "Risk Management: Identifying areas requiring attention"
+        ],
+        commonMistakes: [
+          "Focusing only on revenue without considering profitability",
+          "Ignoring leading indicators in favor of lagging metrics",
+          "Not contextualizing numbers (e.g., comparing to industry benchmarks)",
+          "Overlooking negative trends that might be masked by overall growth"
+        ],
         tableSummary: [
           { label: "Total Revenue", value: "$12.5M" },
           { label: "YoY Growth", value: "+23%" },
           { label: "Enterprise Revenue", value: "$8.5M" },
           { label: "Customer Retention", value: "92%" }
+        ],
+        summaryTable: [
+          { concept: "Revenue Growth", formula: "\\text{YoY Growth} = \\frac{\\text{Current} - \\text{Prior}}{\\text{Prior}} \\times 100\\%", notes: "23% YoY growth" },
+          { concept: "Retention Rate", formula: "\\text{Retention} = \\frac{\\text{Retained Customers}}{\\text{Starting Customers}}", notes: "92% retention" },
+          { concept: "NPS", formula: "\\text{NPS} = \\% \\text{Promoters} - \\% \\text{Detractors}", notes: "72 NPS score" }
         ]
       },
       {
@@ -467,6 +768,25 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Asia-Pacific region showed exceptional 45% growth",
           "Customer acquisition costs decreased by 12%",
           "Customer lifetime value increased by 18%"
+        ],
+        conceptExplanation: "Key metrics provide granular insights into business performance across different dimensions. Segment analysis reveals where growth is strongest, regional analysis identifies geographic opportunities, and efficiency metrics (CAC, LTV) measure operational effectiveness. The shift toward enterprise (68% of revenue) indicates successful upmarket motion, while APAC growth suggests strong international expansion.",
+        applications: [
+          "Sales Strategy: Focusing resources on high-growth segments",
+          "Market Expansion: Identifying regions for investment",
+          "Pricing Strategy: Understanding value delivery by segment",
+          "Marketing Optimization: Improving CAC efficiency",
+          "Product Development: Prioritizing features for enterprise customers"
+        ],
+        commonMistakes: [
+          "Analyzing metrics in isolation without considering relationships",
+          "Not accounting for seasonality or market conditions",
+          "Focusing on absolute numbers without growth rates",
+          "Ignoring efficiency metrics (CAC, LTV) in favor of revenue only"
+        ],
+        summaryTable: [
+          { concept: "CAC Efficiency", formula: "\\text{CAC Ratio} = \\frac{\\text{LTV}}{\\text{CAC}}", notes: "Target: >3:1" },
+          { concept: "Segment Mix", formula: "\\text{Enterprise \\%} = \\frac{\\text{Enterprise Revenue}}{\\text{Total Revenue}}", notes: "68% enterprise" },
+          { concept: "Regional Growth", formula: "\\text{Growth Rate} = \\frac{\\text{Current} - \\text{Prior}}{\\text{Prior}}", notes: "45% APAC growth" }
         ]
       },
       {
@@ -478,6 +798,25 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Strategic partnerships contributed to 20% of new enterprise deals",
           "Product innovation drove increased adoption in mid-market segment",
           "Customer success programs improved retention by 5 percentage points"
+        ],
+        conceptExplanation: "Trends and insights connect metrics to underlying business dynamics. The shift to SaaS (68% of revenue) reflects market preference for recurring revenue models. Partnership contributions (20% of deals) validate channel strategy. Product innovation driving mid-market adoption suggests successful product-market fit expansion. The 5-point retention improvement demonstrates ROI of customer success investment.",
+        applications: [
+          "Product Strategy: Prioritizing SaaS features and capabilities",
+          "Partnership Development: Expanding strategic alliance programs",
+          "Go-to-Market: Adjusting messaging for mid-market segment",
+          "Customer Success: Scaling proven retention programs",
+          "Investment Planning: Allocating resources to high-ROI initiatives"
+        ],
+        commonMistakes: [
+          "Confusing correlation with causation in trend analysis",
+          "Not considering external factors (market conditions, competition)",
+          "Over-extrapolating short-term trends",
+          "Ignoring negative trends that might require intervention"
+        ],
+        summaryTable: [
+          { concept: "SaaS Mix", formula: "\\text{SaaS \\%} = \\frac{\\text{SaaS Revenue}}{\\text{Total Revenue}}", notes: "68% SaaS" },
+          { concept: "Partnership Contribution", formula: "\\text{Partnership \\%} = \\frac{\\text{Partner Deals}}{\\text{Total Deals}}", notes: "20% of deals" },
+          { concept: "Retention Improvement", formula: "\\Delta \\text{Retention} = \\text{Current} - \\text{Prior}", notes: "+5 percentage points" }
         ]
       },
       {
@@ -489,6 +828,25 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Leverage enterprise success to penetrate mid-market segment",
           "Focus on product innovation to maintain competitive advantage",
           "Optimize customer success programs to further improve retention"
+        ],
+        conceptExplanation: "Strategic recommendations translate insights into actionable initiatives. These recommendations are prioritized based on ROI potential, strategic alignment, and resource requirements. APAC expansion leverages proven success, mid-market penetration builds on enterprise credibility, product innovation maintains differentiation, and customer success optimization compounds retention gains.",
+        applications: [
+          "Budget Planning: Allocating resources to recommended initiatives",
+          "Team Building: Hiring for APAC expansion and mid-market sales",
+          "Product Roadmap: Prioritizing innovation projects",
+          "Process Improvement: Scaling customer success best practices",
+          "Performance Tracking: Establishing KPIs for each recommendation"
+        ],
+        commonMistakes: [
+          "Recommending too many initiatives without prioritization",
+          "Not aligning recommendations with available resources",
+          "Ignoring dependencies between recommendations",
+          "Failing to establish success metrics for recommendations"
+        ],
+        summaryTable: [
+          { concept: "Market Expansion", formula: "\\text{Investment ROI} = \\frac{\\text{Growth}}{\\text{Investment}}", notes: "APAC: 45% growth" },
+          { concept: "Segment Penetration", formula: "\\text{Conversion Rate} = \\frac{\\text{Deals Closed}}{\\text{Opportunities}}", notes: "Mid-market focus" },
+          { concept: "Innovation Impact", formula: "\\text{Adoption Rate} = \\frac{\\text{Users}}{\\text{Total Customers}}", notes: "Product-driven" }
         ]
       }
     ],
@@ -561,6 +919,25 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Identify key strategies that promote student engagement",
           "Learn to design activities that require student participation",
           "Develop assessment methods aligned with active learning"
+        ],
+        conceptExplanation: "Learning objectives define what students should know, understand, or be able to do after instruction. Well-written objectives are specific, measurable, and aligned with assessment. Active learning objectives emphasize higher-order thinking skills (analysis, synthesis, evaluation) rather than just recall. Research shows that active learning increases retention by 50% compared to passive lecture methods.",
+        applications: [
+          "Course Design: Structuring curriculum around clear learning outcomes",
+          "Assessment Development: Creating tests that measure stated objectives",
+          "Instructional Planning: Aligning teaching methods with learning goals",
+          "Student Communication: Helping students understand expectations",
+          "Program Evaluation: Measuring educational effectiveness"
+        ],
+        commonMistakes: [
+          "Writing vague objectives that can't be measured",
+          "Focusing only on lower-order thinking (remember, understand)",
+          "Not aligning assessments with stated objectives",
+          "Creating too many objectives, making them unachievable"
+        ],
+        summaryTable: [
+          { concept: "Bloom's Taxonomy", formula: "\\text{Remember} < \\text{Understand} < \\text{Apply} < \\text{Analyze} < \\text{Evaluate} < \\text{Create}", notes: "Higher-order thinking" },
+          { concept: "SMART Objectives", formula: "\\text{Specific} + \\text{Measurable} + \\text{Achievable}", notes: "Well-defined goals" },
+          { concept: "Alignment", formula: "\\text{Objectives} = \\text{Assessment} = \\text{Instruction}", notes: "Three-way alignment" }
         ]
       },
       {
@@ -574,11 +951,30 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Case Studies: Analyze real scenarios and apply knowledge",
           "Collaborative Projects: Team-based learning activities"
         ],
+        conceptExplanation: "Active learning strategies shift the cognitive load from instructor to students. Instead of passively receiving information, students engage in activities that require them to process, analyze, and apply knowledge. Research demonstrates that active learning increases student performance by 6% on exams and reduces failure rates by 1.5x. The key is creating structured activities that promote engagement while maintaining learning objectives.",
+        applications: [
+          "Large Classes: Think-pair-share engages all students efficiently",
+          "STEM Courses: Problem-based learning develops analytical skills",
+          "Professional Programs: Case studies bridge theory and practice",
+          "Diverse Learners: Multiple strategies accommodate different learning styles",
+          "Online Teaching: Adapting active learning for virtual environments"
+        ],
+        commonMistakes: [
+          "Using active learning without clear learning objectives",
+          "Not providing enough structure, leading to confusion",
+          "Assuming all students will participate equally",
+          "Not debriefing activities, missing learning opportunities"
+        ],
         tableSummary: [
           { label: "Think-Pair-Share", value: "5-15 min activity" },
           { label: "Problem-Based", value: "Extended projects" },
           { label: "Peer Instruction", value: "Concept reinforcement" },
           { label: "Case Studies", value: "Critical thinking" }
+        ],
+        summaryTable: [
+          { concept: "Think-Pair-Share", formula: "\\text{Think} (2\\text{min}) + \\text{Pair} (5\\text{min}) + \\text{Share} (10\\text{min})", notes: "17 minutes total" },
+          { concept: "Problem-Based", formula: "\\text{Problem} \\rightarrow \\text{Research} \\rightarrow \\text{Solution}", notes: "Extended timeline" },
+          { concept: "Peer Instruction", formula: "\\text{Individual} + \\text{Discussion} + \\text{Re-vote}", notes: "Concept clarification" }
         ]
       },
       {
@@ -590,6 +986,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Implement peer evaluation in group projects",
           "Create rubrics that assess both process and product",
           "Incorporate self-reflection exercises to promote metacognition"
+        ],
+        conceptExplanation: "Assessment in active learning must measure both content mastery and process skills. Formative assessment provides real-time feedback, allowing instructors to adjust instruction. Peer evaluation develops critical thinking and reduces grading burden. Rubrics ensure consistent evaluation while communicating expectations. Self-reflection promotes metacognition, helping students understand their own learning process.",
+        applications: [
+          "Formative Assessment: Clicker questions, exit tickets, one-minute papers",
+          "Peer Assessment: Peer review of writing, peer evaluation of presentations",
+          "Rubrics: Grading collaborative projects, evaluating problem-solving",
+          "Self-Assessment: Learning journals, reflection papers, self-grading",
+          "Authentic Assessment: Portfolios, projects, real-world applications"
+        ],
+        commonMistakes: [
+          "Relying only on summative assessment (tests, exams)",
+          "Not providing timely feedback on formative assessments",
+          "Creating rubrics that are too vague or too detailed",
+          "Ignoring process in favor of product only"
+        ],
+        summaryTable: [
+          { concept: "Formative Assessment", formula: "\\text{During Learning}", notes: "Real-time feedback" },
+          { concept: "Summative Assessment", formula: "\\text{After Learning}", notes: "Final evaluation" },
+          { concept: "Peer Assessment", formula: "\\text{Students Evaluate Each Other}", notes: "Develops critical thinking" },
+          { concept: "Self-Assessment", formula: "\\text{Students Evaluate Themselves}", notes: "Promotes metacognition" }
         ]
       },
       {
@@ -601,6 +1017,26 @@ export const ONBOARDING_SAMPLES: OnboardingSampleBundle[] = [
           "Step 2: Students think individually and write responses (3 minutes)",
           "Step 3: Pair students to discuss their ideas (5 minutes)",
           "Step 4: Select pairs to share with the whole class (10 minutes)"
+        ],
+        conceptExplanation: "Implementation examples provide concrete, actionable guidance for educators. The think-pair-share example demonstrates how to structure active learning activities with clear time allocations. The progression from individual thinking to pair discussion to class sharing ensures all students engage before public sharing, reducing anxiety and improving participation quality.",
+        applications: [
+          "Classroom Management: Structured activities reduce off-task behavior",
+          "Differentiated Instruction: Accommodates different thinking speeds",
+          "Large Classes: Ensures all students participate, not just vocal ones",
+          "Shy Students: Provides safe space before public sharing",
+          "Concept Reinforcement: Multiple exposures improve retention"
+        ],
+        commonMistakes: [
+          "Not allocating enough time for each phase",
+          "Skipping the 'think' phase, going straight to pair discussion",
+          "Calling on the same students during 'share' phase",
+          "Not connecting the activity back to learning objectives"
+        ],
+        summaryTable: [
+          { concept: "Think Phase", formula: "\\text{Individual} + \\text{Writing}", notes: "2-3 minutes" },
+          { concept: "Pair Phase", formula: "\\text{Discussion} + \\text{Comparison}", notes: "5 minutes" },
+          { concept: "Share Phase", formula: "\\text{Public} + \\text{Synthesis}", notes: "10 minutes" },
+          { concept: "Total Time", formula: "\\text{Think} + \\text{Pair} + \\text{Share}", notes: "15-20 minutes" }
         ]
       }
     ],

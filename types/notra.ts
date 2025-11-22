@@ -12,6 +12,16 @@ export interface NoteSection {
     label: string;
     value: string;
   }[];
+  // Enhanced fields for academic content
+  conceptExplanation?: string; // Enhanced concept explanation
+  formulaDerivation?: string; // Step-by-step formula derivation (LaTeX format)
+  applications?: string[]; // More application cases
+  commonMistakes?: string[]; // Common mistakes students make
+  summaryTable?: {
+    concept: string;
+    formula: string;
+    notes: string;
+  }[]; // Enhanced summary table with more columns
 }
 
 export interface QuizOption {

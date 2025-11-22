@@ -28,19 +28,44 @@ export default function SignupPage() {
     setIsLoading(true);
     setError('');
 
-    // TODO: Implement actual signup logic with backend
-    // For now, just simulate signup and redirect to HOME (not dashboard)
-    setTimeout(() => {
-      setIsLoading(false);
-      // Store user info (mock for now)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('user_email', email);
-        localStorage.setItem('user_display_name', displayName || 'Notra Learner');
-        localStorage.setItem('user_logged_in', 'true');
-        // Redirect to HOME page (not dashboard) - user can access Dashboard from Home
-        window.location.href = '/';
+    try {
+      // Call register API
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, displayName }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Registration failed. Please try again.');
+        setIsLoading(false);
+        return;
       }
-    }, 1000);
+
+      // Store user info in localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user_email', data.user.email);
+        localStorage.setItem('user_display_name', data.user.displayName || data.user.username);
+        localStorage.setItem('user_logged_in', 'true');
+        localStorage.setItem('user_id', data.user.id);
+        localStorage.setItem('user_plan', data.user.plan || 'free');
+        
+        // Store session token if available
+        if (data.session?.access_token) {
+          localStorage.setItem('supabase_access_token', data.session.access_token);
+        }
+      }
+
+      // Redirect to HOME page
+      window.location.href = '/';
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (

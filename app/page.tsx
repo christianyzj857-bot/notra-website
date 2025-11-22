@@ -97,6 +97,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [currentPath, setCurrentPath] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userDisplayName, setUserDisplayName] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -105,10 +107,37 @@ const Navbar = () => {
     // Get current path
     if (typeof window !== 'undefined') {
       setCurrentPath(window.location.pathname);
+      
+      // Check login status
+      const loggedIn = localStorage.getItem('user_logged_in') === 'true';
+      const displayName = localStorage.getItem('user_display_name') || '';
+      setIsLoggedIn(loggedIn);
+      setUserDisplayName(displayName);
     }
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Logout error:', e);
+    }
+    
+    // Clear localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user_logged_in');
+      localStorage.removeItem('user_email');
+      localStorage.removeItem('user_display_name');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_plan');
+      localStorage.removeItem('supabase_access_token');
+    }
+    
+    // Reload page
+    window.location.href = '/';
+  };
 
   // 导航链接配置
   const navItems = [
@@ -156,12 +185,31 @@ const Navbar = () => {
 
           {/* CTA (Actions) */}
           <div className="hidden md:flex items-center space-x-4">
-             <Link href="/chat" className="text-sm font-semibold text-slate-300 hover:text-white">
-               Log in
-             </Link>
-             <Link href="/app">
-                <Button variant="primary" className="h-10 px-5 text-sm">Get Started</Button>
-             </Link>
+            {isLoggedIn ? (
+              <>
+                <Link href="/dashboard" className="text-sm font-semibold text-slate-300 hover:text-white">
+                  Dashboard
+                </Link>
+                <Link href="/settings" className="text-sm font-semibold text-slate-300 hover:text-white">
+                  Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-semibold text-slate-300 hover:text-red-400 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white">
+                  Log in
+                </Link>
+                <Link href="/app">
+                  <Button variant="primary" className="h-10 px-5 text-sm">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -195,12 +243,31 @@ const Navbar = () => {
               );
             })}
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-              <Link href="/chat">
-                <Button variant="secondary" className="w-full justify-center">Log in</Button>
-              </Link>
-              <Link href="/app">
-                <Button variant="primary" className="w-full justify-center">Get Started Free</Button>
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button variant="secondary" className="w-full justify-center">Dashboard</Button>
+                  </Link>
+                  <Link href="/settings">
+                    <Button variant="secondary" className="w-full justify-center">Settings</Button>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-semibold hover:bg-red-500/20 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button variant="secondary" className="w-full justify-center">Log in</Button>
+                  </Link>
+                  <Link href="/app">
+                    <Button variant="primary" className="w-full justify-center">Get Started Free</Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
