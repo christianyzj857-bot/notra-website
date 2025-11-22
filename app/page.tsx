@@ -16,6 +16,7 @@ import {
   Library
 } from 'lucide-react';
 import WelcomeUser from '@/components/WelcomeUser';
+import NotraLogo from '@/components/NotraLogo';
 
 // ---------------------------------------------------------
 // 🔧 修复：使用自定义 Link 组件替代 next/link 以适应预览环境
@@ -121,36 +122,15 @@ const Navbar = () => {
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo - Unified Design */}
           <div className="flex flex-col items-start">
             <Link href="/" className="flex items-center cursor-pointer group">
-              <div className="relative flex h-9 w-9 items-center justify-center mr-3">
-                {/* Dynamic background glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl shadow-lg shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-all duration-300 group-hover:scale-110 animate-pulse" style={{ animationDuration: '3s' }}></div>
-                
-                {/* Rotating decorative ring */}
-                <div className="absolute inset-0 rounded-2xl border-2 border-white/30 group-hover:border-white/50 transition-all duration-300 group-hover:rotate-180"></div>
-                
-                {/* Letter N with enhanced styling */}
-                <span className="relative z-10 text-sm font-extrabold text-white tracking-tight transform group-hover:scale-110 transition-transform duration-300" style={{
-                  textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                  letterSpacing: '-0.05em'
-                }}>
-                  N
-                </span>
-                
-                {/* Highlight dot */}
-                <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white/60 rounded-full blur-sm group-hover:bg-white/80 transition-all z-10"></div>
-                
-                {/* Sparkle particles */}
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity"></div>
-                <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-indigo-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity" style={{ animationDelay: '0.2s' }}></div>
+              <div className="mr-3">
+                <NotraLogo size="sm" />
               </div>
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
                 Notra
               </span>
             </Link>
-            {/* Welcome User Component - Below Logo */}
             <div className="mt-1 ml-12">
               <WelcomeUser />
             </div>
@@ -234,28 +214,43 @@ const Navbar = () => {
 const Hero = () => {
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 bg-[#FDFCFE]" style={{
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white via-indigo-50/50 to-blue-50/50" />
+      <div className="absolute inset-0 -z-10 bg-repeat opacity-[0.05]" style={{
         backgroundImage: 'radial-gradient(#E2E8F0 1px, transparent 1px)',
         backgroundSize: '40px 40px'
       }}></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none overflow-hidden">
          <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-indigo-100/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{animationDuration: '8s'}} />
          <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] mix-blend-multiply" />
+         
+         {/* 3D Decorative Element */}
+         <div className="hidden lg:block absolute top-[25%] left-[5%] w-48 h-48 lg:w-72 lg:h-72 z-0">
+            <div className="absolute inset-0 rounded-[4rem] bg-gradient-to-br from-indigo-500/80 to-cyan-400/80 filter blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '6s' }}></div>
+            <div className="relative w-full h-full transform rotate-12 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/30 shadow-2xl"
+                 style={{
+                    animation: 'float-subtle 6s ease-in-out infinite alternate',
+                    perspective: '1000px',
+                    transform: 'rotateX(20deg) rotateY(-10deg) scale(0.9)',
+                 }}
+            >
+               <div className="absolute inset-4 rounded-xl bg-slate-900/50 backdrop-blur-md"></div>
+               <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-5xl opacity-30">N</span>
+            </div>
+         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <FadeIn>
           <SectionBadge>Notra AI 2.0 is Here</SectionBadge>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1]">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1] headline-glow">
             Turn chaos into <br className="hidden md:block" />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
               structured knowledge.
             </span>
           </h1>
           
-          <h2 className="text-lg md:text-2xl font-medium text-indigo-600/80 mb-8 font-serif italic">
+          <h2 className="text-lg md:text-2xl font-medium text-indigo-700/70 mb-8 font-serif italic">
             "Notes for a New Era."
           </h2>
 
@@ -265,16 +260,22 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
-            {/* Primary Action: Go to Dashboard */}
             <Link href="/dashboard">
-              <Button variant="gradient" icon={Sparkles} className="w-full sm:w-auto h-14 px-10 text-base shadow-indigo-500/25">
+              <Button 
+                variant="gradient" 
+                icon={Sparkles} 
+                className="w-full sm:w-auto h-14 px-10 text-base shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:ring-2 hover:ring-indigo-500/50"
+              >
                 Go to Dashboard
               </Button>
             </Link>
             
-            {/* Secondary Action */}
             <Link href="#features">
-              <Button variant="secondary" icon={Play} className="w-full sm:w-auto h-14 px-10 text-base">
+              <Button 
+                variant="secondary" 
+                icon={Play} 
+                className="w-full sm:w-auto h-14 px-10 text-base border-slate-300 hover:border-indigo-400 hover:text-indigo-700 hover:shadow-indigo-200/50"
+              >
                 See Features
               </Button>
             </Link>
@@ -529,25 +530,7 @@ const Footer = () => (
         <div className="col-span-1 md:col-span-1">
           <Link href="/" className="flex items-center gap-2.5 mb-6 group">
              <div className="relative flex h-8 w-8 items-center justify-center">
-               {/* Dynamic background glow */}
-               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl shadow-lg shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-all duration-300 group-hover:scale-110"></div>
-               
-               {/* Rotating decorative ring */}
-               <div className="absolute inset-0 rounded-2xl border-2 border-white/30 group-hover:border-white/50 transition-all duration-300 group-hover:rotate-180"></div>
-               
-               {/* Letter N with enhanced styling */}
-               <span className="relative z-10 text-xs font-extrabold text-white tracking-tight transform group-hover:scale-110 transition-transform duration-300" style={{
-                 textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                 letterSpacing: '-0.05em'
-               }}>
-                 N
-               </span>
-               
-               {/* Highlight dot */}
-               <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-white/60 rounded-full blur-sm group-hover:bg-white/80 transition-all z-10"></div>
-               
-               {/* Sparkle particles */}
-               <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-cyan-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity"></div>
+               <NotraLogo size="sm" />
              </div>
              <span className="text-xl font-bold text-white tracking-tight group-hover:text-blue-300 transition-colors">Notra</span>
           </Link>

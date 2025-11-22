@@ -131,3 +131,23 @@ body {
     text-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
   }
 }
+
+/* New Animations for Logo & Hero */
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-5px) rotate(-1deg); }
+}
+
+@keyframes slow-pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.9));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 2px rgba(255, 255, 255, 1));
+  }
+}
+
+/* Hero section headline polish */
+.headline-glow {
+  text-shadow: 0 0 10px rgba(100, 100, 255, 0.5), 0 0 20px rgba(100, 100, 255, 0.2);
+}
