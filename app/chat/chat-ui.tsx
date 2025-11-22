@@ -42,39 +42,17 @@ export const Link = ({ href, children, className, ...props }: any) => {
   return <a href={href} className={className} {...props}>{children}</a>;
 };
 
-// 2. Notra Logo (统一设计，更有活力)
+// 2. Notra Logo - Import from components
+import NotraLogoComponent from '@/components/NotraLogo';
+
+// Re-export with size mapping for backward compatibility
 export const NotraLogo = ({ size = "default" }: { size?: "default" | "small" | "large" }) => {
-  const sizeClasses = {
-    small: "w-8 h-8 text-xs",
-    default: "w-10 h-10 text-sm",
-    large: "w-12 h-12 text-base"
+  const sizeMap: Record<"default" | "small" | "large", "xs" | "sm" | "md" | "lg" | "xl" | "2xl"> = {
+    small: "sm",
+    default: "md",
+    large: "lg"
   };
-  
-  return (
-    <div className={`relative ${sizeClasses[size]} flex items-center justify-center group`}>
-      {/* 动态背景光晕效果 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl shadow-lg shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-all duration-300 group-hover:scale-110 animate-pulse" style={{ animationDuration: '3s' }}></div>
-      
-      {/* 旋转的装饰环 */}
-      <div className="absolute inset-0 rounded-2xl border-2 border-white/30 group-hover:border-white/50 transition-all duration-300 group-hover:rotate-180"></div>
-      
-      {/* 字母N - 更有设计感 */}
-      <div className="relative z-10 flex items-center justify-center">
-        <span className="font-extrabold text-white tracking-tight transform group-hover:scale-110 transition-transform duration-300" style={{
-          textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-          letterSpacing: '-0.05em'
-        }}>
-          N
-        </span>
-        {/* 字母N上的高光点 */}
-        <div className="absolute top-1 left-1 w-1.5 h-1.5 bg-white/60 rounded-full blur-sm group-hover:bg-white/80 transition-all"></div>
-      </div>
-      
-      {/* 闪烁的粒子效果 */}
-      <div className="absolute -top-1 -right-1 w-2 h-2 bg-cyan-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity"></div>
-      <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-indigo-300 rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping transition-opacity" style={{ animationDelay: '0.2s' }}></div>
-    </div>
-  );
+  return <NotraLogoComponent size={sizeMap[size]} />;
 };
 
 // 3. Chart Renderer

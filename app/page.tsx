@@ -13,7 +13,8 @@ import {
   X, 
   ChevronDown, 
   Globe,
-  Library
+  Library,
+  Video, // Added for new feature
 } from 'lucide-react';
 import WelcomeUser from '@/components/WelcomeUser';
 import NotraLogo from '@/components/NotraLogo';
@@ -67,10 +68,12 @@ const Button = ({ children, variant = 'primary', className = '', icon: Icon, ...
   const baseStyle = "inline-flex items-center justify-center px-6 py-3 text-sm font-semibold tracking-wide transition-all duration-300 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer";
   
   const variants: any = {
-    primary: "text-white bg-slate-900 hover:bg-slate-800 hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5 border border-transparent",
-    gradient: "text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 border border-transparent",
-    secondary: "text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 shadow-sm hover:shadow-md",
-    ghost: "text-slate-600 hover:text-slate-900 hover:bg-slate-100/50 bg-transparent",
+    // Updated primary for dark theme contrast
+    primary: "text-white bg-indigo-600 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/30 hover:-translate-y-0.5 border border-transparent",
+    gradient: "text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 hover:shadow-lg hover:shadow-indigo-500/40 hover:-translate-y-0.5 border border-transparent",
+    // Updated secondary for dark theme
+    secondary: "text-slate-200 bg-white/10 border border-white/10 hover:bg-white/20 hover:border-white/20 backdrop-blur-sm shadow-sm hover:shadow-md",
+    ghost: "text-slate-400 hover:text-white hover:bg-white/5 bg-transparent",
   };
 
   return (
@@ -82,8 +85,8 @@ const Button = ({ children, variant = 'primary', className = '', icon: Icon, ...
 };
 
 const SectionBadge = ({ children }: { children: React.ReactNode }) => (
-  <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-6">
-    <Sparkles className="w-3 h-3 mr-1.5" />
+  <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
+    <Sparkles className="w-3 h-3 mr-1.5 text-indigo-400" />
     {children}
   </div>
 );
@@ -118,7 +121,7 @@ const Navbar = () => {
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/90 backdrop-blur-xl border-b border-slate-200/50 shadow-sm' : 'bg-transparent'
+      scrolled ? 'bg-[#0B0C15]/90 backdrop-blur-xl border-b border-white/5 shadow-lg' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
@@ -127,7 +130,7 @@ const Navbar = () => {
               <div className="mr-3">
                 <NotraLogo size="sm" />
               </div>
-              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
+              <span className="text-2xl font-bold text-white tracking-tight group-hover:text-indigo-300 transition-all duration-300">
                 Notra
               </span>
             </Link>
@@ -146,8 +149,8 @@ const Navbar = () => {
                   href={item.href} 
                   className={`text-sm font-medium transition-colors ${
                     isActive 
-                      ? 'text-indigo-600 border-b-2 border-indigo-600 pb-1' 
-                      : 'text-slate-600 hover:text-indigo-600'
+                      ? 'text-indigo-400' 
+                      : 'text-slate-300 hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -158,7 +161,7 @@ const Navbar = () => {
 
           {/* CTA (Actions) */}
           <div className="hidden md:flex items-center space-x-4">
-             <Link href="/chat" className="text-sm font-semibold text-slate-600 hover:text-slate-900">
+             <Link href="/chat" className="text-sm font-semibold text-slate-300 hover:text-white">
                Log in
              </Link>
              <Link href="/app">
@@ -168,7 +171,7 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-slate-600 hover:text-slate-900">
+            <button onClick={() => setIsOpen(!isOpen)} className="text-slate-300 hover:text-white">
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -177,7 +180,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-white border-b border-slate-100 absolute w-full">
+        <div className="md:hidden bg-[#0B0C15] border-b border-white/10 absolute w-full">
           <div className="px-4 pt-2 pb-6 space-y-2 shadow-xl">
             {navItems.map((item) => {
               const isActive = currentPath === item.href || (item.href.startsWith('/#') && currentPath === '/');
@@ -187,8 +190,8 @@ const Navbar = () => {
                   href={item.href} 
                   className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${
                     isActive
-                      ? 'text-indigo-600 bg-indigo-50'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'text-indigo-400 bg-white/5'
+                      : 'text-slate-300 hover:bg-white/5'
                   }`}
                   onClick={() => setIsOpen(false)}
                 >
@@ -196,7 +199,7 @@ const Navbar = () => {
                 </Link>
               );
             })}
-            <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
+            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               <Link href="/chat">
                 <Button variant="secondary" className="w-full justify-center">Log in</Button>
               </Link>
@@ -213,106 +216,100 @@ const Navbar = () => {
 
 const Hero = () => {
   return (
-    <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white via-indigo-50/50 to-blue-50/50" />
-      <div className="absolute inset-0 -z-10 bg-repeat opacity-[0.05]" style={{
-        backgroundImage: 'radial-gradient(#E2E8F0 1px, transparent 1px)',
-        backgroundSize: '40px 40px'
-      }}></div>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none overflow-hidden">
-         <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-indigo-100/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{animationDuration: '8s'}} />
-         <div className="absolute top-[10%] right-[-5%] w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[100px] mix-blend-multiply" />
-         
-         {/* 3D Decorative Element */}
-         <div className="hidden lg:block absolute top-[25%] left-[5%] w-48 h-48 lg:w-72 lg:h-72 z-0">
-            <div className="absolute inset-0 rounded-[4rem] bg-gradient-to-br from-indigo-500/80 to-cyan-400/80 filter blur-3xl opacity-30 animate-pulse" style={{ animationDuration: '6s' }}></div>
-            <div className="relative w-full h-full transform rotate-12 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/30 shadow-2xl"
-                 style={{
-                    animation: 'float-subtle 6s ease-in-out infinite alternate',
-                    perspective: '1000px',
-                    transform: 'rotateX(20deg) rotateY(-10deg) scale(0.9)',
-                 }}
-            >
-               <div className="absolute inset-4 rounded-xl bg-slate-900/50 backdrop-blur-md"></div>
-               <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-5xl opacity-30">N</span>
-            </div>
-         </div>
+    <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
+      {/* Batch 3: Sci-fi Dark Background & Particles */}
+      <div className="absolute inset-0 -z-20 bg-[#0B0C15]" /> {/* Deep dark base */}
+      
+      {/* Glowing Gradients */}
+      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen" />
+      
+      {/* Grid & Particles */}
+      <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.03] bg-center"></div>
+      
+      {/* AI Dust / Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(15)].map((_, i) => (
+          <div 
+            key={i}
+            className="absolute w-1 h-1 bg-white/20 rounded-full"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `particle-float ${10 + Math.random() * 20}s infinite linear`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <FadeIn>
           <SectionBadge>Notra AI 2.0 is Here</SectionBadge>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-slate-900 mb-8 leading-[1.1] headline-glow">
+          {/* Batch 2: Headline Font Recovery (Bold Sans-Serif) & Batch 3: Contrast Fix */}
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-white mb-8 leading-[1.1] headline-glow">
             Turn chaos into <br className="hidden md:block" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400">
               structured knowledge.
             </span>
           </h1>
           
-          <h2 className="text-lg md:text-2xl font-medium text-indigo-700/70 mb-8 font-serif italic">
+          {/* Batch 2: Subhead Layout Polish */}
+          <h2 className="text-lg md:text-2xl font-medium text-indigo-200/80 mb-8 font-serif italic">
             "Notes for a New Era."
           </h2>
 
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-600 mb-12 leading-relaxed">
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 mb-12 leading-relaxed">
             Your AI copilot for academic excellence. Upload lectures, slides, or papers, 
             and instantly generate structured notes, flashcards, and summaries.
           </p>
           
+          {/* Batch 6: Button Polish */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
             <Link href="/dashboard">
-              <Button 
-                variant="gradient" 
-                icon={Sparkles} 
-                className="w-full sm:w-auto h-14 px-10 text-base shadow-indigo-500/30 hover:shadow-indigo-500/40 hover:ring-2 hover:ring-indigo-500/50"
-              >
+              <Button variant="gradient" icon={Sparkles} className="w-full sm:w-auto h-14 px-10 text-base shadow-indigo-500/20 hover:shadow-indigo-500/40">
                 Go to Dashboard
               </Button>
             </Link>
             
             <Link href="#features">
-              <Button 
-                variant="secondary" 
-                icon={Play} 
-                className="w-full sm:w-auto h-14 px-10 text-base border-slate-300 hover:border-indigo-400 hover:text-indigo-700 hover:shadow-indigo-200/50"
-              >
+              <Button variant="secondary" icon={Play} className="w-full sm:w-auto h-14 px-10 text-base text-white border-white/10 hover:bg-white/10">
                 See Features
               </Button>
             </Link>
           </div>
         </FadeIn>
 
-        {/* Hero Visual */}
+        {/* Batch 4: Hero Image Update (First-person math notes) */}
         <FadeIn delay={200}>
-          <div className="relative mx-auto max-w-6xl">
-            <div className="relative rounded-3xl bg-slate-900/5 p-2 lg:p-4 backdrop-blur-sm ring-1 ring-slate-900/10">
+          <div className="relative mx-auto max-w-5xl">
+            <div className="relative rounded-3xl bg-white/5 p-2 lg:p-3 backdrop-blur-sm ring-1 ring-white/10">
                <div className="rounded-2xl overflow-hidden shadow-2xl aspect-[16/9] relative group">
                   <img 
-                    src="https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=2940&auto=format&fit=crop" 
-                    alt="Students working on laptops" 
-                    className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000 ease-out"
+                    src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2940&auto=format&fit=crop" 
+                    alt="First person view of writing math notes" 
+                    className="w-full h-full object-cover transform scale-105 group-hover:scale-100 transition-transform duration-1000 ease-out opacity-90 hover:opacity-100"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/20 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0C15]/80 via-transparent to-transparent"></div>
                   
                   {/* Floating UI Card */}
-                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] md:w-[70%] bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-white/50 p-6 text-left transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                      <div className="flex items-start gap-4">
-                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
-                           <Brain size={20} />
-                         </div>
-                         <div className="flex-1">
-                            <h3 className="text-sm font-bold text-slate-900 mb-1">Analyzing "Advanced Macroeconomics - Lecture 04"</h3>
-                            <div className="space-y-2">
-                               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                                  <div className="h-full w-[85%] bg-blue-500 rounded-full"></div>
-                               </div>
-                               <div className="flex justify-between text-xs text-slate-500">
-                                  <span>Extracting key concepts...</span>
-                                  <span>85%</span>
-                               </div>
-                            </div>
-                         </div>
-                      </div>
+                  <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[90%] md:w-[60%] bg-[#1A1B26]/90 backdrop-blur-md rounded-xl shadow-xl border border-white/10 p-5 text-left flex items-center gap-4 animate-in slide-in-from-bottom-4 duration-700">
+                     <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0">
+                       <Brain size={20} />
+                     </div>
+                     <div className="flex-1">
+                        <h3 className="text-sm font-bold text-white mb-1">Analyzing "Calculus III - Partial Derivatives"</h3>
+                        <div className="space-y-2">
+                           <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                              <div className="h-full w-[85%] bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse"></div>
+                           </div>
+                           <div className="flex justify-between text-[10px] text-slate-400 uppercase tracking-wider">
+                              <span>Processing formulas...</span>
+                              <span>85%</span>
+                           </div>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Mail, Lock } from 'lucide-react';
 import Link from 'next/link';
+import NotraLogo from '@/components/NotraLogo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -42,15 +43,8 @@ export default function LoginPage() {
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center cursor-pointer group mb-6">
-            <div className="relative flex h-12 w-12 items-center justify-center mr-3">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-500 to-cyan-400 rounded-2xl shadow-lg shadow-blue-500/50 group-hover:shadow-blue-500/70 transition-all duration-300 group-hover:scale-110 animate-pulse" style={{ animationDuration: '3s' }}></div>
-              <div className="absolute inset-0 rounded-2xl border-2 border-white/30 group-hover:border-white/50 transition-all duration-300 group-hover:rotate-180"></div>
-              <span className="relative z-10 text-base font-extrabold text-white tracking-tight transform group-hover:scale-110 transition-transform duration-300" style={{
-                textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                letterSpacing: '-0.05em'
-              }}>
-                N
-              </span>
+            <div className="mr-3">
+              <NotraLogo size="lg" />
             </div>
             <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 tracking-tight group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300">
               Notra

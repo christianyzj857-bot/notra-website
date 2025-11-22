@@ -132,22 +132,33 @@ body {
   }
 }
 
-/* New Animations for Logo & Hero */
+/* --- NEW Animations for Logo & Hero --- */
+
+/* Subtle floating effect for logo/3D elements */
 @keyframes float-subtle {
-  0%, 100% { transform: translateY(0) rotate(2deg); }
-  50% { transform: translateY(-5px) rotate(-1deg); }
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(1deg); }
 }
 
+/* Breathing glow effect */
 @keyframes slow-pulse-glow {
   0%, 100% {
-    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.9));
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4));
   }
   50% {
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 2px rgba(255, 255, 255, 1));
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8));
   }
 }
 
-/* Hero section headline polish */
-.headline-glow {
-  text-shadow: 0 0 10px rgba(100, 100, 255, 0.5), 0 0 20px rgba(100, 100, 255, 0.2);
+/* AI Dust / Particles movement */
+@keyframes particle-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(-20px) translateX(10px); opacity: 0; }
 }
+
+/* Hero Headline Glow - Stronger for dark mode */
+.headline-glow {
+  text-shadow: 0 0 20px rgba(99, 102, 241, 0.3), 0 0 40px rgba(99, 102, 241, 0.1);
+}
+

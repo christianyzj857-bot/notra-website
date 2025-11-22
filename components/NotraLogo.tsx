@@ -28,9 +28,9 @@ export default function NotraLogo({ className = "", size = "md" }: NotraLogoProp
       >
         <defs>
           <linearGradient id="notra-gradient" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#6366F1" />
-            <stop offset="50%" stopColor="#8B5CF6" />
-            <stop offset="100%" stopColor="#60A5FA" />
+            <stop offset="0%" stopColor="#6366F1" /> {/* Indigo-500 */}
+            <stop offset="50%" stopColor="#8B5CF6" /> {/* Violet-500 */}
+            <stop offset="100%" stopColor="#60A5FA" /> {/* Blue-400 */}
           </linearGradient>
         </defs>
 
@@ -45,12 +45,12 @@ export default function NotraLogo({ className = "", size = "md" }: NotraLogoProp
           }}
         />
         
-        {/* Page Folds */}
+        {/* Page Folds / Grid Lines */}
         <path 
-          d="M30 25 L80 25 M30 35 L80 35 M30 45 L80 45" 
+          d="M25 25 L75 25 M25 35 L75 35 M25 45 L75 45 M25 55 L75 55" 
           stroke="white"
-          strokeWidth="3"
-          strokeOpacity="0.1"
+          strokeWidth="2"
+          strokeOpacity="0.15"
           strokeLinecap="round"
           style={{
             transform: 'skewY(-5deg) translate(0px, 0px)',
@@ -60,20 +60,27 @@ export default function NotraLogo({ className = "", size = "md" }: NotraLogoProp
 
         {/* Central AI Core - Node Network & Glow */}
         <g 
-          transform="translate(48 48)"
+          transform="translate(50 50)"
           className="animate-[slow-pulse-glow_3s_ease-in-out_infinite]"
         >
-          <circle cx="0" cy="0" r="12" fill="white" fillOpacity="0.8" />
+          {/* Main Core (White Glow) */}
+          <circle cx="0" cy="0" r="10" fill="white" fillOpacity="0.9" />
+          
+          {/* Inner Node (Violet/AI Color) */}
           <circle cx="0" cy="0" r="4" fill="#6366F1" className="shadow-2xl" />
-          <circle cx="0" cy="-25" r="2" fill="white" fillOpacity="0.6" />
-          <circle cx="20" cy="15" r="2" fill="white" fillOpacity="0.6" />
-          <circle cx="-20" cy="15" r="2" fill="white" fillOpacity="0.6" />
-          <path d="M0 -12 L0 -23" stroke="white" strokeWidth="1" strokeOpacity="0.4" />
-          <path d="M12 5 L18 13" stroke="white" strokeWidth="1" strokeOpacity="0.4" />
-          <path d="M-12 5 L-18 13" stroke="white" strokeWidth="1" strokeOpacity="0.4" />
+          
+          {/* Surrounding Nodes (AI/Knowledge) */}
+          <circle cx="0" cy="-20" r="2.5" fill="white" fillOpacity="0.8" />
+          <circle cx="18" cy="12" r="2.5" fill="white" fillOpacity="0.8" />
+          <circle cx="-18" cy="12" r="2.5" fill="white" fillOpacity="0.8" />
+
+          {/* Connections */}
+          <path d="M0 -10 L0 -17" stroke="white" strokeWidth="1.5" strokeOpacity="0.6" />
+          <path d="M9 5 L15 10" stroke="white" strokeWidth="1.5" strokeOpacity="0.6" />
+          <path d="M-9 5 L-15 10" stroke="white" strokeWidth="1.5" strokeOpacity="0.6" />
         </g>
 
-        {/* Top Highlight */}
+        {/* Top Highlight/Shimmer */}
         <path 
           d="M15 15 L80 15 L78 20 L18 20 L15 15 Z" 
           fill="white"
@@ -87,4 +94,3 @@ export default function NotraLogo({ className = "", size = "md" }: NotraLogoProp
     </div>
   );
 }
-

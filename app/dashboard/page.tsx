@@ -15,7 +15,7 @@ import {
   Crown,
   Sparkles
 } from 'lucide-react';
-import { NotraLogo } from '../chat/chat-ui';
+import NotraLogo from '@/components/NotraLogo';
 import { getCurrentUserPlan } from '@/lib/userPlan';
 import { USAGE_LIMITS } from '@/config/usageLimits';
 import NextLink from 'next/link';
@@ -251,7 +251,7 @@ export default function Dashboard() {
             {/* Logo */}
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-6">
-                <NotraLogo size="default" />
+                <NotraLogo size="md" />
                 <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
                   Notra
                 </span>
