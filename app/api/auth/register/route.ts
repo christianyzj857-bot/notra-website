@@ -21,6 +21,28 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if Supabase is configured (not using placeholder)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey || 
+        supabaseUrl.includes('placeholder') || 
+        supabaseAnonKey.includes('placeholder')) {
+      // Mock registration for development (when Supabase not configured)
+      return NextResponse.json({
+        user: {
+          id: `mock-${Date.now()}`,
+          email: email,
+          username: displayName,
+          displayName: displayName,
+          plan: 'free',
+        },
+        session: {
+          access_token: `mock-token-${Date.now()}`,
+        },
+      });
+    }
+
     // Sign up user with Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -52,8 +74,9 @@ export async function POST(req: Request) {
       session: data.session,
     });
   } catch (e: any) {
+    console.error('Registration error:', e);
     return NextResponse.json(
-      { error: e.message || 'Registration failed' },
+      { error: e.message || 'Registration failed. Please try again.' },
       { status: 500 }
     );
   }

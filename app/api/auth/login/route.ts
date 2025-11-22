@@ -14,6 +14,28 @@ export async function POST(req: Request) {
       );
     }
 
+    // Check if Supabase is configured (not using placeholder)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey || 
+        supabaseUrl.includes('placeholder') || 
+        supabaseAnonKey.includes('placeholder')) {
+      // Mock login for development (when Supabase not configured)
+      return NextResponse.json({
+        user: {
+          id: `mock-${Date.now()}`,
+          email: email,
+          username: email.split('@')[0],
+          displayName: email.split('@')[0],
+          plan: 'free',
+        },
+        session: {
+          access_token: `mock-token-${Date.now()}`,
+        },
+      });
+    }
+
     // Sign in user with Supabase
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -44,8 +66,9 @@ export async function POST(req: Request) {
       session: data.session,
     });
   } catch (e: any) {
+    console.error('Login error:', e);
     return NextResponse.json(
-      { error: e.message || 'Login failed' },
+      { error: e.message || 'Login failed. Please try again.' },
       { status: 500 }
     );
   }

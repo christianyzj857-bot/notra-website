@@ -5,7 +5,6 @@ import { ArrowRight } from 'lucide-react';
 import { onboardingSamples } from '../config';
 import { type OnboardingRole, type OnboardingSampleBundle } from '@/types/notra';
 import { InlineMath, BlockMath } from 'react-katex';
-import Image from 'next/image';
 
 // Academic images for different roles
 const getAcademicImage = (role: OnboardingRole | null): string => {
@@ -199,13 +198,15 @@ export default function OnboardingStep4() {
             {/* Left: Academic Image (Role-specific) */}
             <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
               <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 px-4">Academic Content</h4>
-              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-blue-100">
-                <Image
+              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-blue-100 bg-slate-200">
+                <img
                   src={getAcademicImage(onboardingRole)}
                   alt={`${roleLabels[onboardingRole || 'other']} academic content`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to a placeholder if image fails to load
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=800&auto=format&fit=crop';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4">
@@ -284,10 +285,14 @@ export default function OnboardingStep4() {
             <h3 className="text-2xl font-bold text-slate-900 mb-3">
               {sections.formalDefinition.title}
             </h3>
-            <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-indigo-100">
+            <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-indigo-100 overflow-hidden">
               {sections?.formalDefinition?.definition && (
-                <div className="text-lg text-slate-900 leading-relaxed">
-                  <MathBlock math={sections.formalDefinition.definition} />
+                <div className="text-lg text-slate-900 leading-relaxed break-words overflow-wrap-anywhere">
+                  {sections.formalDefinition.definition.includes('\\') ? (
+                    <MathBlock math={sections.formalDefinition.definition} />
+                  ) : (
+                    <p className="whitespace-normal break-words">{sections.formalDefinition.definition}</p>
+                  )}
                 </div>
               )}
             </div>
