@@ -32,6 +32,25 @@ export default function SettingsPage() {
       const displayName = localStorage.getItem('user_display_name') || 'User';
       const plan = localStorage.getItem('user_plan') || 'free';
       
+      // Load language preferences
+      const savedUILang = localStorage.getItem('ui_language') || 
+                          localStorage.getItem('onboarding_content_language') || 
+                          'en';
+      const savedContentLang = localStorage.getItem('content_language') || 
+                               localStorage.getItem('onboarding_content_language') || 
+                               'en';
+      const savedCountry = localStorage.getItem('onboarding_country') || '';
+      
+      setUILanguage(savedUILang === 'other' ? 'en' : savedUILang);
+      setContentLanguage(savedContentLang === 'other' ? 'en' : savedContentLang);
+      setCountry(savedCountry);
+      
+      // Set education mode based on country
+      if (savedCountry) {
+        const mode = getEducationModeByCountry(savedCountry);
+        setEducationMode(mode);
+      }
+      
       if (email) {
         setUser({ email, displayName, plan });
       } else {
@@ -40,6 +59,28 @@ export default function SettingsPage() {
       }
     }
   }, []);
+  
+  const handleUILanguageChange = (lang: string) => {
+    localStorage.setItem('ui_language', lang);
+    setUILanguage(lang);
+    // Reload page to apply language change
+    window.location.reload();
+  };
+  
+  const handleContentLanguageChange = (lang: string) => {
+    localStorage.setItem('content_language', lang);
+    setContentLanguage(lang);
+    // Show notification (no page reload needed)
+    alert(t('settings.contentLanguageChanged'));
+  };
+  
+  const handleCountryChange = (newCountry: string) => {
+    localStorage.setItem('onboarding_country', newCountry);
+    setCountry(newCountry);
+    const newMode = getEducationModeByCountry(newCountry);
+    setEducationMode(newMode);
+    alert(t('settings.countryChanged', { mode: t(`settings.mode.${newMode.toLowerCase()}`) }));
+  };
 
   const handleLogout = async () => {
     try {
@@ -281,8 +322,8 @@ export default function SettingsPage() {
                       >
                         <option value="">{t('settings.country')}</option>
                         {COUNTRIES.map(c => (
-                          <option key={c.code} value={c.code}>
-                            {c.flag} {c.name}
+                          <option key={c.code || c.id} value={c.code || c.id}>
+                            {c.label}
                           </option>
                         ))}
                       </select>
