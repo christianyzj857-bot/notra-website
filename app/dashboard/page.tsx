@@ -19,6 +19,7 @@ import NotraLogo from '@/components/NotraLogo';
 import { getCurrentUserPlan } from '@/lib/userPlan';
 import { USAGE_LIMITS } from '@/config/usageLimits';
 import NextLink from 'next/link';
+import { t } from '@/lib/i18n';
 
 // Type definitions
 type ProjectType = 'document' | 'audio' | 'video';
@@ -52,10 +53,14 @@ const formatRelativeTime = (timestamp: number): string => {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes} min ago`;
-  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-  return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (minutes < 1) return t('dashboard.justNow');
+  if (minutes < 60) return t('dashboard.minAgo', { minutes: minutes.toString() });
+  if (hours < 24) {
+    if (hours === 1) return t('dashboard.hourAgo', { hours: hours.toString() });
+    return t('dashboard.hoursAgo', { hours: hours.toString() });
+  }
+  if (days === 1) return t('dashboard.dayAgo', { days: days.toString() });
+  return t('dashboard.daysAgo', { days: days.toString() });
 };
 
 export default function Dashboard() {
@@ -130,10 +135,10 @@ export default function Dashboard() {
   const handleNewNote = () => {
     const newProject: Project = {
       id: `project-${Date.now()}`,
-      title: 'Untitled Note',
+      title: t('dashboard.untitled'),
       type: 'document',
       createdAt: Date.now(),
-      summary: 'Start adding content to your note...'
+      summary: t('dashboard.noProjectsDesc')
     };
     setProjects([newProject, ...projects]);
     setSelectedProject(newProject);
@@ -337,19 +342,19 @@ export default function Dashboard() {
               className="w-full mb-8 px-4 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              New Note
+              {t('dashboard.createNew')}
             </button>
 
             {/* My Notes Section */}
             <div className="flex-1 overflow-y-auto">
               <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                My Notes
+                {t('dashboard.recentProjects')}
               </h2>
               
               {projects.length === 0 ? (
                 <div className="text-center py-12 text-slate-500 text-sm">
-                  <p>No notes yet.</p>
-                  <p className="mt-2">Upload a file to get started.</p>
+                  <p>{t('dashboard.noProjects')}</p>
+                  <p className="mt-2">{t('dashboard.noProjectsDesc')}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -411,10 +416,10 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
-                    Dashboard
+                    {t('dashboard.title')}
                   </h1>
                   <p className="text-lg text-slate-400">
-                    Upload files, record audio, or paste video links to create your notes
+                    {t('dashboard.noProjectsDesc')}
                   </p>
                 </div>
                 <button
@@ -433,20 +438,20 @@ export default function Dashboard() {
                       <>
                         <div className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg font-semibold text-sm flex items-center gap-2 shadow-lg shadow-amber-500/30">
                           <Crown className="w-4 h-4" />
-                          Pro Plan
+                          {t('dashboard.proPlan')}
                         </div>
                       </>
                     ) : (
                       <>
                         <div className="px-3 py-1.5 bg-white/10 text-slate-300 rounded-lg font-semibold text-sm border border-white/10">
-                          Free Plan
+                          {t('dashboard.freePlan')}
                         </div>
                         <NextLink
                           href="/pricing"
                           className="px-4 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-indigo-400 hover:to-purple-500 transition-all flex items-center gap-2 shadow-lg shadow-indigo-500/30"
                         >
                           <Sparkles className="w-4 h-4" />
-                          Upgrade
+                          {t('dashboard.upgrade')}
                         </NextLink>
                       </>
                     )}
@@ -457,19 +462,19 @@ export default function Dashboard() {
                 {usage && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <p className="text-slate-400 mb-1">File uploads</p>
+                      <p className="text-slate-400 mb-1">{t('dashboard.fileUploads')}</p>
                       <p className="font-semibold text-white">
                         {usage.fileThisMonth} / {limits.maxFileSessionsPerMonth === 9999 ? '∞' : limits.maxFileSessionsPerMonth}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400 mb-1">Audio transcriptions</p>
+                      <p className="text-slate-400 mb-1">{t('dashboard.audioTranscriptions')}</p>
                       <p className="font-semibold text-white">
                         {usage.audioThisMonth} / {limits.maxAudioSessionsPerMonth === 9999 ? '∞' : limits.maxAudioSessionsPerMonth}
                       </p>
                     </div>
                     <div>
-                      <p className="text-slate-400 mb-1">Chat messages today</p>
+                      <p className="text-slate-400 mb-1">{t('dashboard.chatMessagesToday')}</p>
                       <p className="font-semibold text-white">
                         {usage.chatToday} / {limits.maxChatMessagesPerDay === 9999 ? '∞' : limits.maxChatMessagesPerDay}
                       </p>
@@ -511,13 +516,13 @@ export default function Dashboard() {
                     <FileText className="w-8 h-8 text-blue-400" />
                   </div>
                   <div className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold mb-3 border border-blue-500/30">
-                    Document
+                    {t('dashboard.document')}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    Upload a document
+                    {t('upload.file.title')}
                   </h3>
                   <p className="text-sm text-slate-400">
-                    PDFs, PPT, Word, lecture slides, and more
+                    {t('upload.file.supportedFormats')}
                   </p>
                 </div>
               </div>
@@ -529,29 +534,29 @@ export default function Dashboard() {
                     <Mic className="w-8 h-8 text-purple-400" />
                   </div>
                   <div className="inline-block px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold mb-3 border border-purple-500/30">
-                    Audio
+                    {t('dashboard.audio')}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    Record or upload audio
+                    {t('upload.audio.title')}
                   </h3>
                   <p className="text-sm text-slate-400 mb-4">
-                    Lecture recordings, podcasts, meeting audio
+                    {t('upload.audio.supportedFormats')}
                   </p>
                 </div>
                 <div className="space-y-3">
                   <button
-                    onClick={() => alert('Recording coming soon')}
+                    onClick={() => alert(t('upload.audio.processing'))}
                     className="w-full px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-400 hover:to-pink-500 transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30"
                   >
                     <Play className="w-4 h-4" />
-                    Record audio
+                    {t('chat.recordAudio')}
                   </button>
                   <button
                     onClick={() => audioInputRef.current?.click()}
                     className="w-full px-4 py-2.5 bg-white/5 border-2 border-purple-500/30 text-purple-300 font-semibold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                   >
                     <Upload className="w-4 h-4" />
-                    Upload audio file
+                    {t('upload.audio.title')}
                   </button>
                   <input
                     ref={audioInputRef}
@@ -573,13 +578,13 @@ export default function Dashboard() {
                     <Video className="w-8 h-8 text-pink-400" />
                   </div>
                   <div className="inline-block px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs font-semibold mb-3 border border-pink-500/30">
-                    Video
+                    {t('dashboard.video')}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    Video link
+                    {t('upload.video.title')}
                   </h3>
                   <p className="text-sm text-slate-400 mb-4">
-                    Paste a link from YouTube, Bilibili, TikTok, or others
+                    {t('upload.video.supportedPlatforms')}
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -599,7 +604,7 @@ export default function Dashboard() {
                     onClick={handleVideoLink}
                     className="w-full px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white font-semibold rounded-xl hover:from-pink-400 hover:to-rose-500 transition-all shadow-lg shadow-pink-500/30"
                   >
-                    Process Video
+                    {t('dashboard.processVideo')}
                   </button>
                 </div>
               </div>
@@ -608,7 +613,7 @@ export default function Dashboard() {
             {/* Latest Note Preview - Dark Theme */}
             <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-xl">
               <h2 className="text-2xl font-bold text-white mb-6">
-                Latest note
+                {t('dashboard.latestNote')}
               </h2>
 
               {selectedProject ? (
@@ -641,17 +646,17 @@ export default function Dashboard() {
                     onClick={() => window.location.href = `/dashboard/${selectedProject.id}`}
                     className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center gap-2"
                   >
-                    Open in full view
+                    {t('dashboard.openFullView')}
                     <ExternalLink className="w-4 h-4" />
                   </button>
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <p className="text-slate-400 text-lg mb-2">
-                    No notes yet.
+                    {t('dashboard.noProjects')}
                   </p>
                   <p className="text-slate-500 text-sm">
-                    Upload a file or record audio to see your first note.
+                    {t('dashboard.noProjectsDesc')}
                   </p>
                 </div>
               )}

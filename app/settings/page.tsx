@@ -7,6 +7,10 @@ import {
   ChevronRight, Shield, ChevronLeft, Users, Settings as SettingsIcon
 } from 'lucide-react';
 import NotraLogo from '@/components/NotraLogo';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { t, getUILanguage } from '@/lib/i18n';
+import { getEducationModeByCountry, type EducationMode } from '@/lib/educationMode';
+import { COUNTRIES } from '@/constants/countries';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<{
@@ -17,7 +21,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('account');
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('space');
-  const [language, setLanguage] = useState('en');
+  const [uiLanguage, setUILanguage] = useState('en');
+  const [contentLanguage, setContentLanguage] = useState('en');
+  const [country, setCountry] = useState<string>('');
+  const [educationMode, setEducationMode] = useState<EducationMode>('western');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -238,17 +245,53 @@ export default function SettingsPage() {
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-3">Language</label>
-                    <select 
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full bg-[#0B0C15] border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
-                    >
-                      <option value="en">English (US)</option>
-                      <option value="zh">简体中文</option>
-                      <option value="jp">日本語</option>
-                    </select>
+                  <div className="space-y-6">
+                    <div>
+                      <LanguageSwitcher
+                        value={uiLanguage}
+                        onChange={handleUILanguageChange}
+                        variant="dropdown"
+                        size="md"
+                        showLabel={true}
+                      />
+                      <p className="text-xs text-slate-400 mt-2">
+                        {t('settings.uiLanguageHint')}
+                      </p>
+                    </div>
+                    <div>
+                      <LanguageSwitcher
+                        value={contentLanguage}
+                        onChange={handleContentLanguageChange}
+                        variant="dropdown"
+                        size="md"
+                        showLabel={true}
+                      />
+                      <p className="text-xs text-slate-400 mt-2">
+                        {t('settings.contentLanguageHint')}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-300 mb-3">
+                        {t('settings.country')}
+                      </label>
+                      <select 
+                        value={country}
+                        onChange={(e) => handleCountryChange(e.target.value)}
+                        className="w-full bg-[#0B0C15] border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
+                      >
+                        <option value="">{t('settings.country')}</option>
+                        {COUNTRIES.map(c => (
+                          <option key={c.code} value={c.code}>
+                            {c.flag} {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      {educationMode && (
+                        <p className="text-xs text-slate-400 mt-2">
+                          {t('settings.educationMode')}: {t(`settings.mode.${educationMode.toLowerCase()}`)}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
