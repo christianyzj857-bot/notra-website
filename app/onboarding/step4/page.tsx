@@ -277,11 +277,42 @@ export default function OnboardingStep4() {
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-indigo-100 overflow-hidden">
               {sections?.formalDefinition?.definition && (
                 <div className="text-lg text-slate-900 leading-relaxed break-words overflow-wrap-anywhere">
-                  {sections.formalDefinition.definition.includes('\\') ? (
-                    <MathBlock math={sections.formalDefinition.definition} />
-                  ) : (
-                    <p className="whitespace-normal break-words">{sections.formalDefinition.definition}</p>
-                  )}
+                  {(() => {
+                    const definition = sections.formalDefinition.definition;
+                    const mathSymbols = /[∇∂∑∏∫√≤≥≠≈αβγδθλπσφω₀₁₂₃₄₅₆₇₈₉]/;
+                    const hasMathSymbols = mathSymbols.test(definition);
+                    const hasLaTeX = definition.includes('\\');
+                    
+                    // Check for colon separator
+                    if (definition.includes(':')) {
+                      const colonIndex = definition.indexOf(':');
+                      const label = definition.substring(0, colonIndex).trim();
+                      const afterColon = definition.substring(colonIndex + 1).trim();
+                      
+                      if ((hasMathSymbols || hasLaTeX || afterColon.match(/[a-zA-Z]+\s*[=<>≤≥]/)) && label) {
+                        return (
+                          <div className="flex flex-col gap-2">
+                            <span className="font-medium">{label}:</span>
+                            <div>
+                              {hasLaTeX || hasMathSymbols ? (
+                                <MathBlock math={afterColon} />
+                              ) : (
+                                <span>{afterColon}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                    
+                    // Check if it's a pure formula (starts with math or is short)
+                    if (hasLaTeX || hasMathSymbols || definition.match(/^[a-zA-Z]+\s*[=<>≤≥]/)) {
+                      return <MathBlock math={definition} />;
+                    }
+                    
+                    // Default: render as text
+                    return <p className="whitespace-normal break-words">{definition}</p>;
+                  })()}
                 </div>
               )}
             </div>
@@ -349,19 +380,113 @@ export default function OnboardingStep4() {
             <div className="bg-white/70 backdrop-blur-sm p-4 rounded-lg border border-blue-100 mb-4">
               {sections.workedExample.problem && (
                 <div className="text-lg text-slate-900 leading-relaxed">
-                  <MathBlock math={sections.workedExample.problem} />
+                  {(() => {
+                    const problem = sections.workedExample.problem;
+                    const mathSymbols = /[∇∂∑∏∫√≤≥≠≈αβγδθλπσφω₀₁₂₃₄₅₆₇₈₉]/;
+                    const hasMathSymbols = mathSymbols.test(problem);
+                    const hasLaTeX = problem.includes('\\');
+                    
+                    // Check for colon separator
+                    if (problem.includes(':')) {
+                      const colonIndex = problem.indexOf(':');
+                      const label = problem.substring(0, colonIndex).trim();
+                      const afterColon = problem.substring(colonIndex + 1).trim();
+                      
+                      if ((hasMathSymbols || hasLaTeX || afterColon.match(/[a-zA-Z]+\s*[=<>≤≥]/)) && label) {
+                        return (
+                          <div className="flex flex-col gap-1">
+                            <span className="font-medium">{label}:</span>
+                            <div>
+                              {hasLaTeX || hasMathSymbols ? (
+                                <MathBlock math={afterColon} />
+                              ) : (
+                                <span>{afterColon}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                    }
+                    
+                    // Default: render as is
+                    return hasLaTeX ? <MathBlock math={problem} /> : <span>{problem}</span>;
+                  })()}
                 </div>
               )}
             </div>
             <ol className="space-y-3">
-              {sections?.workedExample?.steps?.map((step: string, idx: number) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <span className="text-[#9F6BFF] font-bold mt-1">{idx + 1}.</span>
-                  <span className="text-slate-700 text-base leading-relaxed">
-                    {step.includes('\\') ? <MathInline math={step} /> : step}
-                  </span>
-                </li>
-              ))}
+              {sections?.workedExample?.steps?.map((step: string, idx: number) => {
+                // Parse step to separate English text from formulas
+                const mathSymbols = /[∇∂∑∏∫√≤≥≠≈αβγδθλπσφω₀₁₂₃₄₅₆₇₈₉]/;
+                const hasMathSymbols = mathSymbols.test(step);
+                const hasLaTeX = step.includes('\\');
+                const hasMath = hasMathSymbols || hasLaTeX;
+                
+                // Check for colon separator (e.g., "Partials: ∂f/∂x = 2xy")
+                if (step.includes(':')) {
+                  const colonIndex = step.indexOf(':');
+                  const label = step.substring(0, colonIndex).trim();
+                  const afterColon = step.substring(colonIndex + 1).trim();
+                  
+                  // Check if after colon contains math
+                  const afterColonHasMath = mathSymbols.test(afterColon) || afterColon.includes('\\') || afterColon.match(/[a-zA-Z]+\s*[=<>≤≥]/);
+                  
+                  if (afterColonHasMath && label) {
+                    return (
+                      <li key={idx} className="flex items-start gap-3">
+                        <span className="text-[#9F6BFF] font-bold mt-1">{idx + 1}.</span>
+                        <div className="flex-1 flex flex-col gap-1">
+                          <span className="text-slate-800 font-medium">{label}:</span>
+                          <div className="text-slate-700">
+                            {hasLaTeX || hasMathSymbols ? (
+                              <MathInline math={afterColon} />
+                            ) : (
+                              <span>{afterColon}</span>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  }
+                }
+                
+                // Check for arrow separator (e.g., "Apply power rule → f'(x) = 3x²")
+                if (step.includes('→')) {
+                  const arrowIndex = step.indexOf('→');
+                  const beforeArrow = step.substring(0, arrowIndex).trim();
+                  const afterArrow = step.substring(arrowIndex + 1).trim();
+                  
+                  const afterArrowHasMath = mathSymbols.test(afterArrow) || afterArrow.includes('\\') || afterArrow.match(/[a-zA-Z]+\s*[=<>≤≥]/);
+                  
+                  if (afterArrowHasMath && beforeArrow) {
+                    return (
+                      <li key={idx} className="flex items-start gap-3">
+                        <span className="text-[#9F6BFF] font-bold mt-1">{idx + 1}.</span>
+                        <div className="flex-1 flex flex-col gap-1">
+                          <span className="text-slate-800 font-medium">{beforeArrow}</span>
+                          <div className="text-slate-700">
+                            {hasLaTeX || hasMathSymbols ? (
+                              <MathInline math={afterArrow} />
+                            ) : (
+                              <span>{afterArrow}</span>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  }
+                }
+                
+                // Default: render as is
+                return (
+                  <li key={idx} className="flex items-start gap-3">
+                    <span className="text-[#9F6BFF] font-bold mt-1">{idx + 1}.</span>
+                    <span className="text-slate-700 text-base leading-relaxed">
+                      {hasLaTeX ? <MathInline math={step} /> : step}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           </div>
 
