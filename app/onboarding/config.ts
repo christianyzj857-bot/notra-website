@@ -23,7 +23,8 @@ export interface NoteContent {
   mainSubtitle: string;
   sections: {
     overview: string;
-    illustrations: Array<{
+    keyConcepts?: string[];
+    illustrations?: Array<{
       title: string;
       description: string;
       icon: string;
