@@ -86,13 +86,23 @@ export default function OnboardingStep4() {
   useEffect(() => {
     // Check if user came from step3 and get sample data from localStorage
     if (typeof window !== 'undefined') {
-      const stage = localStorage.getItem('onboarding_stage') as OnboardingRole | null;
+      const stage = localStorage.getItem('onboarding_stage');
       if (!stage) {
         window.location.href = '/onboarding/step1';
         return;
       }
       
-      setOnboardingRole(stage);
+      // Map step1 IDs to config role keys
+      const roleMap: Record<string, OnboardingRole> = {
+        'middle_school': 'middleschool',
+        'undergraduate': 'undergrad',
+        'graduate': 'grad',
+        'working_professional': 'professional',
+        'educator': 'educator',
+        'other': 'other',
+      };
+      const mappedRole = roleMap[stage] || 'other';
+      setOnboardingRole(mappedRole as OnboardingRole);
       
       // Try to get sample data from localStorage (stored during drag-and-drop)
       const sampleDataStr = localStorage.getItem('onboarding_sample_data');
