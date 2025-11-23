@@ -2,7 +2,7 @@ import React from 'react';
 
 export const BusinessMetricsDiagram = () => {
   return (
-    <svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FFFFFF', fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FFFFFF', fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
       <title>Q2 Business Metrics: Regions and Sales Funnel</title>
       
       <text x="600" y="60" fontSize="32" fontWeight="bold" textAnchor="middle" fill="#24292E">Q2 Market Performance &amp; Sales Funnel Health</text>

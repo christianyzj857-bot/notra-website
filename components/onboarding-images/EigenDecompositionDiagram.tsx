@@ -2,7 +2,7 @@ import React from 'react';
 
 export const EigenDecompositionDiagram = () => {
   return (
-    <svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FFFFFF', fontFamily: 'Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FFFFFF', fontFamily: 'Arial, sans-serif' }}>
       <title>Concept Diagram: Matrix Diagonalization A = PDP⁻¹</title>
       
       <text x="600" y="60" fontSize="32" fontWeight="bold" textAnchor="middle" fill="#333">Understanding Matrix Diagonalization: A = PDP⁻¹</text>

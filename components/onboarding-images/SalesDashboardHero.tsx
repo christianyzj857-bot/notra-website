@@ -2,7 +2,7 @@ import React from 'react';
 
 export const SalesDashboardHero = () => {
   return (
-    <svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#F5F7FA', fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#F5F7FA', fontFamily: 'Helvetica Neue, Arial, sans-serif' }}>
       <title>Q2 Sales Report Dashboard – TechCorp</title>
       {/* Top Banner / Header */}
       <rect x="0" y="0" width="1200" height="100" fill="#FFFFFF"/>

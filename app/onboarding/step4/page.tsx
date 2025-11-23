@@ -225,29 +225,22 @@ export default function OnboardingStep4() {
             <p className="text-xl text-slate-500">{noteContent.mainSubtitle}</p>
           </div>
 
-          {/* Top Visual Area: Academic Image + Formula Card */}
+          {/* Top Visual Area: Academic Image + Concept Diagram */}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
             {/* Left: Academic Image (Role-specific) */}
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
               <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 px-4">Academic Content</h4>
-              <div className="relative w-full rounded-xl overflow-hidden border border-blue-100 bg-white">
-                <div className="w-full" style={{ aspectRatio: '3/2' }}>
-                  {getHeroImageComponent(onboardingRole)}
-                </div>
+              <div className="relative w-full rounded-xl overflow-hidden border border-blue-100 bg-white" style={{ height: '320px' }}>
+                {getHeroImageComponent(onboardingRole)}
               </div>
             </div>
             
-            {/* Right: Main Formula Card with KaTeX */}
-            <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-8 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
-              <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4">Main Formula</h4>
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-purple-100">
-                <div className="text-center">
-                  <MathBlock math="f'(x) = \lim_{h \to 0} \frac{f(x + h) - f(x)}{h}" />
-                </div>
+            {/* Right: Concept Diagram - Textbook-style illustration */}
+            <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 rounded-2xl p-4 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+              <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 px-4">Concept Diagram</h4>
+              <div className="relative w-full rounded-xl overflow-hidden border border-purple-100 bg-white" style={{ height: '320px' }}>
+                {getConceptDiagramComponent(onboardingRole)}
               </div>
-              <p className="text-sm text-slate-600 mt-4 text-center">
-                Limit definition of derivative
-              </p>
             </div>
           </div>
 
@@ -257,13 +250,6 @@ export default function OnboardingStep4() {
             <p className="text-lg text-slate-700 leading-relaxed max-w-3xl">
               {sections.overview}
             </p>
-          </div>
-
-          {/* Concept Diagram - Textbook-style illustration */}
-          <div className="mb-12 bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-lg">
-            <div className="w-full" style={{ aspectRatio: '3/2' }}>
-              {getConceptDiagramComponent(onboardingRole)}
-            </div>
           </div>
 
           {/* Key Concepts - Replacing illustrations with concise concept cards */}

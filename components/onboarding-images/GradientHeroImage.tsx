@@ -6,7 +6,7 @@ export const GradientHeroImage = () => {
   const centerX = width / 2;
   const centerY = height / 2 + 50;
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#F0F2F5', fontFamily: 'Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#F0F2F5', fontFamily: 'Arial, sans-serif' }}>
       <title>Multivariable Calculus: Gradients and Level Curves</title>
       
       <text x="60" y="60" fontSize="32" fontWeight="bold" fill="#333">Multivariable Gradients: ∇f(x,y)</text>

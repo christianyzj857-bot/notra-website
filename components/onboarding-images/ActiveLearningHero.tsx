@@ -24,7 +24,7 @@ export const ActiveLearningHero = () => {
   );
 
   return (
-    <svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: cream, fontFamily: 'Comic Sans MS, Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: cream, fontFamily: 'Comic Sans MS, Arial, sans-serif' }}>
       <title>Active Learning Strategy: Think-Pair-Share Flow</title>
       
       <text x="600" y="60" fontSize="36" fontWeight="bold" textAnchor="middle" fill="#333">Active Learning in Action: Think-Pair-Share</text>

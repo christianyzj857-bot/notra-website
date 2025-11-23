@@ -23,7 +23,7 @@ export const LinearAlgebraHeroImage = () => {
     );
   };
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FDFDFD', fontFamily: 'Arial, sans-serif' }}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style={{ backgroundColor: '#FDFDFD', fontFamily: 'Arial, sans-serif' }}>
       <title>Linear Algebra: Eigenvalues and Eigenvectors</title>
       
       {/* Definitions for colored arrows */}
