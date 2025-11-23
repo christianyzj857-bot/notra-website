@@ -226,6 +226,141 @@ if (shouldLocalize()) {
 
 ---
 
+## 🌐 语言切换系统设计（国际网站风格）
+
+### 语言列表一致性
+
+**核心原则**: Settings 中的语言选择器必须与 Onboarding 中的语言列表完全一致
+
+- ✅ **语言数量**: 21 种语言（包括 'other'）
+- ✅ **语言列表来源**: `constants/languages.ts` - 统一管理，单一数据源
+- ✅ **"other" 处理**: 在 Settings 中自动映射为英语（'en'）
+- ✅ **显示格式**: 语言名称 + 本地名称（如 "English / English" 或 "简体中文 / Simplified Chinese"）
+
+### 语言列表详情
+
+**完整的 21 种语言**（与 Onboarding 一致）:
+
+1. English (en) - 默认语言
+2. 简体中文 (zh-CN)
+3. 繁體中文 (zh-TW)
+4. Español (es)
+5. Français (fr)
+6. Deutsch (de)
+7. 日本語 (ja)
+8. 한국어 (ko)
+9. Português (pt)
+10. Русский (ru)
+11. Hindi (hi)
+12. العربية (ar)
+13. Italiano (it)
+14. Nederlands (nl)
+15. Polski (pl)
+16. Türkçe (tr)
+17. Tiếng Việt (vi)
+18. ไทย (th)
+19. Bahasa Indonesia (id)
+20. Bahasa Melayu (ms)
+21. Other → **自动映射为 English (en)**
+
+### 语言切换器组件设计
+
+参考国际网站（GitHub, Notion, Vercel, Stripe）的设计模式：
+
+**两种显示模式**:
+
+1. **下拉菜单（Dropdown）** - 适用于 Settings 和导航栏
+   ```
+   [🌐 English ▼]
+   ┌─────────────────────┐
+   │ ✓ English           │
+   │   简体中文          │
+   │   繁體中文          │
+   │   Español           │
+   │   ...               │
+   └─────────────────────┘
+   ```
+   - 紧凑设计，节省空间
+   - 显示当前语言
+   - 点击展开完整列表
+   - 支持键盘导航
+
+2. **网格布局（Grid）** - 适用于 Settings 详细页面
+   ```
+   [English] [简体中文] [繁體中文]
+   [Español] [Français] [Deutsch]
+   ...
+   ```
+   - 类似 Onboarding 的卡片式选择
+   - 视觉清晰，适合详细设置
+   - 支持搜索过滤
+
+**功能特性**:
+- ✅ 显示所有 21 种语言（与 Onboarding 一致）
+- ✅ 当前语言高亮显示（✓ 标记）
+- ✅ 点击后立即切换
+- ✅ 支持键盘导航（↑↓ 键选择，Enter 确认）
+- ✅ 响应式设计（移动端友好）
+- ✅ Dark mode 支持
+- ✅ 点击外部区域自动关闭
+- ✅ "other" 选项自动映射为英语
+
+### 使用场景
+
+| 场景 | 组件位置 | 显示模式 | 说明 |
+|------|---------|---------|------|
+| **Settings 页面** | Preferences 标签 | Dropdown 或 Grid | 用户详细设置 |
+| **导航栏**（可选） | 右上角 | Dropdown | 快速切换语言 |
+| **Notes 详情页** | 顶部工具栏 | Dropdown | 切换生成语言 |
+
+### 语言切换流程
+
+```
+用户在 Settings 选择语言
+    ↓
+LanguageSwitcher 组件触发 onChange
+    ↓
+检查: 如果是 'other' → 自动映射为 'en'
+    ↓
+更新 localStorage:
+  - ui_language (UI 语言)
+  - content_language (内容语言)
+    ↓
+如果是 UI 语言变更:
+  → 立即刷新页面 (window.location.reload())
+  → 所有需要本地化的页面显示新语言
+    ↓
+如果是内容语言变更:
+  → 提示用户: "后续生成的 notes 将使用 {语言}"
+  → 不影响当前页面显示
+```
+
+### 实现细节
+
+**组件 API**:
+```typescript
+<LanguageSwitcher
+  value={currentLanguage}        // 当前语言代码 (如 'en', 'zh-CN')
+  onChange={(lang) => {...}}     // 语言变更回调
+  variant="dropdown" | "grid"    // 显示模式
+  size="sm" | "md" | "lg"        // 尺寸
+  showLabel={true}               // 是否显示标签
+/>
+```
+
+**"other" 处理逻辑**:
+```typescript
+const handleLanguageChange = (lang: Language) => {
+  if (lang.id === 'other') {
+    onChange('en'); // 自动映射为英语
+  } else {
+    onChange(lang.code || lang.id);
+  }
+};
+```
+
+---
+
 ## 🛠️ 技术选型
 
 ### 方案对比
@@ -676,14 +811,63 @@ export default function PricingPage() {
 }
 ```
 
-### Step 6: Settings 页面功能实现
+### Step 6: 语言切换器组件 (国际网站风格)
 
-#### 6.1 更新 Settings 页面 (`app/settings/page.tsx`)
+#### 6.1 创建语言切换器组件 (`components/LanguageSwitcher.tsx`)
+
+参考国际网站（如 GitHub, Notion, Vercel）的语言切换设计：
+
+**设计特点**:
+- ✅ 下拉菜单（Dropdown）或网格布局（Grid）
+- ✅ 显示语言名称和本地名称（如 "English" / "English"）
+- ✅ 当前语言高亮显示
+- ✅ 点击后立即切换
+- ✅ 支持所有 onboarding 中的语言（21 种）
+- ✅ "other" 选项默认映射到英语
+
+**使用场景**:
+- Settings 页面：使用下拉菜单或网格布局
+- 导航栏（可选）：使用紧凑的下拉菜单
+- Notes 详情页：使用下拉菜单切换生成语言
+
+#### 6.2 语言列表说明
+
+**Onboarding 中的语言列表** (`constants/languages.ts`):
+- 共 21 种语言（包括 'other'）
+- Settings 中的语言选择器使用相同的列表
+- "other" 选项在 Settings 中映射为英语（'en'）
+
+**语言列表**:
+1. English (en)
+2. 简体中文 (zh-CN)
+3. 繁體中文 (zh-TW)
+4. Español (es)
+5. Français (fr)
+6. Deutsch (de)
+7. 日本語 (ja)
+8. 한국어 (ko)
+9. Português (pt)
+10. Русский (ru)
+11. Hindi (hi)
+12. العربية (ar)
+13. Italiano (it)
+14. Nederlands (nl)
+15. Polski (pl)
+16. Türkçe (tr)
+17. Tiếng Việt (vi)
+18. ไทย (th)
+19. Bahasa Indonesia (id)
+20. Bahasa Melayu (ms)
+21. Other → 默认映射为 English
+
+### Step 7: Settings 页面功能实现
+
+#### 7.1 更新 Settings 页面 (`app/settings/page.tsx`)
 ```typescript
 import { COUNTRIES } from '@/constants/countries';
-import { LANGUAGES } from '@/constants/languages';
 import { getEducationModeByCountry, getEducationModeDescription, type EducationMode } from '@/lib/educationMode';
 import { getUILanguage, t } from '@/lib/i18n';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function SettingsPage() {
   const [country, setCountry] = useState<string>('');
@@ -762,30 +946,32 @@ export default function SettingsPage() {
         <p>{getEducationModeDescription(educationMode, uiLanguage)}</p>
       </div>
 
-      {/* UI 语言选择 */}
+      {/* UI 语言选择 - 使用 LanguageSwitcher 组件 */}
       <div>
-        <label>{t('settings.uiLanguage')}</label>
-        <select value={uiLanguage} onChange={(e) => handleUILanguageChange(e.target.value)}>
-          {LANGUAGES.map(lang => (
-            <option key={lang.id} value={lang.code || lang.id}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
-        <p>{t('settings.uiLanguageHint')}</p>
+        <LanguageSwitcher
+          value={uiLanguage}
+          onChange={handleUILanguageChange}
+          variant="dropdown"
+          showLabel={true}
+          size="md"
+        />
+        <p className="text-xs text-slate-400 mt-2">
+          {t('settings.uiLanguageHint')}
+        </p>
       </div>
 
-      {/* 内容语言选择 */}
+      {/* 内容语言选择 - 使用 LanguageSwitcher 组件 */}
       <div>
-        <label>{t('settings.contentLanguage')}</label>
-        <select value={contentLanguage} onChange={(e) => handleContentLanguageChange(e.target.value)}>
-          {LANGUAGES.map(lang => (
-            <option key={lang.id} value={lang.code || lang.id}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
-        <p>{t('settings.contentLanguageHint')}</p>
+        <LanguageSwitcher
+          value={contentLanguage}
+          onChange={handleContentLanguageChange}
+          variant="dropdown"
+          showLabel={true}
+          size="md"
+        />
+        <p className="text-xs text-slate-400 mt-2">
+          {t('settings.contentLanguageHint')}
+        </p>
       </div>
 
       {/* 教育模式 (显示当前模式，允许手动覆盖) */}
@@ -807,9 +993,9 @@ export default function SettingsPage() {
 }
 ```
 
-### Step 7: Notes 界面语言切换器
+### Step 8: Notes 界面语言切换器
 
-#### 7.1 在详情页添加语言选择器 (`app/dashboard/[id]/page.tsx`)
+#### 8.1 在详情页添加语言选择器 (`app/dashboard/[id]/page.tsx`)
 ```typescript
 const [selectedLanguage, setSelectedLanguage] = useState(session.generatedLanguage || 'en');
 const [isRegenerating, setIsRegenerating] = useState(false);
@@ -838,10 +1024,12 @@ const handleLanguageChange = async (newLang: string) => {
 };
 
 // 在 UI 中
-<LanguageSelector
+<LanguageSwitcher
   value={selectedLanguage}
   onChange={handleLanguageChange}
-  disabled={isRegenerating}
+  variant="dropdown"
+  size="sm"
+  showLabel={false}
 />
 ```
 
@@ -877,7 +1065,7 @@ app/api/
             └── route.ts    (待创建)
 
 components/
-└── LanguageSelector.tsx    (待创建)
+└── LanguageSwitcher.tsx    ✅ (已创建 - 国际网站风格的语言切换器)
 ```
 
 ### 需要修改的文件
@@ -1094,13 +1282,18 @@ localStorage.setItem('content_language', 'en')
 - [ ] 测试: 错误处理和加载状态
 
 ### Phase 3 检查清单
+- [x] 创建 LanguageSwitcher 组件（国际网站风格）✅
 - [ ] Settings 页面添加国家选择器
-- [ ] Settings 页面添加语言选择器 (UI + Content)
+- [ ] Settings 页面使用 LanguageSwitcher 组件 (UI + Content)
+  - [ ] 使用完整的语言列表（21 种，与 onboarding 一致）
+  - [ ] "other" 选项默认映射为英语
+  - [ ] 支持下拉菜单和网格两种布局
 - [ ] Settings 页面添加教育模式显示和选择
 - [ ] Settings API 完成 (GET/POST)
 - [ ] 测试: 切换国家 → 教育模式自动更新
 - [ ] 测试: 切换 UI 语言 → 页面立即刷新
 - [ ] 测试: 切换内容语言 → 后续生成使用新语言
+- [ ] 测试: 选择 "other" → 自动映射为英语
 
 ### Phase 4 检查清单
 - [ ] 翻译文件结构创建
