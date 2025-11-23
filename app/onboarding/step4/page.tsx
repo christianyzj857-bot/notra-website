@@ -2,30 +2,61 @@
 
 import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { onboardingSamples } from '../config';
-import { type OnboardingRole, type OnboardingSampleBundle } from '@/types/notra';
+import { onboardingSamples, type OnboardingRole } from '../config';
+import { type OnboardingSampleBundle } from '@/types/notra';
 import { InlineMath, BlockMath } from 'react-katex';
 
-// Academic images for different roles - Textbook quality illustrations
-const getAcademicImage = (role: OnboardingRole | null): string => {
+// Import all image components
+import { AlgebraHeroImage } from '@/components/onboarding-images/AlgebraHeroImage';
+import { AlgebraConceptDiagram } from '@/components/onboarding-images/AlgebraConceptDiagram';
+import { CalculusHeroImage } from '@/components/onboarding-images/CalculusHeroImage';
+import { CalculusApplicationDiagram } from '@/components/onboarding-images/CalculusApplicationDiagram';
+import { LinearAlgebraHeroImage } from '@/components/onboarding-images/LinearAlgebraHeroImage';
+import { EigenDecompositionDiagram } from '@/components/onboarding-images/EigenDecompositionDiagram';
+import { GradientHeroImage } from '@/components/onboarding-images/GradientHeroImage';
+import { DirectionalDerivativeDiagram } from '@/components/onboarding-images/DirectionalDerivativeDiagram';
+import { SalesDashboardHero } from '@/components/onboarding-images/SalesDashboardHero';
+import { BusinessMetricsDiagram } from '@/components/onboarding-images/BusinessMetricsDiagram';
+import { ActiveLearningHero } from '@/components/onboarding-images/ActiveLearningHero';
+import { LearningStrategiesDiagram } from '@/components/onboarding-images/LearningStrategiesDiagram';
+
+// Get hero image component for different roles
+const getHeroImageComponent = (role: OnboardingRole | null) => {
   switch (role) {
-    case 'middle_school':
-      // Basic Algebra/Geometry - Graph and equations
-      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop';
-    case 'undergraduate':
-      // Linear Algebra - Matrix and vectors visualization
-      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop';
-    case 'graduate':
-      // Advanced Calculus - 3D graphs and complex functions
-      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop';
-    case 'working_professional':
-      // Business analytics - Charts and data visualization
-      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop';
+    case 'middleschool':
+      return <AlgebraHeroImage />;
+    case 'highschool':
+      return <CalculusHeroImage />;
+    case 'undergrad':
+      return <LinearAlgebraHeroImage />;
+    case 'grad':
+      return <GradientHeroImage />;
+    case 'professional':
+      return <SalesDashboardHero />;
     case 'educator':
-      // Teaching materials - Structured content
-      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop';
+      return <ActiveLearningHero />;
     default:
-      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop';
+      return <AlgebraHeroImage />;
+  }
+};
+
+// Get concept diagram component for different roles
+const getConceptDiagramComponent = (role: OnboardingRole | null) => {
+  switch (role) {
+    case 'middleschool':
+      return <AlgebraConceptDiagram />;
+    case 'highschool':
+      return <CalculusApplicationDiagram />;
+    case 'undergrad':
+      return <EigenDecompositionDiagram />;
+    case 'grad':
+      return <DirectionalDerivativeDiagram />;
+    case 'professional':
+      return <BusinessMetricsDiagram />;
+    case 'educator':
+      return <LearningStrategiesDiagram />;
+    default:
+      return <AlgebraConceptDiagram />;
   }
 };
 
@@ -133,10 +164,11 @@ export default function OnboardingStep4() {
 
   // Get role label and metadata
   const roleLabels: Partial<Record<OnboardingRole, string>> = {
-    middle_school: 'Middle School',
-    undergraduate: 'Undergraduate',
-    graduate: 'Graduate',
-    working_professional: 'Working Professional',
+    middleschool: 'Middle School',
+    highschool: 'High School',
+    undergrad: 'Undergraduate',
+    grad: 'Graduate',
+    professional: 'Working Professional',
     educator: 'Educator',
     other: 'Other',
   };
@@ -198,21 +230,9 @@ export default function OnboardingStep4() {
             {/* Left: Academic Image (Role-specific) */}
             <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
               <h4 className="text-sm font-semibold text-slate-600 uppercase tracking-wider mb-4 px-4">Academic Content</h4>
-              <div className="relative w-full h-64 rounded-xl overflow-hidden border border-blue-100 bg-slate-200">
-                <img
-                  src={getAcademicImage(onboardingRole)}
-                  alt={`${roleLabels[onboardingRole || 'other']} academic content`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Fallback to a placeholder if image fails to load
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=800&auto=format&fit=crop';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
-                <div className="absolute bottom-4 left-4 right-4">
-                  <p className="text-white text-sm font-semibold drop-shadow-lg">
-                    {roleLabels[onboardingRole || 'other']} Level Content
-                  </p>
+              <div className="relative w-full rounded-xl overflow-hidden border border-blue-100 bg-white">
+                <div className="w-full" style={{ aspectRatio: '3/2' }}>
+                  {getHeroImageComponent(onboardingRole)}
                 </div>
               </div>
             </div>
@@ -237,6 +257,13 @@ export default function OnboardingStep4() {
             <p className="text-lg text-slate-700 leading-relaxed max-w-3xl">
               {sections.overview}
             </p>
+          </div>
+
+          {/* Concept Diagram - Textbook-style illustration */}
+          <div className="mb-12 bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-lg">
+            <div className="w-full" style={{ aspectRatio: '3/2' }}>
+              {getConceptDiagramComponent(onboardingRole)}
+            </div>
           </div>
 
           {/* Key Concepts - Replacing illustrations with concise concept cards */}
