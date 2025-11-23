@@ -51,16 +51,29 @@ export function getUILanguage(): string {
   return uiLang;
 }
 
+// Get nested value from object by path (e.g., "dashboard.title")
+function getNestedValue(obj: any, path: string): string | undefined {
+  const keys = path.split('.');
+  let current = obj;
+  for (const key of keys) {
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key];
+    } else {
+      return undefined;
+    }
+  }
+  return typeof current === 'string' ? current : undefined;
+}
+
 // Get translation text
 export function t(key: string, params?: Record<string, string>): string {
   const lang = getUILanguage();
 
   try {
-    // Dynamically import translation file
-    // For now, we'll use a simple mapping approach
-    // In production, you might want to use dynamic imports
     const translations = getTranslations(lang);
-    let text = translations[key] || key;
+    
+    // Support nested keys like "dashboard.title"
+    let text = getNestedValue(translations, key) || key;
 
     // Replace parameters
     if (params) {
@@ -76,11 +89,15 @@ export function t(key: string, params?: Record<string, string>): string {
   }
 }
 
+// Import translation files statically
+import enTranslations from '@/locales/en/common.json';
+import zhCNTranslations from '@/locales/zh-CN/common.json';
+
 // Translation cache
-const translationCache: Record<string, Record<string, string>> = {};
+const translationCache: Record<string, Record<string, any>> = {};
 
 // Get translations for a language
-function getTranslations(lang: string): Record<string, string> {
+function getTranslations(lang: string): Record<string, any> {
   // Normalize language code
   const normalizedLang = lang === 'zh-cn' ? 'zh-CN' : 
                          lang === 'zh-tw' ? 'zh-TW' :
@@ -91,59 +108,31 @@ function getTranslations(lang: string): Record<string, string> {
     return translationCache[normalizedLang];
   }
 
+  let translations: Record<string, any> = {};
+  
   try {
-    let translations: Record<string, string> = {};
-    
+    // Use static imports for client-side (Next.js will bundle them)
     if (typeof window !== 'undefined') {
-      // Client-side: use dynamic import with try-catch
-      try {
-        // Use dynamic import for client-side
-        // For Next.js, we'll use a synchronous require approach
-        // This works because webpack will bundle the JSON files
-        const translationModule = require(`@/locales/${normalizedLang}/common.json`);
-        translations = translationModule.default || translationModule;
-      } catch (e) {
-        // Fallback to English if translation file doesn't exist
-        if (normalizedLang !== 'en') {
-          try {
-            const fallbackModule = require('@/locales/en/common.json');
-            translations = fallbackModule.default || fallbackModule;
-          } catch (fallbackError) {
-            console.warn('Failed to load English translations');
-            return {};
-          }
-        } else {
-          return {};
-        }
+      // Client-side: use static imports
+      switch (normalizedLang) {
+        case 'zh-CN':
+          translations = zhCNTranslations as any;
+          break;
+        case 'en':
+        default:
+          translations = enTranslations as any;
+          break;
       }
     } else {
-      // Server-side: use fs
-      try {
-        const fs = require('fs');
-        const path = require('path');
-        const filePath = path.join(process.cwd(), 'locales', normalizedLang, 'common.json');
-        if (fs.existsSync(filePath)) {
-          const fileContent = fs.readFileSync(filePath, 'utf-8');
-          translations = JSON.parse(fileContent);
-        } else {
-          throw new Error('File not found');
-        }
-      } catch (e) {
-        // Fallback to English
-        if (normalizedLang !== 'en') {
-          try {
-            const fs = require('fs');
-            const path = require('path');
-            const filePath = path.join(process.cwd(), 'locales', 'en', 'common.json');
-            const fileContent = fs.readFileSync(filePath, 'utf-8');
-            translations = JSON.parse(fileContent);
-          } catch (fallbackError) {
-            console.warn('Failed to load English translations on server');
-            return {};
-          }
-        } else {
-          return {};
-        }
+      // Server-side: use static imports
+      switch (normalizedLang) {
+        case 'zh-CN':
+          translations = zhCNTranslations as any;
+          break;
+        case 'en':
+        default:
+          translations = enTranslations as any;
+          break;
       }
     }
 
@@ -156,7 +145,7 @@ function getTranslations(lang: string): Record<string, string> {
     if (normalizedLang !== 'en') {
       return getTranslations('en');
     }
-    return {};
+    return enTranslations as any;
   }
 }
 
