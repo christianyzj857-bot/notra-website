@@ -71,13 +71,21 @@ Notra 采用**三层系统设计**，分别处理 UI 界面语言、内容生成
 - `localStorage.getItem('ui_language')` 或从 `onboarding_content_language` 继承
 
 **影响范围**:
-- ✅ 导航栏 (Features, Pricing, FAQ, Dashboard)
-- ✅ 按钮文本 (Go to Dashboard, See Features, Get Started)
-- ✅ 表单标签和占位符
-- ✅ 错误消息和提示
-- ✅ 设置页面所有选项
-- ✅ 上传页面的说明文字
-- ✅ Chat 界面的欢迎消息和占位符
+- ✅ Dashboard 页面所有文本
+- ✅ Chat 界面的欢迎消息、占位符、按钮
+- ✅ Settings 页面所有选项和标签
+- ✅ Upload 页面的说明文字、按钮、提示
+- ✅ 错误消息和提示（除 Homepage 外）
+- ✅ 导航栏（除 Homepage 外）
+
+**保持英文不变** (品牌一致性):
+- ❌ **Onboarding 流程**: 所有 onboarding 页面保持英文
+- ❌ **Homepage** (`app/page.tsx`): 整个首页保持英文
+- ❌ **Logo 文字**: Logo 旁边的 "Notra" 文字保持英文（品牌名）
+- ❌ **Pricing 页面 Slogan**: 
+  - "Notes for a new era of learning"
+  - "Notra helps you turn lectures, PDFs, and messy ideas into clean study notes, quizzes, and flashcards – in seconds."
+  - 这些核心 slogan 保持英文，但其他内容（如按钮、描述）可以本地化
 
 ### 2. 内容生成语言 (Content Language)
 
@@ -137,6 +145,84 @@ Notra 采用**三层系统设计**，分别处理 UI 界面语言、内容生成
 - ✅ Quiz 问题的类型 (记忆型 vs 分析型)
 - ✅ Flashcards 的格式 (定义式 vs 应用式)
 - ✅ 示例和案例的选择
+
+---
+
+## 📍 本地化范围说明
+
+### ✅ 需要支持语言切换的页面
+
+以下页面会根据用户选择的 UI 语言动态切换：
+
+1. **Dashboard** (`app/dashboard/page.tsx`, `app/dashboard/[id]/page.tsx`)
+   - 所有文本、按钮、标签
+   - 错误消息和提示
+
+2. **Chat 界面** (`app/chat/page.tsx`)
+   - 欢迎消息
+   - 占位符文本
+   - 按钮和操作提示
+   - 错误消息
+
+3. **Settings 页面** (`app/settings/page.tsx`)
+   - 所有设置选项
+   - 标签和说明文字
+   - 按钮和提示
+
+4. **Upload 页面** (`app/upload/*/page.tsx`)
+   - 上传说明
+   - 按钮文本
+   - 错误和成功提示
+
+5. **Login/Signup 页面** (`app/login/page.tsx`, `app/signup/page.tsx`)
+   - 表单标签
+   - 按钮文本
+   - 错误消息
+
+6. **导航栏** (除 Homepage 外)
+   - 导航链接文本
+   - 按钮文本
+
+### ❌ 保持英文不变的页面/元素
+
+以下内容保持英文，不受语言设置影响：
+
+1. **Onboarding 流程** (`app/onboarding/**`)
+   - 所有 onboarding 页面保持英文
+   - 原因: 保持首次体验的一致性
+
+2. **Homepage** (`app/page.tsx`)
+   - 整个首页保持英文
+   - 包括: Hero section, Features, Benefits, FAQ 等所有内容
+   - 原因: 品牌展示和营销内容
+
+3. **Logo 文字** (`components/NotraLogo.tsx`)
+   - Logo 旁边的 "Notra" 文字保持英文
+   - 原因: 品牌名，保持一致性
+
+4. **Pricing 页面 Slogan** (`app/pricing/page.tsx`)
+   - 核心 Slogan 保持英文:
+     - "Notes for a new era of learning"
+     - "Notra helps you turn lectures, PDFs, and messy ideas into clean study notes, quizzes, and flashcards – in seconds."
+   - 其他内容（按钮、描述等）可以本地化
+   - 原因: 核心品牌信息
+
+### 实施策略
+
+使用 `shouldLocalize()` 函数判断当前页面是否需要本地化：
+
+```typescript
+// 在需要本地化的页面
+import { t, shouldLocalize } from '@/lib/i18n';
+
+if (shouldLocalize()) {
+  // 使用翻译
+  return <h1>{t('dashboard.title')}</h1>;
+} else {
+  // 使用硬编码英文
+  return <h1>Dashboard</h1>;
+}
+```
 
 ---
 
@@ -288,9 +374,37 @@ locales/
 
 #### 1.2 创建 i18n 工具函数 (`lib/i18n.ts`)
 ```typescript
+// 需要保持英文的页面路径
+const ENGLISH_ONLY_PAGES = [
+  '/',
+  '/onboarding',
+  '/pricing', // Pricing 页面的 slogan 保持英文
+];
+
+// 判断当前页面是否需要本地化
+export function shouldLocalize(pathname?: string): boolean {
+  if (typeof window === 'undefined') return true;
+  
+  const path = pathname || window.location.pathname;
+  
+  // 检查是否在需要保持英文的页面
+  for (const englishPage of ENGLISH_ONLY_PAGES) {
+    if (path.startsWith(englishPage)) {
+      return false;
+    }
+  }
+  
+  return true;
+}
+
 // 获取用户 UI 语言
 export function getUILanguage(): string {
   if (typeof window !== 'undefined') {
+    // 如果当前页面不需要本地化，返回英文
+    if (!shouldLocalize()) {
+      return 'en';
+    }
+    
     return localStorage.getItem('ui_language') || 
            localStorage.getItem('onboarding_content_language') || 
            'en';
@@ -301,6 +415,22 @@ export function getUILanguage(): string {
 // 获取翻译文本
 export function t(key: string, params?: Record<string, string>): string {
   const lang = getUILanguage();
+  
+  // 如果不需要本地化，尝试从英文翻译文件获取（作为 fallback）
+  if (!shouldLocalize() && lang !== 'en') {
+    // 在英文页面，即使设置了其他语言，也返回英文
+    const translations = require(`@/locales/en/common.json`);
+    let text = translations[key] || key;
+    
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, v);
+      });
+    }
+    
+    return text;
+  }
+  
   const translations = require(`@/locales/${lang}/common.json`);
   let text = translations[key] || key;
   
@@ -312,6 +442,11 @@ export function t(key: string, params?: Record<string, string>): string {
   }
   
   return text;
+}
+
+// Logo 文字始终返回英文
+export function getLogoText(): string {
+  return 'Notra'; // 品牌名，始终英文
 }
 ```
 
@@ -469,19 +604,69 @@ export interface NotraSession {
 }
 ```
 
-#### 5.2 在组件中使用 (`app/page.tsx`)
+#### 5.2 在组件中使用
+
+**需要本地化的页面** (`app/dashboard/page.tsx`):
 ```typescript
 import { t } from '@/lib/i18n';
 
+export default function Dashboard() {
+  return (
+    <div>
+      <h1>{t('dashboard.title')}</h1>
+      <p>{t('dashboard.subtitle')}</p>
+      <Button>{t('buttons.upload')}</Button>
+    </div>
+  );
+}
+```
+
+**保持英文的页面** (`app/page.tsx` - Homepage):
+```typescript
+// Homepage 保持硬编码英文，不使用 t() 函数
 const Hero = () => {
   return (
     <section>
-      <h1>{t('hero.title')}</h1>
-      <p>{t('hero.subtitle')}</p>
-      <Button>{t('buttons.goToDashboard')}</Button>
+      <h1>Turn chaos into structured knowledge.</h1>
+      <p>Your AI copilot for academic excellence...</p>
+      <Button>Go to Dashboard</Button>
     </section>
   );
 };
+```
+
+**Logo 组件** (`components/NotraLogo.tsx`):
+```typescript
+import { getLogoText } from '@/lib/i18n';
+
+export default function NotraLogo({ showText }: { showText?: boolean }) {
+  return (
+    <div>
+      {/* Logo icon */}
+      {showText && (
+        <span>{getLogoText()}</span> // 始终返回 "Notra"
+      )}
+    </div>
+  );
+}
+```
+
+**Pricing 页面** (`app/pricing/page.tsx`):
+```typescript
+// Slogan 保持英文，其他内容可以本地化
+export default function PricingPage() {
+  return (
+    <div>
+      {/* 保持英文的 Slogan */}
+      <h1>Notes for a new era of learning</h1>
+      <p>Notra helps you turn lectures, PDFs, and messy ideas into clean study notes, quizzes, and flashcards – in seconds.</p>
+      
+      {/* 其他内容可以本地化 */}
+      <Button>{t('buttons.getStarted')}</Button>
+      <p>{t('pricing.description')}</p>
+    </div>
+  );
+}
 ```
 
 ### Step 6: Settings 页面功能实现
@@ -689,17 +874,31 @@ components/
 ```
 
 ### 需要修改的文件
+
+**需要本地化的文件**:
 ```
 types/notra.ts              (添加语言字段)
 app/api/process/file/route.ts
 app/api/process/audio/route.ts
 app/api/process/video/route.ts
 app/api/chat/route.ts
-app/dashboard/[id]/page.tsx
-app/page.tsx
-app/chat/page.tsx
-app/settings/page.tsx
-... (所有包含 UI 文本的页面)
+app/dashboard/page.tsx      ✅ 需要本地化
+app/dashboard/[id]/page.tsx ✅ 需要本地化
+app/chat/page.tsx           ✅ 需要本地化
+app/settings/page.tsx        ✅ 需要本地化
+app/upload/file/page.tsx    ✅ 需要本地化
+app/upload/audio/page.tsx   ✅ 需要本地化
+app/upload/video/page.tsx   ✅ 需要本地化
+app/login/page.tsx          ✅ 需要本地化
+app/signup/page.tsx         ✅ 需要本地化
+```
+
+**保持英文不变的文件**:
+```
+app/page.tsx                ❌ 保持英文 (Homepage)
+app/onboarding/**           ❌ 保持英文 (所有 onboarding 页面)
+app/pricing/page.tsx        ⚠️ 部分保持英文 (Slogan 保持英文，其他可本地化)
+components/NotraLogo.tsx    ❌ Logo 文字保持英文
 ```
 
 ---
@@ -898,12 +1097,19 @@ localStorage.setItem('content_language', 'en')
 
 ### Phase 4 检查清单
 - [ ] 翻译文件结构创建
-- [ ] i18n 工具函数完成
-- [ ] 首页本地化完成
-- [ ] Dashboard 本地化完成
-- [ ] Chat 界面本地化完成
-- [ ] 设置页面本地化完成
-- [ ] 测试: 切换 UI 语言 → 所有文本更新
+- [ ] i18n 工具函数完成（包含 `shouldLocalize()` 函数）
+- [ ] **Dashboard 本地化完成** ✅
+- [ ] **Chat 界面本地化完成** ✅
+- [ ] **设置页面本地化完成** ✅
+- [ ] **上传页面本地化完成** ✅
+- [ ] **登录/注册页面本地化完成** ✅
+- [ ] **确认 Homepage 保持英文** ❌
+- [ ] **确认 Onboarding 保持英文** ❌
+- [ ] **确认 Logo 文字保持英文** ❌
+- [ ] **确认 Pricing Slogan 保持英文** ⚠️
+- [ ] 测试: 在 Dashboard 切换 UI 语言 → 文本更新
+- [ ] 测试: 在 Homepage → 文本保持英文
+- [ ] 测试: 在 Onboarding → 文本保持英文
 
 ### Phase 4 检查清单
 - [ ] Chat API 集成语言设置
