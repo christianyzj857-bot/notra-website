@@ -90,25 +90,23 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
       mainTitle: 'Linear Equations',
       mainSubtitle: 'Overview',
       sections: {
-        overview: 'Linear equations are fundamental mathematical expressions that represent relationships between variables. They form the foundation for understanding more complex algebraic concepts and are essential tools in solving real-world problems.',
-        illustrations: [
-          { title: 'Basic Form', description: 'y = mx + b', icon: '📊' },
-          { title: 'Graph', description: 'Straight line visualization', icon: '📈' },
-          { title: 'Solution', description: 'Finding x-intercept', icon: '🎯' },
-          { title: 'Applications', description: 'Real-world examples', icon: '🌍' },
+        overview: 'Equations that form straight lines when graphed. Essential for solving real-world problems involving proportional relationships.',
+        keyConcepts: [
+          'Basic form: y = mx + b',
+          'Slope (m) = rate of change',
+          'y-intercept (b) = starting value',
         ],
         conceptIntuition: {
           title: 'Concept Intuition',
           paragraphs: [
-            'A linear equation represents a straight line when graphed on a coordinate plane. The equation y = mx + b tells us that for every change in x, y changes by a constant amount (the slope m).',
-            'Think of it like a recipe: if you know how much of one ingredient (x) you have, you can always calculate how much of another ingredient (y) you need, and the relationship stays consistent.',
-            'Linear equations are everywhere in daily life: calculating costs, predicting trends, and understanding proportional relationships.',
+            'A linear equation represents a straight line. For every change in x, y changes by a constant amount (the slope m).',
+            'Used everywhere: calculating costs, predicting trends, understanding proportional relationships.',
           ],
         },
         formalDefinition: {
           title: 'Formal Definition',
-          definition: 'A linear equation in one variable is an equation that can be written in the form ax + b = 0, where a and b are constants and a ≠ 0.',
-          explanation: 'The solution to this equation is x = -b/a. In two variables, a linear equation takes the form y = mx + b, where m is the slope and b is the y-intercept.',
+          definition: 'ax + b = 0',
+          explanation: 'One variable: solution is x = -b/a. Two variables: y = mx + b, where m is slope and b is y-intercept.',
         },
         commonPatterns: {
           title: 'Common Patterns',
@@ -123,19 +121,19 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
         realWorldApplications: {
           title: 'Real-world Applications',
           items: [
-            'Budget planning: If you save $20 per week, calculate total savings over time',
-            'Distance problems: If you travel at 60 mph, find distance after t hours',
-            'Shopping: Calculate total cost when items have fixed prices',
-            'Temperature conversion: Convert between Celsius and Fahrenheit',
+            'Budget planning: savings over time',
+            'Distance problems: speed × time',
+            'Shopping: fixed price calculations',
+            'Temperature conversion: Celsius ↔ Fahrenheit',
           ],
         },
         workedExample: {
           title: 'Worked Example',
-          problem: 'Solve for x: 3x + 7 = 22',
+          problem: 'Solve: 3x + 7 = 22',
           steps: [
-            'Step 1: Subtract 7 from both sides → 3x = 15',
-            'Step 2: Divide both sides by 3 → x = 5',
-            'Step 3: Verify: 3(5) + 7 = 15 + 7 = 22 ✓',
+            'Subtract 7: 3x = 15',
+            'Divide by 3: x = 5',
+            'Verify: 3(5) + 7 = 22 ✓',
           ],
         },
         summaryTable: {
@@ -269,25 +267,23 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
       mainTitle: 'Eigenvalues and Eigenvectors',
       mainSubtitle: 'Overview',
       sections: {
-        overview: 'Eigenvalues and eigenvectors are fundamental concepts in linear algebra that reveal the intrinsic properties of linear transformations. They help us understand how matrices stretch, rotate, and transform vectors in space, with applications spanning from quantum mechanics to machine learning.',
-        illustrations: [
-          { title: 'Eigenvalue Equation', description: 'Av = λv', icon: '🔢' },
-          { title: 'Transformation', description: 'Direction preservation', icon: '🔄' },
-          { title: 'Characteristic Polynomial', description: 'det(A - λI) = 0', icon: '📊' },
-          { title: 'Applications', description: 'PCA, Quantum states', icon: '⚛️' },
+        overview: 'Reveal intrinsic properties of linear transformations. Eigenvectors preserve direction; eigenvalues scale them.',
+        keyConcepts: [
+          'Eigenvalue equation: Av = λv',
+          'Characteristic polynomial: det(A - λI) = 0',
+          'Applications: PCA, quantum mechanics',
         ],
         conceptIntuition: {
           title: 'Concept Intuition',
           paragraphs: [
-            'Think of a matrix as a transformation that moves and stretches vectors in space. An eigenvector is a special vector that, when transformed by the matrix, only gets scaled (stretched or compressed) but doesn\'t change direction. The eigenvalue is the factor by which it\'s scaled.',
-            'Imagine stretching a rubber sheet. Most points move in complex ways, but some special directions (eigenvectors) stretch uniformly. The amount of stretching in each direction is the eigenvalue.',
-            'Eigenvalues tell us about the "essence" of a transformation: which directions are preserved, how much stretching occurs, and whether the transformation is invertible.',
+            'Eigenvectors are special directions that only get scaled, not rotated. Eigenvalues are the scaling factors.',
+            'Like stretching a rubber sheet: some directions stretch uniformly—those are eigenvectors.',
           ],
         },
         formalDefinition: {
           title: 'Formal Definition',
-          definition: 'For a square matrix A, a nonzero vector v is an eigenvector if Av = λv for some scalar λ. The scalar λ is called the eigenvalue corresponding to the eigenvector v.',
-          explanation: 'To find eigenvalues, we solve the characteristic equation det(A - λI) = 0. The eigenvectors are found by solving (A - λI)v = 0 for each eigenvalue λ.',
+          definition: 'Av = \\lambda v',
+          explanation: 'For square matrix A, nonzero vector v is eigenvector if Av = λv. Find λ from det(A - λI) = 0, then solve (A - λI)v = 0.',
         },
         commonPatterns: {
           title: 'Common Patterns',
@@ -302,20 +298,19 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
         realWorldApplications: {
           title: 'Real-world Applications',
           items: [
-            'Principal Component Analysis (PCA): Finding directions of maximum variance in data',
-            'Quantum Mechanics: Energy states correspond to eigenvalues of Hamiltonian operators',
-            'Vibration Analysis: Natural frequencies of mechanical systems',
-            'Google PageRank: Eigenvectors determine page importance',
+            'PCA: directions of maximum variance',
+            'Quantum mechanics: energy states',
+            'Vibration analysis: natural frequencies',
+            'PageRank: page importance',
           ],
         },
         workedExample: {
           title: 'Worked Example',
-          problem: 'Find eigenvalues and eigenvectors of A = [[2, 1], [0, 3]]',
+          problem: 'Find eigenvalues/eigenvectors of A = [[2, 1], [0, 3]]',
           steps: [
-            'Step 1: Characteristic equation → det(A - λI) = (2-λ)(3-λ) = 0',
-            'Step 2: Solve → λ₁ = 2, λ₂ = 3',
-            'Step 3: For λ₁ = 2: Solve (A - 2I)v = 0 → v₁ = [1, 0]',
-            'Step 4: For λ₂ = 3: Solve (A - 3I)v = 0 → v₂ = [1, 1]',
+            'Characteristic: det(A - λI) = (2-λ)(3-λ) = 0',
+            'Eigenvalues: λ₁ = 2, λ₂ = 3',
+            'Eigenvectors: v₁ = [1, 0] for λ₁, v₂ = [1, 1] for λ₂',
           ],
         },
         summaryTable: {
@@ -358,25 +353,23 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
       mainTitle: 'Gradient and Directional Derivatives',
       mainSubtitle: 'Overview',
       sections: {
-        overview: 'The gradient is a fundamental concept in multivariable calculus that generalizes the derivative to functions of multiple variables. It points in the direction of steepest ascent and its magnitude represents the rate of change in that direction.',
-        illustrations: [
-          { title: 'Gradient Vector', description: '∇f = (∂f/∂x, ∂f/∂y)', icon: '📐' },
-          { title: 'Level Curves', description: 'Contour visualization', icon: '🗺️' },
-          { title: 'Steepest Ascent', description: 'Gradient direction', icon: '⛰️' },
-          { title: 'Applications', description: 'Optimization, ML', icon: '🧠' },
+        overview: 'Generalizes derivative to multiple variables. Points in direction of steepest ascent; magnitude = rate of change.',
+        keyConcepts: [
+          'Gradient: ∇f = (∂f/∂x, ∂f/∂y, ...)',
+          'Directional derivative: D_u f = ∇f · u',
+          'Applications: optimization, ML',
         ],
         conceptIntuition: {
           title: 'Concept Intuition',
           paragraphs: [
-            'Imagine you\'re hiking on a mountain. The gradient tells you which direction to walk to go uphill the fastest. It\'s like having a compass that always points to the steepest path.',
-            'The gradient is a vector that combines all partial derivatives. Each component tells you how the function changes if you move in that coordinate direction, and together they give you the complete picture of how the function behaves in space.',
-            'At any point, the gradient is perpendicular to the level curve (contour line) passing through that point. This makes sense: if you move along a level curve, the function doesn\'t change, so the direction of maximum change must be perpendicular.',
+            'Like a compass pointing uphill fastest. Combines all partial derivatives into one vector.',
+            'Gradient is perpendicular to level curves. Maximum change direction is perpendicular to constant-value lines.',
           ],
         },
         formalDefinition: {
           title: 'Formal Definition',
-          definition: 'For a function f(x₁, x₂, ..., xₙ), the gradient is defined as: ∇f = (∂f/∂x₁, ∂f/∂x₂, ..., ∂f/∂xₙ). The directional derivative in direction u is: D_u f = ∇f · u.',
-          explanation: 'The gradient points in the direction of steepest increase, and ||∇f|| gives the maximum rate of change. The directional derivative measures how f changes when moving in direction u.',
+          definition: '\\nabla f = (\\frac{\\partial f}{\\partial x_1}, \\frac{\\partial f}{\\partial x_2}, \\ldots)',
+          explanation: 'Gradient points to steepest increase; ||∇f|| = max rate. Directional derivative: D_u f = ∇f · u.',
         },
         commonPatterns: {
           title: 'Common Patterns',
@@ -390,20 +383,19 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
         realWorldApplications: {
           title: 'Real-world Applications',
           items: [
-            'Machine Learning: Gradient descent uses gradients to optimize loss functions',
-            'Physics: Electric and gravitational fields are gradient fields',
-            'Economics: Gradient helps find optimal production levels',
-            'Engineering: Heat flow and fluid dynamics use gradient concepts',
+            'ML: gradient descent optimization',
+            'Physics: electric/gravitational fields',
+            'Economics: optimal production',
+            'Engineering: heat flow, fluid dynamics',
           ],
         },
         workedExample: {
           title: 'Worked Example',
-          problem: 'Find the gradient of f(x,y) = x²y + 3y at point (2, 1)',
+          problem: 'Find ∇f for f(x,y) = x²y + 3y at (2, 1)',
           steps: [
-            'Step 1: Compute partial derivatives → ∂f/∂x = 2xy, ∂f/∂y = x² + 3',
-            'Step 2: Form gradient → ∇f = (2xy, x² + 3)',
-            'Step 3: Evaluate at (2,1) → ∇f(2,1) = (4, 7)',
-            'Step 4: Interpretation: Steepest ascent direction is (4,7) with rate √(16+49) = √65',
+            'Partials: ∂f/∂x = 2xy, ∂f/∂y = x² + 3',
+            'Gradient: ∇f = (2xy, x² + 3)',
+            'At (2,1): ∇f = (4, 7), rate = √65',
           ],
         },
         summaryTable: {
@@ -446,19 +438,17 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
       mainTitle: 'Executive Summary',
       mainSubtitle: 'Q2 Performance Overview',
       sections: {
-        overview: 'Q2 2024 sales performance shows strong growth across all major product lines, with total revenue increasing 23% year-over-year. Key metrics indicate successful market expansion and improved customer retention rates.',
-        illustrations: [
-          { title: 'Revenue Growth', description: '+23% YoY', icon: '📈' },
-          { title: 'Market Share', description: '15% increase', icon: '📊' },
-          { title: 'Customer Retention', description: '92% rate', icon: '👥' },
-          { title: 'Regional Performance', description: 'Multi-region data', icon: '🌍' },
+        overview: 'Q2 2024: 23% revenue growth YoY. Strong enterprise sales (+35%) and improved retention (92%).',
+        keyConcepts: [
+          'Revenue: $12.5M (+23% YoY)',
+          'Enterprise: +35% growth',
+          'Retention: 92%',
         ],
         conceptIntuition: {
           title: 'Key Metrics',
           paragraphs: [
-            'Total revenue reached $12.5M, representing a 23% increase compared to Q2 2023. This growth was driven primarily by enterprise sales, which grew 35% year-over-year.',
-            'Customer acquisition costs decreased by 12% while customer lifetime value increased by 18%, indicating improved efficiency in our sales and marketing operations.',
-            'The Asia-Pacific region showed exceptional performance with 45% growth, while North America maintained steady 15% growth. European markets showed moderate 8% growth.',
+            'Revenue $12.5M (+23% YoY), driven by enterprise (+35%). Customer acquisition costs down 12%, lifetime value up 18%.',
+            'Asia-Pacific: +45%, North America: +15%, Europe: +8%.',
           ],
         },
         formalDefinition: {
@@ -535,25 +525,23 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
       mainTitle: 'Active Learning Teaching Strategies',
       mainSubtitle: 'Overview',
       sections: {
-        overview: 'Active learning engages students in the learning process through activities that require them to think, discuss, and apply knowledge. Research shows that active learning significantly improves student retention, critical thinking, and engagement compared to traditional lecture-based methods.',
-        illustrations: [
-          { title: 'Engagement', description: 'Student participation', icon: '👥' },
-          { title: 'Retention', description: 'Knowledge retention rates', icon: '🧠' },
-          { title: 'Critical Thinking', description: 'Problem-solving skills', icon: '💭' },
-          { title: 'Application', description: 'Real-world practice', icon: '🎯' },
+        overview: 'Engages students through thinking, discussion, and application. Improves retention, critical thinking, and engagement vs. lectures.',
+        keyConcepts: [
+          'Think-pair-share: individual → pair → class',
+          'Problem-based learning: real-world scenarios',
+          'Peer instruction: student-to-student teaching',
         ],
         conceptIntuition: {
           title: 'Learning Objectives',
           paragraphs: [
-            'Students will understand the principles of active learning and how it differs from passive learning approaches. They will be able to identify key strategies that promote student engagement and knowledge retention.',
-            'By the end of this module, educators will be equipped with practical techniques to implement active learning in their classrooms, regardless of subject matter or class size.',
-            'The goal is to transform traditional lecture-based classrooms into dynamic learning environments where students take ownership of their learning process.',
+            'Understand active vs. passive learning. Identify strategies for engagement and retention.',
+            'Equip educators with practical techniques for any subject or class size. Transform lectures into dynamic learning.',
           ],
         },
         formalDefinition: {
           title: 'Teaching Strategies',
-          definition: 'Active learning strategies include think-pair-share, problem-based learning, case studies, peer instruction, and collaborative projects. These methods require students to actively process information rather than passively receiving it.',
-          explanation: 'Effective active learning incorporates immediate feedback, peer interaction, and real-world application. The instructor\'s role shifts from information deliverer to learning facilitator.',
+          definition: 'Think-pair-share, problem-based learning, case studies, peer instruction, collaborative projects.',
+          explanation: 'Requires active processing vs. passive receiving. Includes feedback, peer interaction, real-world application. Instructor = facilitator.',
         },
         commonPatterns: {
           title: 'Key Strategies',
@@ -568,20 +556,20 @@ export const onboardingSamples: Record<OnboardingRole, OnboardingSample> = {
         realWorldApplications: {
           title: 'Assessment Ideas',
           items: [
-            'Use formative assessments during activities to gauge understanding',
-            'Implement peer evaluation in group projects',
-            'Create rubrics that assess both process and product',
-            'Incorporate self-reflection exercises to promote metacognition',
+            'Formative assessments during activities',
+            'Peer evaluation in group projects',
+            'Rubrics: process + product',
+            'Self-reflection for metacognition',
           ],
         },
         workedExample: {
           title: 'Implementation Example',
-          problem: 'How to implement think-pair-share in a 30-student class',
+          problem: 'Think-pair-share in 30-student class',
           steps: [
-            'Step 1: Pose a thought-provoking question (2 minutes)',
-            'Step 2: Students think individually and write responses (3 minutes)',
-            'Step 3: Pair students to discuss their ideas (5 minutes)',
-            'Step 4: Select pairs to share with the whole class (10 minutes)',
+            'Pose question (2 min)',
+            'Individual thinking + writing (3 min)',
+            'Pair discussion (5 min)',
+            'Class sharing (10 min)',
           ],
         },
         summaryTable: {

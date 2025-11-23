@@ -6,26 +6,26 @@ import { onboardingSamples } from '../config';
 import { type OnboardingRole, type OnboardingSampleBundle } from '@/types/notra';
 import { InlineMath, BlockMath } from 'react-katex';
 
-// Academic images for different roles
+// Academic images for different roles - Textbook quality illustrations
 const getAcademicImage = (role: OnboardingRole | null): string => {
   switch (role) {
     case 'middle_school':
-      // Basic STEM - Algebra/Geometry
-      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2940&auto=format&fit=crop';
+      // Basic Algebra/Geometry - Graph and equations
+      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop';
     case 'undergraduate':
-      // Textbook style - Linear Algebra/Calculus
-      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=2940&auto=format&fit=crop';
+      // Linear Algebra - Matrix and vectors visualization
+      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop';
     case 'graduate':
-      // Advanced research - Complex formulas and graphs
-      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop';
+      // Advanced Calculus - 3D graphs and complex functions
+      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop';
     case 'working_professional':
-      // Business reports and data charts
-      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop';
+      // Business analytics - Charts and data visualization
+      return 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop';
     case 'educator':
-      // Course structure and lesson plans
-      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=2940&auto=format&fit=crop';
+      // Teaching materials - Structured content
+      return 'https://images.unsplash.com/photo-1509228468518-180dd4864904?q=80&w=1200&auto=format&fit=crop';
     default:
-      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2940&auto=format&fit=crop';
+      return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=1200&auto=format&fit=crop';
   }
 };
 
@@ -231,49 +231,38 @@ export default function OnboardingStep4() {
             </div>
           </div>
 
-          {/* Overview Paragraph */}
+          {/* Overview Paragraph - Concise */}
           <div className="mb-10">
             <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Overview</h3>
-            <p className="text-lg text-slate-700 leading-relaxed">
+            <p className="text-lg text-slate-700 leading-relaxed max-w-3xl">
               {sections.overview}
             </p>
           </div>
 
-          {/* Illustrations Grid - 3-4 images (Enhanced) */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {sections?.illustrations?.map((illustration: any, idx: number) => (
-              <div
-                key={idx}
-                className={`bg-gradient-to-br ${
-                  idx % 4 === 0 ? 'from-blue-50 to-indigo-50 border-blue-100' :
-                  idx % 4 === 1 ? 'from-purple-50 to-pink-50 border-purple-100' :
-                  idx % 4 === 2 ? 'from-green-50 to-emerald-50 border-green-100' :
-                  'from-orange-50 to-red-50 border-orange-100'
-                } rounded-2xl p-6 border-2`}
-              >
-                <div className="aspect-square bg-white rounded-xl flex flex-col items-center justify-center mb-4 border-2 border-slate-200">
-                  <div className="text-4xl mb-3">{illustration.icon}</div>
-                  <div className="text-center">
-                    <p className="text-xs font-mono text-slate-600 break-words px-2">
-                      {illustration.description}
-                    </p>
-                  </div>
+          {/* Key Concepts - Replacing illustrations with concise concept cards */}
+          {sections?.keyConcepts && sections.keyConcepts.length > 0 && (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+              {sections.keyConcepts.map((concept: string, idx: number) => (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100 hover:border-indigo-200 transition-colors"
+                >
+                  <p className="text-sm font-semibold text-slate-800 leading-relaxed">
+                    {concept}
+                  </p>
                 </div>
-                <p className="text-sm font-semibold text-slate-700 text-center">
-                  {illustration.title}
-                </p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* Concept Intuition */}
+          {/* Concept Intuition - Concise */}
           <div className="mb-10">
             <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
               {sections.conceptIntuition.title}
             </h3>
-            <div className="space-y-4">
-              {sections?.conceptIntuition?.paragraphs?.map((para: string, idx: number) => (
-                <p key={idx} className="text-lg text-slate-700 leading-relaxed">
+            <div className="space-y-3">
+              {sections?.conceptIntuition?.paragraphs?.slice(0, 2).map((para: string, idx: number) => (
+                <p key={idx} className="text-base text-slate-700 leading-relaxed">
                   {para}
                 </p>
               ))}
@@ -314,10 +303,22 @@ export default function OnboardingStep4() {
                 >
                   <div className="flex items-start gap-3">
                     <span className="text-[#9F6BFF] font-bold mt-1">•</span>
-                    <div className="flex-1">
-                      <MathInline math={item.function} />
-                      <span className="text-slate-600 mx-2">→</span>
-                      <MathInline math={item.derivative} />
+                    <div className="flex-1 flex flex-col gap-1">
+                      <div className="text-slate-800 font-medium">
+                        {item.function.includes('\\') ? (
+                          <MathInline math={item.function} />
+                        ) : (
+                          <span>{item.function}</span>
+                        )}
+                      </div>
+                      <span className="text-slate-400 text-xs">→</span>
+                      <div className="text-slate-700">
+                        {item.derivative.includes('\\') ? (
+                          <MathInline math={item.derivative} />
+                        ) : (
+                          <span>{item.derivative}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
