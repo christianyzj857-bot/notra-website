@@ -642,16 +642,32 @@ const Footer = () => (
 // --- Main Layout ---
 
 export default function LandingPage() {
+  const [isChecking, setIsChecking] = useState(true);
+  
   // Check onboarding status on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
         // Redirect to onboarding step 1 if not completed
-        window.location.href = '/onboarding/step1';
+        // Use replace to avoid showing homepage background
+        window.location.replace('/onboarding/step1');
+        return;
       }
+      setIsChecking(false);
     }
   }, []);
+
+  // Show loading state with onboarding background during check
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0C15] font-sans selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">

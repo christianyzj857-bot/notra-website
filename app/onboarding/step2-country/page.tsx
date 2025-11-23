@@ -76,9 +76,6 @@ export default function OnboardingStep2Country() {
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-4">
               Where are you studying now?
             </h1>
-            <p className="text-xl text-slate-600">
-              Select your country or region
-            </p>
           </div>
 
           {/* Search Box */}

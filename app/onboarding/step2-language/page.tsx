@@ -77,9 +77,6 @@ export default function OnboardingStep2Language() {
             <h1 className="text-5xl md:text-6xl font-bold text-slate-900 mb-4">
               What language do you prefer?
             </h1>
-            <p className="text-xl text-slate-600">
-              你希望使用哪种语言的内容？
-            </p>
           </div>
 
           {/* Search Box */}
@@ -100,7 +97,7 @@ export default function OnboardingStep2Language() {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-6">
               <Languages className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Content Language / 内容语言</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Content Language</h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[500px] overflow-y-auto pr-2">
               {filteredLanguages.map((language) => {

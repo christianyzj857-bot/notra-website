@@ -130,7 +130,7 @@ export default function OnboardingStep2Location() {
           <div className="mb-12">
             <div className="flex items-center gap-2 mb-6">
               <Languages className="w-6 h-6 text-indigo-600" />
-              <h2 className="text-2xl font-bold text-slate-900">Content Language / 内容语言</h2>
+              <h2 className="text-2xl font-bold text-slate-900">Content Language</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               {languages.map((language) => {
