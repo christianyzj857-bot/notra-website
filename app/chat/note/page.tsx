@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useRef, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
   Send, Menu, X, BookOpen, Sparkles, History, Plus
@@ -18,7 +18,7 @@ interface NoteSession {
   createdAt: string;
 }
 
-export default function ChatWithNotePage() {
+function ChatWithNoteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const sessionId = searchParams?.get('sessionId');
@@ -378,6 +378,21 @@ export default function ChatWithNotePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatWithNotePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen bg-[#1A1B26] items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-300">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ChatWithNoteContent />
+    </Suspense>
   );
 }
 
