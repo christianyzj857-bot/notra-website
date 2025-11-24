@@ -202,10 +202,10 @@ function ChatWithNoteContent() {
           />
         )}
         
-        {/* Sidebar - Lighter theme */}
+        {/* Sidebar - Similar to General Chat */}
         <aside className={`
           fixed md:static inset-y-0 left-0 z-50
-          w-80 bg-[#252836]/90 backdrop-blur-xl border-r border-white/10
+          w-80 bg-[#0F111A]/90 backdrop-blur-xl border-r border-white/10
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           flex flex-col
