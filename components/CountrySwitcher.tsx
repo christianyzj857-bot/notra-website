@@ -36,7 +36,7 @@ export default function CountrySwitcher({
 
   // 计算下拉菜单位置的函数
   const calculatePosition = () => {
-    if (buttonRef.current && isOpen) {
+    if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
         top: rect.bottom + window.scrollY + 4,
@@ -46,9 +46,20 @@ export default function CountrySwitcher({
     }
   };
 
-  // 当菜单打开或窗口滚动/调整大小时重新计算位置
+  // 当菜单打开时立即计算位置
   useEffect(() => {
-    calculatePosition();
+    if (isOpen && buttonRef.current) {
+      // 使用 setTimeout 确保 DOM 已更新
+      setTimeout(() => {
+        calculatePosition();
+      }, 0);
+    }
+  }, [isOpen]);
+
+  // 当窗口滚动/调整大小时重新计算位置（仅在打开时）
+  useEffect(() => {
+    if (!isOpen) return;
+    
     window.addEventListener('scroll', calculatePosition, { passive: true });
     window.addEventListener('resize', calculatePosition, { passive: true });
     return () => {
@@ -96,7 +107,14 @@ export default function CountrySwitcher({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          setIsOpen(!isOpen);
+          const newIsOpen = !isOpen;
+          setIsOpen(newIsOpen);
+          // 立即计算位置
+          if (newIsOpen && buttonRef.current) {
+            setTimeout(() => {
+              calculatePosition();
+            }, 0);
+          }
         }}
         style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
         className={`
@@ -127,7 +145,7 @@ export default function CountrySwitcher({
       </button>
 
       {/* 使用 Portal 将下拉菜单渲染到 body */}
-      {isOpen && typeof window !== 'undefined' && createPortal(
+      {isOpen && typeof window !== 'undefined' && buttonRef.current && createPortal(
         <>
           {/* 透明遮罩层 */}
           <div
@@ -138,9 +156,9 @@ export default function CountrySwitcher({
           <div
             className="fixed z-[99999] bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent"
             style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              minWidth: `${Math.max(dropdownPosition.width, 240)}px`, // 国家名称较长，给一个更大的最小宽度
+              top: `${dropdownPosition.top || (buttonRef.current.getBoundingClientRect().bottom + window.scrollY + 4)}px`,
+              left: `${dropdownPosition.left || (buttonRef.current.getBoundingClientRect().left + window.scrollX)}px`,
+              minWidth: `${Math.max(dropdownPosition.width || buttonRef.current.offsetWidth, 240)}px`, // 国家名称较长，给一个更大的最小宽度
             }}
           >
             <div className="py-2">
