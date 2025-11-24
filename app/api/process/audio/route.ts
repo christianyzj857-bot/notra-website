@@ -252,8 +252,23 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('Audio processing error:', error);
+    const errorMessage = error.message || 'Failed to process audio';
+    
+    // Extract error code from message if present
+    let errorCode = 'AUDIO_PROCESSING_ERROR';
+    if (errorMessage.includes('EMPTY_TRANSCRIPTION')) {
+      errorCode = 'EMPTY_TRANSCRIPTION';
+    } else if (errorMessage.includes('UNSUPPORTED_AUDIO_FORMAT')) {
+      errorCode = 'UNSUPPORTED_AUDIO_FORMAT';
+    } else if (errorMessage.includes('transcribe') || errorMessage.includes('Transcribe')) {
+      errorCode = 'TRANSCRIPTION_ERROR';
+    }
+    
     return NextResponse.json(
-      { error: error.message || 'Failed to process audio' },
+      { 
+        error: errorCode,
+        message: errorMessage
+      },
       { status: 500 }
     );
   }
