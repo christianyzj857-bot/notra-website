@@ -14,6 +14,7 @@ import { getEducationModeByCountry, type EducationMode } from '@/lib/educationMo
 import { CountryId } from '@/constants/countries';
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [user, setUser] = useState<{
     email: string;
     displayName: string;
