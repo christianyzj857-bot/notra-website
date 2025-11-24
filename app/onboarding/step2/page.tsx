@@ -1,9 +1,83 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { FileText, Upload, Youtube, Mic, AlertCircle, Sparkles, BookOpen } from 'lucide-react';
+import { FileText, Upload, Youtube, Mic, AlertCircle, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
 import { ONBOARDING_SAMPLES } from '@/sample-data/onboardingSamples';
 import { type OnboardingRole } from '@/types/notra';
+import { onboardingSamples } from '../config';
+import { InlineMath, BlockMath } from 'react-katex';
+
+// Import all image components
+import { AlgebraHeroImage } from '@/components/onboarding-images/AlgebraHeroImage';
+import { AlgebraConceptDiagram } from '@/components/onboarding-images/AlgebraConceptDiagram';
+import { CalculusHeroImage } from '@/components/onboarding-images/CalculusHeroImage';
+import { CalculusApplicationDiagram } from '@/components/onboarding-images/CalculusApplicationDiagram';
+import { LinearAlgebraHeroImage } from '@/components/onboarding-images/LinearAlgebraHeroImage';
+import { EigenDecompositionDiagram } from '@/components/onboarding-images/EigenDecompositionDiagram';
+import { GradientHeroImage } from '@/components/onboarding-images/GradientHeroImage';
+import { DirectionalDerivativeDiagram } from '@/components/onboarding-images/DirectionalDerivativeDiagram';
+import { SalesDashboardHero } from '@/components/onboarding-images/SalesDashboardHero';
+import { BusinessMetricsDiagram } from '@/components/onboarding-images/BusinessMetricsDiagram';
+import { ActiveLearningHero } from '@/components/onboarding-images/ActiveLearningHero';
+import { LearningStrategiesDiagram } from '@/components/onboarding-images/LearningStrategiesDiagram';
+
+// Get hero image component for different roles
+const getHeroImageComponent = (role: OnboardingRole | null) => {
+  switch (role) {
+    case 'middleschool':
+      return <AlgebraHeroImage />;
+    case 'highschool':
+      return <CalculusHeroImage />;
+    case 'undergrad':
+      return <LinearAlgebraHeroImage />;
+    case 'grad':
+      return <GradientHeroImage />;
+    case 'professional':
+      return <SalesDashboardHero />;
+    case 'educator':
+      return <ActiveLearningHero />;
+    default:
+      return <AlgebraHeroImage />;
+  }
+};
+
+// Get concept diagram component for different roles
+const getConceptDiagramComponent = (role: OnboardingRole | null) => {
+  switch (role) {
+    case 'middleschool':
+      return <AlgebraConceptDiagram />;
+    case 'highschool':
+      return <CalculusApplicationDiagram />;
+    case 'undergrad':
+      return <EigenDecompositionDiagram />;
+    case 'grad':
+      return <DirectionalDerivativeDiagram />;
+    case 'professional':
+      return <BusinessMetricsDiagram />;
+    case 'educator':
+      return <LearningStrategiesDiagram />;
+    default:
+      return <AlgebraConceptDiagram />;
+  }
+};
+
+// Math inline component using KaTeX
+const MathInline = ({ math }: { math: string }) => {
+  try {
+    return <InlineMath>{math}</InlineMath>;
+  } catch (e) {
+    return <span className="math-text text-slate-800">{math}</span>;
+  }
+};
+
+// Math block component using KaTeX
+const MathBlock = ({ math }: { math: string }) => {
+  try {
+    return <BlockMath>{math}</BlockMath>;
+  } catch (e) {
+    return <div className="math-block text-slate-900">{math}</div>;
+  }
+};
 
 export default function OnboardingStep2() {
   const [isDragging, setIsDragging] = useState(false);
@@ -13,8 +87,21 @@ export default function OnboardingStep2() {
   const [showClickHint, setShowClickHint] = useState(false);
   const [onboardingRole, setOnboardingRole] = useState<OnboardingRole>('other');
   const [sampleFile, setSampleFile] = useState(ONBOARDING_SAMPLES.find(s => s.role === 'other')?.file || ONBOARDING_SAMPLES[0].file);
-  const [bookState, setBookState] = useState<'idle' | 'hovering' | 'feeding' | 'digesting' | 'complete'>('idle');
+  const [bookState, setBookState] = useState<'idle' | 'hovering' | 'loading' | 'complete'>('idle');
   const [bookGlow, setBookGlow] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [currentLoadingStep, setCurrentLoadingStep] = useState(0);
+  const [noteContent, setNoteContent] = useState<any>(null);
+  const [showNotes, setShowNotes] = useState(false);
+  const [rightPageScale, setRightPageScale] = useState(1);
+
+  const loadingSteps = [
+    { text: 'Analyzing content...', progress: 25 },
+    { text: 'Extracting key ideas...', progress: 50 },
+    { text: 'Generating structured notes...', progress: 75 },
+    { text: 'Creating quizzes and flashcards...', progress: 90 },
+    { text: 'Almost ready...', progress: 100 },
+  ];
 
   // Check if user came from step2-location and get role
   useEffect(() => {
@@ -70,6 +157,73 @@ export default function OnboardingStep2() {
     setBookGlow(0);
   };
 
+  // Loading effect when bookState is 'loading'
+  useEffect(() => {
+    if (bookState === 'loading') {
+      let stepIndex = 0;
+      const stepInterval = setInterval(() => {
+        if (stepIndex < loadingSteps.length) {
+          setCurrentLoadingStep(stepIndex);
+          setLoadingProgress(loadingSteps[stepIndex].progress);
+          stepIndex++;
+        }
+      }, 650);
+
+      const progressInterval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev < 100) {
+            const step = loadingSteps.find(s => s.progress > prev);
+            if (step) {
+              return Math.min(prev + 1, step.progress);
+            }
+            return prev + 0.5;
+          } else {
+            clearInterval(progressInterval);
+            clearInterval(stepInterval);
+            // Load note content and show it
+            loadNoteContent();
+            return 100;
+          }
+        });
+      }, 30);
+
+      return () => {
+        clearInterval(progressInterval);
+        clearInterval(stepInterval);
+      };
+    }
+  }, [bookState]);
+
+  // Load note content from config
+  const loadNoteContent = () => {
+    // Map role to config key
+    const roleMap: Record<string, keyof typeof onboardingSamples> = {
+      'middle_school': 'middleschool',
+      'high_school': 'highschool',
+      'undergraduate': 'undergrad',
+      'graduate': 'grad',
+      'working_professional': 'professional',
+      'educator': 'educator',
+      'other': 'other',
+    };
+    
+    const stage = localStorage.getItem('onboarding_stage') || 'other';
+    const configKey = roleMap[stage] || onboardingRole || 'other';
+    const sample = onboardingSamples[configKey as keyof typeof onboardingSamples];
+    
+    if (sample?.note) {
+      setNoteContent(sample.note);
+      // Start scale animation after a brief delay
+      setTimeout(() => {
+        setRightPageScale(1.5);
+        setTimeout(() => {
+          setShowNotes(true);
+          setBookState('complete');
+        }, 300);
+      }, 500);
+    }
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -80,23 +234,22 @@ export default function OnboardingStep2() {
     const isSampleFile = draggedData === `sample-file-${onboardingRole}` || draggedData.includes('sample-file');
     
     if (!isSampleFile) {
-      // User tried to drop their own file - ignore it completely
       setBookState('idle');
       setBookGlow(0);
       return;
     }
     
-    // Magic book feeding animation sequence
-    setBookState('feeding');
+    // Start loading sequence
+    setBookState('loading');
     setBookGlow(150);
     setHasDroppedSample(true);
+    setLoadingProgress(0);
     
-    // Store file info and sample data immediately (before navigation)
+    // Store file info
     if (typeof window !== 'undefined') {
       localStorage.setItem('onboarding_file_name', sampleFile.title);
       localStorage.setItem('onboarding_file_type', 'application/pdf');
       
-      // Store the full sample bundle for later use in notes/quiz/flashcards
       const sampleBundle = ONBOARDING_SAMPLES.find(s => s.role === onboardingRole) || 
                           ONBOARDING_SAMPLES.find(s => s.role === 'other') || 
                           ONBOARDING_SAMPLES[0];
@@ -104,17 +257,6 @@ export default function OnboardingStep2() {
         localStorage.setItem('onboarding_sample_data', JSON.stringify(sampleBundle));
       }
     }
-    
-    // Show digesting animation, then navigate
-    setTimeout(() => {
-      setBookState('digesting');
-      setTimeout(() => {
-        setBookState('complete');
-        setTimeout(() => {
-          window.location.href = '/onboarding/step3';
-        }, 500);
-      }, 800);
-    }, 600);
   };
 
   // Disable file input - users cannot upload their own files
@@ -296,62 +438,85 @@ export default function OnboardingStep2() {
                 <div className="absolute bottom-8 left-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
               </div>
               
-              {/* Left Page Content */}
-              <div className="relative h-full flex flex-col items-center justify-center p-8 text-center z-10">
-                {bookState === 'idle' && (
-                  <>
-                    <div className="mb-6">
-                      <BookOpen className="w-16 h-16 text-indigo-400/60" />
+              {/* Left Page Content - Messy Old Notes */}
+              <div className="relative h-full p-6 overflow-hidden z-10">
+                {/* Messy handwritten notes effect */}
+                <div className="absolute inset-0 p-4 space-y-3 opacity-60">
+                  {/* Random text snippets at different angles */}
+                  {[
+                    { text: 'f(x) = x² + 3x - 2', top: '5%', left: '10%', rotate: '-2deg', size: 'text-xs' },
+                    { text: 'Derivative: 2x + 3', top: '12%', left: '15%', rotate: '1deg', size: 'text-xs' },
+                    { text: '∫ x dx = x²/2 + C', top: '20%', left: '8%', rotate: '-1deg', size: 'text-xs' },
+                    { text: 'lim x→0 sin(x)/x = 1', top: '28%', left: '12%', rotate: '2deg', size: 'text-xs' },
+                    { text: 'Matrix A = [1, 2; 3, 4]', top: '35%', left: '10%', rotate: '-1.5deg', size: 'text-xs' },
+                    { text: 'Eigenvalue λ = 5', top: '42%', left: '15%', rotate: '1deg', size: 'text-xs' },
+                    { text: '∇f = (∂f/∂x, ∂f/∂y)', top: '50%', left: '8%', rotate: '-2deg', size: 'text-xs' },
+                    { text: 'Chain rule: d/dx f(g(x))', top: '58%', left: '12%', rotate: '1.5deg', size: 'text-xs' },
+                    { text: 'Taylor series expansion...', top: '65%', left: '10%', rotate: '-1deg', size: 'text-xs' },
+                    { text: 'Note: Check this later', top: '72%', left: '15%', rotate: '2deg', size: 'text-xs', style: 'italic' },
+                    { text: '???', top: '80%', left: '8%', rotate: '0deg', size: 'text-lg', style: 'font-bold' },
+                    { text: 'Remember: Always check units', top: '88%', left: '12%', rotate: '-1deg', size: 'text-xs' },
+                  ].map((note, i) => (
+                    <div
+                      key={i}
+                      className={`absolute ${note.size} text-slate-600 ${note.style || ''} font-mono`}
+                      style={{
+                        top: note.top,
+                        left: note.left,
+                        transform: `rotate(${note.rotate})`,
+                        opacity: 0.4 + Math.random() * 0.3,
+                      }}
+                    >
+                      {note.text}
                     </div>
-                    <p className="text-xl font-semibold text-slate-700 mb-2">
-                      Ancient Knowledge
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Awaits your contribution
-                    </p>
-                  </>
-                )}
-                {bookState === 'hovering' && (
-                  <>
-                    <div className="mb-6 animate-bounce">
-                      <Sparkles className="w-16 h-16 text-indigo-500" />
-                    </div>
-                    <p className="text-xl font-bold text-indigo-600 mb-2 animate-pulse">
-                      Ready to Receive!
-                    </p>
-                    <p className="text-sm text-indigo-500">
-                      Release the file now
-                    </p>
-                  </>
-                )}
-                {(bookState === 'feeding' || bookState === 'digesting') && (
-                  <>
-                    <div className="mb-6">
-                      <Sparkles className="w-16 h-16 text-purple-500 animate-spin" />
-                    </div>
-                    <p className="text-xl font-bold text-purple-600 mb-2">
-                      {bookState === 'feeding' ? 'Absorbing...' : 'Processing...'}
-                    </p>
-                    <p className="text-sm text-purple-500">
-                      {bookState === 'feeding' ? 'Knowledge flowing in' : 'Pages turning'}
-                    </p>
-                  </>
-                )}
-                {bookState === 'complete' && (
-                  <>
-                    <div className="mb-6">
-                      <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
-                        <span className="text-3xl">✓</span>
-                      </div>
-                    </div>
-                    <p className="text-xl font-bold text-green-600 mb-2">
-                      Complete!
-                    </p>
-                    <p className="text-sm text-green-500">
-                      Knowledge absorbed
-                    </p>
-                  </>
-                )}
+                  ))}
+                  
+                  {/* Random lines and scribbles */}
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={`line-${i}`}
+                      className="absolute bg-slate-400/20"
+                      style={{
+                        top: `${10 + i * 11}%`,
+                        left: `${5 + Math.random() * 10}%`,
+                        width: `${30 + Math.random() * 40}%`,
+                        height: '1px',
+                        transform: `rotate(${-2 + Math.random() * 4}deg)`,
+                        opacity: 0.2 + Math.random() * 0.3,
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Coffee stain effect */}
+                  <div 
+                    className="absolute rounded-full bg-amber-700/10 blur-xl"
+                    style={{
+                      top: '60%',
+                      left: '20%',
+                      width: '80px',
+                      height: '80px',
+                    }}
+                  />
+                  
+                  {/* Highlighted text */}
+                  <div 
+                    className="absolute bg-yellow-200/30"
+                    style={{
+                      top: '25%',
+                      left: '8%',
+                      width: '35%',
+                      height: '15px',
+                      transform: 'rotate(-1deg)',
+                    }}
+                  />
+                </div>
+                
+                {/* Overlay text */}
+                <div className="relative z-10 mt-4">
+                  <p className="text-sm font-semibold text-slate-500 italic">
+                    Old messy notes...
+                  </p>
+                </div>
               </div>
             </div>
             
@@ -423,10 +588,16 @@ export default function OnboardingStep2() {
                 <div className="absolute bottom-8 right-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
               </div>
               
-              {/* Right Page Content - Main Message */}
-              <div className="relative h-full flex flex-col items-center justify-center p-8 text-center z-10">
+              {/* Right Page Content - Blank / Loading / Notes */}
+              <div 
+                className="relative h-full overflow-hidden z-10 transition-all duration-1000"
+                style={{
+                  transform: `scale(${rightPageScale})`,
+                  transformOrigin: 'center center',
+                }}
+              >
                 {bookState === 'idle' && (
-                  <>
+                  <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                     <div className="mb-8">
                       <div className="text-6xl mb-4">📖</div>
                     </div>
@@ -439,10 +610,11 @@ export default function OnboardingStep2() {
                     <p className="text-sm text-slate-500">
                       into this magic book
                     </p>
-                  </>
+                  </div>
                 )}
+                
                 {bookState === 'hovering' && (
-                  <>
+                  <div className="h-full flex flex-col items-center justify-center p-8 text-center">
                     <div className="mb-8 animate-bounce">
                       <div className="text-6xl">✨</div>
                     </div>
@@ -455,55 +627,99 @@ export default function OnboardingStep2() {
                     <p className="text-sm text-indigo-400">
                       I'm ready to absorb!
                     </p>
-                  </>
+                  </div>
                 )}
-                {bookState === 'feeding' && (
-                  <>
-                    <div className="mb-8">
-                      <Sparkles className="w-16 h-16 text-purple-500 animate-spin mx-auto" />
+                
+                {bookState === 'loading' && (
+                  <div className="h-full flex flex-col items-center justify-center p-8 text-center">
+                    {/* Magic loading animation */}
+                    <div className="mb-8 relative">
+                      <div className="w-24 h-24 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                      <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-purple-500 animate-pulse" />
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-purple-600 mb-4">
-                      Feeding...
-                    </h2>
-                    <p className="text-lg text-purple-500 mb-2">
-                      The book is consuming
+                    
+                    {/* Progress bar */}
+                    <div className="w-full max-w-xs mb-4">
+                      <div className="h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                        <div
+                          className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-300 ease-out rounded-full shadow-lg"
+                          style={{ width: `${loadingProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                    
+                    <p className="text-2xl font-semibold text-indigo-600 mb-2">
+                      {loadingProgress}%
                     </p>
-                    <p className="text-sm text-purple-400">
-                      your knowledge
+                    
+                    <p className="text-lg text-slate-600 font-medium animate-pulse">
+                      {loadingSteps[currentLoadingStep]?.text || loadingSteps[loadingSteps.length - 1].text}
                     </p>
-                  </>
+                    
+                    {/* Magic particles */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      {[...Array(15)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping"
+                          style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animationDelay: `${Math.random() * 2}s`,
+                            animationDuration: `${1 + Math.random()}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {bookState === 'digesting' && (
-                  <>
-                    <div className="mb-8">
-                      <div className="w-16 h-16 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                
+                {showNotes && noteContent && (
+                  <div className="h-full overflow-y-auto p-6 text-left animate-in fade-in slide-in-from-bottom-4">
+                    {/* Note content similar to step4 */}
+                    <div className="mb-6">
+                      <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                        {noteContent.mainTitle}
+                      </h2>
+                      <p className="text-lg text-slate-600">{noteContent.mainSubtitle}</p>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-indigo-600 mb-4">
-                      Digesting...
-                    </h2>
-                    <p className="text-lg text-indigo-500 mb-2">
-                      Pages are turning
-                    </p>
-                    <p className="text-sm text-indigo-400">
-                      Knowledge is being absorbed
-                    </p>
-                  </>
-                )}
-                {bookState === 'complete' && (
-                  <>
-                    <div className="mb-8">
-                      <div className="text-6xl">✅</div>
+                    
+                    {/* Overview */}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2">Overview</h3>
+                      <p className="text-base text-slate-700 leading-relaxed">
+                        {noteContent.sections.overview}
+                      </p>
                     </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-green-600 mb-4">
-                      ✓ Knowledge Absorbed!
-                    </h2>
-                    <p className="text-lg text-green-500 mb-2">
-                      Ready to create
-                    </p>
-                    <p className="text-sm text-green-400">
-                      your notes...
-                    </p>
-                  </>
+                    
+                    {/* Key Concepts */}
+                    {noteContent.sections?.keyConcepts && (
+                      <div className="mb-6">
+                        <h3 className="text-xl font-bold text-slate-900 mb-3">Key Concepts</h3>
+                        <div className="space-y-2">
+                          {noteContent.sections.keyConcepts.map((concept: string, idx: number) => (
+                            <div key={idx} className="bg-indigo-50 rounded-lg p-3 border border-indigo-100">
+                              <p className="text-sm font-semibold text-slate-800">{concept}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Continue button */}
+                    <div className="mt-8 flex justify-center">
+                      <button
+                        onClick={() => {
+                          localStorage.setItem('onboarding_complete', 'true');
+                          window.location.href = '/onboarding/step4';
+                        }}
+                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center gap-2 shadow-lg"
+                      >
+                        View Full Notes
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
