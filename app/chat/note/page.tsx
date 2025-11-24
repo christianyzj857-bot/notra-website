@@ -489,7 +489,7 @@ function ChatWithNoteContent() {
 export default function ChatWithNotePage() {
   return (
     <Suspense fallback={
-      <div className="flex h-screen bg-[#1A1B26] items-center justify-center">
+      <div className="flex h-screen bg-[#0B0C15] items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-300">Loading...</p>
