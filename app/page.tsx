@@ -139,13 +139,14 @@ const Navbar = () => {
     window.location.href = '/';
   };
 
-  // 导航链接配置
+  // 导航链接配置 - 均匀居中排布，Settings 在最右边
   const navItems = [
     { label: 'Features', href: '/#features' },
     { label: 'Pricing', href: '/pricing' },
     { label: 'FAQ', href: '/#faq' },
     { label: 'Notra AI', href: '/app' },
-    { label: 'Dashboard', href: '/dashboard' }
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Settings', href: '/settings' }
   ];
 
   return (
@@ -163,44 +164,31 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center space-x-10">
-            {navItems.map((item) => {
-              const isActive = currentPath === item.href || (item.href.startsWith('/#') && currentPath === '/');
-              return (
-                <Link 
-                  key={item.label} 
-                  href={item.href} 
-                  className={`text-sm font-medium transition-colors ${
-                    isActive 
-                      ? 'text-indigo-400' 
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
+          {/* Desktop Links - 均匀居中排布 */}
+          <div className="hidden md:flex items-center justify-center flex-1">
+            <div className="flex items-center space-x-8 lg:space-x-10">
+              {navItems.map((item) => {
+                const isActive = currentPath === item.href || (item.href.startsWith('/#') && currentPath === '/');
+                return (
+                  <Link 
+                    key={item.label} 
+                    href={item.href} 
+                    className={`text-sm font-medium transition-colors ${
+                      isActive 
+                        ? 'text-indigo-400' 
+                        : 'text-slate-300 hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
-          {/* CTA (Actions) */}
+          {/* CTA (Actions) - 只显示未登录时的按钮 */}
           <div className="hidden md:flex items-center space-x-4">
-            {isLoggedIn ? (
-              <>
-                <Link href="/dashboard" className="text-sm font-semibold text-slate-300 hover:text-white">
-                  Dashboard
-                </Link>
-                <Link href="/settings" className="text-sm font-semibold text-slate-300 hover:text-white">
-                  Settings
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm font-semibold text-slate-300 hover:text-red-400 transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
+            {!isLoggedIn && (
               <>
                 <Link href="/login" className="text-sm font-semibold text-slate-300 hover:text-white">
                   Log in
@@ -242,33 +230,17 @@ const Navbar = () => {
                 </Link>
               );
             })}
-            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
-              {isLoggedIn ? (
-                <>
-                  <Link href="/dashboard">
-                    <Button variant="secondary" className="w-full justify-center">Dashboard</Button>
-                  </Link>
-                  <Link href="/settings">
-                    <Button variant="secondary" className="w-full justify-center">Settings</Button>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full py-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-semibold hover:bg-red-500/20 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="secondary" className="w-full justify-center">Log in</Button>
-                  </Link>
-                  <Link href="/app">
-                    <Button variant="primary" className="w-full justify-center">Get Started Free</Button>
-                  </Link>
-                </>
-              )}
-            </div>
+            {/* 移动端只显示未登录时的按钮 */}
+            {!isLoggedIn && (
+              <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+                <Link href="/login">
+                  <Button variant="secondary" className="w-full justify-center">Log in</Button>
+                </Link>
+                <Link href="/app">
+                  <Button variant="primary" className="w-full justify-center">Get Started Free</Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -372,6 +344,19 @@ const Hero = () => {
                            </div>
                         </div>
                      </div>
+                  </div>
+                  
+                  {/* Try Notra AI Button - 在图片中间 */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                    <Link href="/chat">
+                      <Button 
+                        variant="gradient" 
+                        icon={Sparkles} 
+                        className="h-14 px-10 text-base shadow-indigo-500/20 hover:shadow-indigo-500/40"
+                      >
+                        Try Notra AI
+                      </Button>
+                    </Link>
                   </div>
                </div>
             </div>
