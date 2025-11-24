@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
   User, Lock, Globe, Moon, Bell, LogOut, Trash2, 
@@ -49,7 +50,7 @@ export default function SettingsPage() {
         setUser({ email, displayName, plan });
       } else {
         // Redirect to login if not logged in
-        window.location.href = '/login';
+        router.replace('/login');
       }
     }
   }, []);

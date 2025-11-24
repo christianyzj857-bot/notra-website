@@ -200,7 +200,7 @@ export default function SignupPage() {
                   localStorage.setItem('user_display_name', 'Google User');
                   localStorage.setItem('user_logged_in', 'true');
                   // Redirect to HOME page (not chat or dashboard)
-                  window.location.href = '/';
+                  router.push('/');
                 }
               }, 1000);
             }}

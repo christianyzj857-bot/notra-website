@@ -49,7 +49,7 @@ export default function LoginPage() {
       }
 
       // Redirect to HOME page
-      window.location.href = '/';
+      router.push('/');
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
       setIsLoading(false);
