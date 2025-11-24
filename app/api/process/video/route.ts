@@ -154,7 +154,20 @@ export async function POST(req: Request) {
     }
 
     // Get video transcript from platform API
-    const videoData = await getVideoTranscript(url);
+    let videoData;
+    try {
+      videoData = await getVideoTranscript(url);
+    } catch (error: any) {
+      console.error('Video transcript error:', error);
+      return NextResponse.json(
+        { 
+          error: 'TRANSCRIPT_ERROR',
+          message: error.message || 'Failed to get video transcript. Please ensure the video has captions/subtitles enabled.'
+        },
+        { status: 500 }
+      );
+    }
+    
     const transcript = videoData.transcript;
     const videoTitle = videoData.title;
     const videoDescription = videoData.description;
