@@ -40,15 +40,26 @@ export function getUILanguage(): string {
 
   // Get language from localStorage
   // Priority: ui_language > onboarding_content_language > default 'en'
-  const uiLang = localStorage.getItem('ui_language') ||
-                 localStorage.getItem('onboarding_content_language') ||
-                 'en';
+  let uiLang = localStorage.getItem('ui_language') ||
+               localStorage.getItem('onboarding_content_language') ||
+               'en';
 
   // Handle 'other' option - default to English
   if (uiLang === 'other') {
     return 'en';
   }
 
+  // Normalize language code (handle both zh-CN and zh-cn)
+  uiLang = uiLang.toLowerCase();
+  
+  // Debug log (only in development)
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('[i18n] Current language:', uiLang, 'from localStorage:', {
+      ui_language: localStorage.getItem('ui_language'),
+      onboarding_content_language: localStorage.getItem('onboarding_content_language'),
+    });
+  }
+  
   return uiLang;
 }
 
