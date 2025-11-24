@@ -45,6 +45,30 @@ export interface Flashcard {
   tag?: string;
 }
 
+// Source information for different session types
+export interface FileSource {
+  fileName: string;
+  mimeType?: string;
+  fileSize?: number;
+  pageCount?: number;
+}
+
+export interface AudioSource {
+  fileName?: string;
+  duration?: number; // in seconds
+  sampleRate?: number;
+  format?: string;
+}
+
+export interface VideoSource {
+  videoUrl: string;
+  platform: "youtube" | "bilibili" | "douyin" | "other";
+  videoId?: string;
+  title?: string;
+}
+
+export type SessionSource = FileSource | AudioSource | VideoSource;
+
 export interface NotraSession {
   id: string;
   type: SessionType;
@@ -55,6 +79,7 @@ export interface NotraSession {
   quizzes: QuizItem[];
   flashcards: Flashcard[];
   summaryForChat: string;
+  source?: SessionSource; // Optional: source information (file metadata, audio duration, video platform, etc.)
 }
 
 // API Request/Response types

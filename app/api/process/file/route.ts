@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { createSession, findSessionByHash, generateContentHash } from "@/lib/db";
-import { NotraSession, NoteSection, QuizItem, Flashcard } from "@/types/notra";
-import { writeFile, unlink } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
+import { NotraSession, FileSource } from "@/types/notra";
 import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-// Model selection - use 4o-mini for cost efficiency
-const DEFAULT_MODEL = "gpt-4o-mini";
+import { generateLearningAsset } from "@/lib/learning-asset-generator";
 
 // Extract text from different file types
 async function extractTextFromFile(file: File): Promise<string> {
@@ -56,114 +48,8 @@ async function extractTextFromFile(file: File): Promise<string> {
   }
 }
 
-// Call LLM to generate structured content
-async function generateStructuredContent(text: string): Promise<{
-  title: string;
-  notes: NoteSection[];
-  quizzes: QuizItem[];
-  flashcards: Flashcard[];
-  summaryForChat: string;
-}> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured');
-  }
-
-  const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-  // Truncate text to save tokens (keep first 8000 characters)
-  const truncatedText = text.substring(0, 8000);
-
-  const prompt = `You are an AI learning assistant. Analyze the following educational content and generate structured study materials.
-
-Content:
-${truncatedText}
-
-Please return a JSON object with the following structure:
-{
-  "title": "A concise title for this content",
-  "notes": [
-    {
-      "id": "note-1",
-      "heading": "Section heading",
-      "content": "Main content paragraph",
-      "bullets": ["Key point 1", "Key point 2"],
-      "example": "Optional example",
-      "tableSummary": [{"label": "Term", "value": "Definition"}]
-    }
-  ],
-  "quizzes": [
-    {
-      "id": "quiz-1",
-      "question": "Question text",
-      "options": [{"label": "A", "text": "Option A"}, {"label": "B", "text": "Option B"}, {"label": "C", "text": "Option C"}, {"label": "D", "text": "Option D"}],
-      "correctIndex": 0,
-      "explanation": "Why this answer is correct",
-      "difficulty": "easy"
-    }
-  ],
-  "flashcards": [
-    {
-      "id": "card-1",
-      "front": "Question or term",
-      "back": "Answer or definition",
-      "tag": "Category"
-    }
-  ],
-  "summaryForChat": "A concise 2-3 sentence summary of the key concepts for chat context"
-}
-
-Generate 4-6 note sections, 3-5 quiz questions, and 4-6 flashcards. Make sure all content is educational and accurate.`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      messages: [
-        { role: "system", content: "You are a helpful educational assistant that generates structured learning materials in JSON format." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 3000,
-    });
-
-    const responseText = completion.choices[0]?.message?.content || '{}';
-    const parsed = JSON.parse(responseText);
-
-    // Validate and structure the response
-    return {
-      title: parsed.title || "Untitled Document",
-      notes: (parsed.notes || []).map((note: any, idx: number) => ({
-        id: note.id || `note-${idx + 1}`,
-        heading: note.heading || "",
-        content: note.content || "",
-        bullets: note.bullets || [],
-        example: note.example,
-        tableSummary: note.tableSummary || [],
-      })) as NoteSection[],
-      quizzes: (parsed.quizzes || []).map((quiz: any, idx: number) => ({
-        id: quiz.id || `quiz-${idx + 1}`,
-        question: quiz.question || "",
-        options: (quiz.options || []).map((opt: any, optIdx: number) => ({
-          label: opt.label || String.fromCharCode(65 + optIdx),
-          text: opt.text || "",
-        })),
-        correctIndex: quiz.correctIndex ?? 0,
-        explanation: quiz.explanation || "",
-        difficulty: quiz.difficulty || "medium",
-      })) as QuizItem[],
-      flashcards: (parsed.flashcards || []).map((card: any, idx: number) => ({
-        id: card.id || `card-${idx + 1}`,
-        front: card.front || "",
-        back: card.back || "",
-        tag: card.tag,
-      })) as Flashcard[],
-      summaryForChat: parsed.summaryForChat || "Educational content covering key concepts and topics.",
-    };
-  } catch (error: any) {
-    console.error('LLM generation error:', error);
-    throw new Error('Failed to generate structured content');
-  }
-}
+// Note: generateStructuredContent has been moved to lib/learning-asset-generator.ts
+// This file now uses the unified generator function
 
 export async function POST(req: Request) {
   try {
@@ -210,10 +96,22 @@ export async function POST(req: Request) {
       });
     }
 
-    // Generate structured content using LLM
-    const structuredContent = await generateStructuredContent(text);
+    // Generate structured content using unified generator (ONE LLM call)
+    const structuredContent = await generateLearningAsset(text, {
+      type: "file",
+      metadata: {
+        fileName: file.name,
+      }
+    });
 
-    // Create new session
+    // Prepare source information
+    const source: FileSource = {
+      fileName: file.name,
+      mimeType: file.type,
+      fileSize: file.size,
+    };
+
+    // Create new session with source information
     const newSession = await createSession({
       type: "file",
       title: structuredContent.title || file.name,
@@ -222,6 +120,7 @@ export async function POST(req: Request) {
       quizzes: structuredContent.quizzes,
       flashcards: structuredContent.flashcards,
       summaryForChat: structuredContent.summaryForChat,
+      source,
     });
 
     // Increment usage count after successful processing

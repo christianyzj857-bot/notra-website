@@ -55,10 +55,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing API Key" }, { status: 500 });
     }
 
-    // Validate mode and sessionId
-    if (mode === "note" && !sessionId) {
+    // Validate mode and sessionId/assetId
+    // Support both sessionId (existing) and assetId (new naming) for compatibility
+    const assetId = sessionId || (body as any).assetId;
+    
+    if (mode === "note" && !assetId) {
       return NextResponse.json(
-        { error: "sessionId is required when mode is 'note'" },
+        { 
+          error: "MISSING_ASSET_ID",
+          message: "sessionId or assetId is required when mode is 'note'. Please provide a valid learning asset ID."
+        },
         { status: 400 }
       );
     }
@@ -68,56 +74,72 @@ export async function POST(req: Request) {
     // Get user plan (use provided userPlan or get from server-side function)
     const currentUserPlan = userPlan || getCurrentUserPlan();
     
-    // Model selection and cost control
-    let selectedModel: ModelKey = (MODEL_MAP[model] || "gpt-4o-mini") as ModelKey;
-    let shouldShowUpgradeMessage = false;
+    // Model selection and permission check
+    const requestedModel = (model || "gpt-4o-mini") as ModelKey;
+    let selectedModel: ModelKey = (MODEL_MAP[requestedModel] || "gpt-4o-mini") as ModelKey;
     
-    // Free users: force downgrade to 4o-mini if requesting Pro-only models
+    // Model permission check: Free users can only use gpt-4o-mini
+    // Pro-only models (gpt-4o, gpt-5.1) require Pro plan
     if (currentUserPlan === "free" && isProOnlyModel(selectedModel)) {
-      selectedModel = "gpt-4o-mini";
-      shouldShowUpgradeMessage = true;
+      return NextResponse.json(
+        {
+          error: "UPGRADE_REQUIRED",
+          message: "Upgrade to Pro to unlock this model. Free plan only supports GPT-4o-mini.",
+          requestedModel: requestedModel,
+          availableModel: "gpt-4o-mini"
+        },
+        { status: 403 }
+      );
     }
 
     // Prepare messages based on mode
     let systemMessage = GENERAL_SYSTEM_PROMPT;
     let conversationMessages = messages;
 
-    if (mode === "note" && sessionId) {
-      // Get session data (note: getSessionById uses Node.js APIs, so this won't work in Edge runtime)
-      // For Edge runtime, we'd need to use a different approach (e.g., fetch from an API endpoint)
-      // For now, we'll handle this gracefully
+    if (mode === "note" && assetId) {
+      // Get session/asset data (note: getSessionById uses Node.js APIs, so this won't work in Edge runtime)
+      // For Edge runtime, we fetch from an API endpoint
       try {
-        const sessionResponse = await fetch(`${req.headers.get('origin') || 'http://localhost:3000'}/api/session/${sessionId}`);
+        const sessionResponse = await fetch(`${req.headers.get('origin') || 'http://localhost:3000'}/api/session/${assetId}`);
         if (!sessionResponse.ok) {
+          if (sessionResponse.status === 404) {
+            return NextResponse.json(
+              { 
+                error: "ASSET_NOT_FOUND",
+                message: "The requested learning asset was not found. Please check the asset ID."
+              },
+              { status: 404 }
+            );
+          }
           return NextResponse.json(
-            { error: "Session not found" },
-            { status: 404 }
+            { 
+              error: "ASSET_FETCH_ERROR",
+              message: "Failed to fetch learning asset data."
+            },
+            { status: 500 }
           );
         }
         const session = await sessionResponse.json();
 
-      // Get latest user question for relevance filtering
-      const latestUserMessage = messages
-        .filter(m => m.role === "user")
-        .pop()?.content || "";
+        // Get latest user question for relevance filtering
+        const latestUserMessage = messages
+          .filter(m => m.role === "user")
+          .pop()?.content || "";
 
-      // Pick relevant note sections to reduce token usage
-      const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
+        // Pick relevant note sections to reduce token usage
+        const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
 
         // Build context-aware system prompt
         let contextText = `Summary: ${session.summaryForChat}\n\n`;
         
-        if (session.notes && session.notes.length > 0) {
-          const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
-          if (relevantSections.length > 0) {
-            contextText += "Relevant sections:\n";
-            relevantSections.forEach((section: any) => {
-              contextText += `- ${section.heading}: ${section.content.substring(0, 200)}\n`;
-            });
-          } else {
-            // Fallback to summary only if no relevant sections
-            contextText += "Key concepts from the study material.\n";
-          }
+        if (relevantSections.length > 0) {
+          contextText += "Relevant sections:\n";
+          relevantSections.forEach((section: any) => {
+            contextText += `- ${section.heading}: ${section.content.substring(0, 200)}\n`;
+          });
+        } else {
+          // Fallback to summary only if no relevant sections
+          contextText += "Key concepts from the study material.\n";
         }
 
         systemMessage = `You are Notra, an AI learning assistant.
@@ -130,6 +152,13 @@ If the question is not related to the study material, politely redirect to the m
       } catch (err) {
         // If session fetch fails, fall back to general mode
         console.error('Failed to fetch session:', err);
+        return NextResponse.json(
+          { 
+            error: "ASSET_FETCH_ERROR",
+            message: "Failed to fetch learning asset data. Please try again."
+          },
+          { status: 500 }
+        );
       }
     }
 
@@ -145,8 +174,8 @@ If the question is not related to the study material, politely redirect to the m
       })),
     ];
 
-    // Set max_tokens for cost control
-    const maxTokens = currentUserPlan === "free" ? 512 : 768;
+    // Set max_tokens for cost control (based on plan)
+    const maxTokens = currentUserPlan === "free" ? 512 : 1024;
 
     const completion = await openai.chat.completions.create({
       model: selectedModel,
@@ -158,12 +187,6 @@ If the question is not related to the study material, politely redirect to the m
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        // Add upgrade message at the beginning if needed (only for first message)
-        if (shouldShowUpgradeMessage && messages.length <= 2) {
-          const upgradeMessage = "\n\n(You are on the free plan, so this reply uses GPT-4o-mini. Upgrade to unlock GPT-4o and GPT-5.1.)\n\n";
-          controller.enqueue(encoder.encode(upgradeMessage));
-        }
-        
         for await (const chunk of completion) {
           const delta = chunk.choices[0]?.delta?.content;
           if (delta) controller.enqueue(encoder.encode(delta));
