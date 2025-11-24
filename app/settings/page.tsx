@@ -10,6 +10,7 @@ import NotraLogo from '@/components/NotraLogo';
 import CountrySwitcher from '@/components/CountrySwitcher';
 import { t } from '@/lib/i18n';
 import { getEducationModeByCountry, type EducationMode } from '@/lib/educationMode';
+import { CountryId } from '@/constants/countries';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<{
@@ -20,7 +21,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('account');
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('space');
-  const [country, setCountry] = useState<string>('');
+  const [country, setCountry] = useState<CountryId>('');
   const [educationMode, setEducationMode] = useState<EducationMode>('western');
 
   // Initialize state on client mount
@@ -53,12 +54,12 @@ export default function SettingsPage() {
     }
   }, []);
   
-  const handleCountryChange = (newCountry: string) => {
+  const handleCountryChange = (newCountry: CountryId) => {
     localStorage.setItem('onboarding_country', newCountry);
     setCountry(newCountry);
     const newMode = getEducationModeByCountry(newCountry);
     setEducationMode(newMode);
-    alert(t('settings.countryChanged', { mode: t(`settings.mode.${newMode.toLowerCase()}`) }));
+    // 教育模式状态保留但不显示给用户
   };
 
   const handleLogout = async () => {
@@ -268,17 +269,21 @@ export default function SettingsPage() {
                   <div className="space-y-6" style={{ position: 'relative', zIndex: 1 }}>
                     {/* Country Switcher */}
                     <div style={{ position: 'relative', zIndex: 10 }}>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Country / Region / 国家/地区
+                      </label>
                       <CountrySwitcher
                         value={country}
                         onChange={handleCountryChange}
-                        size="md"
-                        showLabel={true}
+                        size="lg"
+                        includeOther={true} // 确保包含 "Other"
                       />
-                      {educationMode && (
-                        <p className="text-xs text-slate-400 mt-2">
-                          {t('settings.educationMode')}: {t(`settings.mode.${educationMode.toLowerCase()}`)}
-                        </p>
-                      )}
+                      {/* 移除教育模式显示，但保留状态逻辑 */}
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                        Affects localized content and educational examples.
+                        <br />
+                        影响本地化内容和教育示例。
+                      </p>
                     </div>
                   </div>
                 </div>

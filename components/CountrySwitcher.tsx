@@ -1,101 +1,196 @@
-// Country Switcher Component
-// Similar to LanguageSwitcher but for countries
-
-'use client';
+"use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom'; // 导入 createPortal
-import { Globe, ChevronDown, Check } from 'lucide-react';
-import { COUNTRIES, type Country } from '@/constants/countries';
+import { createPortal } from 'react-dom'; // 引入 createPortal
+import { Check, ChevronDown, MapPin, Search } from 'lucide-react';
+import { COUNTRIES, CountryId } from '@/constants/countries';
 
 interface CountrySwitcherProps {
-  value: string; // Current selected country code (e.g., 'CN', 'US')
-  onChange: (countryCode: string) => void;
-  className?: string;
-  showLabel?: boolean;
+  value: CountryId;
+  onChange: (value: CountryId) => void;
   size?: 'sm' | 'md' | 'lg';
+  variant?: 'default' | 'minimal';
+  includeOther?: boolean;
+  showSearch?: boolean;
+  showLabel?: boolean;
+  className?: string;
 }
 
-export default function CountrySwitcher({
+const CountrySwitcher: React.FC<CountrySwitcherProps> = ({
   value,
   onChange,
-  className = '',
-  showLabel = true,
   size = 'md',
-}: CountrySwitcherProps) {
+  variant = 'default',
+  includeOther = true,
+  showSearch = true,
+  showLabel = false,
+  className = ''
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  // 使用 ref 来引用触发按钮
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  // 存储下拉菜单的位置信息
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const buttonRef = useRef<HTMLButtonElement>(null); // 添加 button ref
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 }); // 存储下拉菜单位置
 
-  // Find current country
-  const currentCountry = COUNTRIES.find(
-    c => (c.code || c.id) === value
-  ) || COUNTRIES[0];
+  // 获取所有可用的国家列表，确保包括 "Other"
+  // 如果 includeOther 为 false，则过滤掉 'other'，否则显示全部
+  const availableCountries = includeOther
+    ? COUNTRIES
+    : COUNTRIES.filter(c => c.id !== 'other');
 
-  // 计算下拉菜单位置的函数
-  const calculatePosition = () => {
+  const selectedCountry = availableCountries.find(c => c.id === value) || availableCountries[0];
+
+  // 计算下拉菜单位置
+  const updatePosition = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 4,
+        top: rect.bottom + window.scrollY + 8, // 按钮底部下方 8px
         left: rect.left + window.scrollX,
-        width: rect.width
+        width: rect.width,
       });
     }
   };
 
-  // 当菜单打开时立即计算位置
+  // 当菜单打开时更新位置，并监听窗口变化
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      // 使用 setTimeout 确保 DOM 已更新
-      setTimeout(() => {
-        calculatePosition();
-      }, 0);
+    if (isOpen) {
+      updatePosition();
+      window.addEventListener('resize', updatePosition);
+      window.addEventListener('scroll', updatePosition);
     }
-  }, [isOpen]);
-
-  // 当窗口滚动/调整大小时重新计算位置（仅在打开时）
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    window.addEventListener('scroll', calculatePosition, { passive: true });
-    window.addEventListener('resize', calculatePosition, { passive: true });
     return () => {
-      window.removeEventListener('scroll', calculatePosition);
-      window.removeEventListener('resize', calculatePosition);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition);
     };
   }, [isOpen]);
 
-  const handleCountryChange = (country: Country) => {
-    onChange(country.code || country.id);
-    setIsOpen(false);
-  };
+  const filteredCountries = availableCountries.filter(country => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      country.label.toLowerCase().includes(query) ||
+      (country.nativeLabel && country.nativeLabel.toLowerCase().includes(query))
+    );
+  });
 
-  // Size classes
-  const sizeClasses = {
+  const sizes = {
     sm: {
-      button: 'px-3 py-1.5 text-sm',
-      item: 'px-3 py-2 text-sm',
-      icon: 'w-4 h-4',
+      button: 'text-xs px-2 py-1',
+      icon: 'w-3.5 h-3.5',
+      item: 'text-xs px-2 py-1.5',
+      flag: 'text-sm'
     },
     md: {
-      button: 'px-4 py-2 text-base',
-      item: 'px-4 py-2.5 text-base',
-      icon: 'w-5 h-5',
+      button: 'text-sm px-3 py-2',
+      icon: 'w-4 h-4',
+      item: 'text-sm px-3 py-2',
+      flag: 'text-base'
     },
     lg: {
-      button: 'px-5 py-2.5 text-lg',
-      item: 'px-5 py-3 text-lg',
-      icon: 'w-6 h-6',
-    },
+      button: 'text-base px-4 py-2.5',
+      icon: 'w-5 h-5',
+      item: 'text-base px-4 py-2.5',
+      flag: 'text-lg'
+    }
   };
 
-  const currentSize = sizeClasses[size];
+  const currentSize = sizes[size];
+
+  const buttonClasses = variant === 'default'
+    ? `w-full flex items-center justify-between gap-2 rounded-xl border transition-all duration-200 font-medium
+       bg-white dark:bg-white/5 border-slate-200 dark:border-white/10
+       hover:border-indigo-500 dark:hover:border-indigo-400
+       text-slate-700 dark:text-slate-300`
+    : `flex items-center gap-2 rounded-lg transition-all duration-200 font-medium
+       text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white
+       hover:bg-slate-100 dark:hover:bg-white/5`;
+
+  // 下拉菜单内容
+  const dropdownContent = (
+    <>
+      {/* 透明遮罩，点击关闭 */}
+      <div
+        className="fixed inset-0 z-[99998] bg-transparent"
+        onClick={() => setIsOpen(false)}
+      />
+      <div
+        className="fixed z-[99999] bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl max-h-96 overflow-hidden flex flex-col"
+        style={{
+          top: `${dropdownPosition.top}px`,
+          left: `${dropdownPosition.left}px`,
+          minWidth: `${Math.max(dropdownPosition.width, 240)}px`, // 确保最小宽度
+          maxWidth: '90vw'
+        }}
+      >
+        {showSearch && (
+          <div className="p-2 border-b border-slate-100 dark:border-white/5 sticky top-0 bg-white dark:bg-[#0B0C15] z-10">
+            <div className="relative">
+              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 ${currentSize.icon} text-slate-400`} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search country..."
+                className={`w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-white/5 border-none rounded-lg
+                         text-slate-900 dark:text-white placeholder-slate-400
+                         focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 ${currentSize.item}`}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
+        <div className="overflow-y-auto thin-scrollbar flex-1 p-1">
+          {filteredCountries.length > 0 ? (
+            filteredCountries.map((country) => {
+              const isSelected = country.id === value;
+              return (
+                <button
+                  key={country.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(country.id);
+                    setIsOpen(false);
+                    setSearchQuery('');
+                  }}
+                  className={`
+                    w-full flex items-center justify-between
+                    ${currentSize.item} rounded-lg
+                    text-left transition-colors duration-150
+                    ${isSelected
+                      ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                    <span className={`${currentSize.flag} flex-shrink-0`}>{country.flag || '🌍'}</span>
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="font-medium truncate">{country.label}</span>
+                      {country.nativeLabel && country.nativeLabel !== country.label && (
+                        <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {country.nativeLabel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {isSelected && (
+                    <Check className={`${currentSize.icon} text-indigo-600 dark:text-indigo-400 flex-shrink-0 ml-2`} />
+                  )}
+                </button>
+              );
+            })
+          ) : (
+            <div className={`text-center text-slate-500 dark:text-slate-400 py-4 ${currentSize.item}`}>
+              No countries found
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
 
   return (
-    <div className={`relative ${className}`} style={{ zIndex: 1 }}>
+    <div className={className}>
       {showLabel && (
         <label className="block text-sm font-medium text-slate-300 dark:text-slate-400 mb-3">
           Country / Region / 国家/地区
@@ -104,101 +199,30 @@ export default function CountrySwitcher({
       <button
         ref={buttonRef} // 绑定 ref
         type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const newIsOpen = !isOpen;
-          setIsOpen(newIsOpen);
-          // 立即计算位置
-          if (newIsOpen && buttonRef.current) {
-            setTimeout(() => {
-              calculatePosition();
-            }, 0);
-          }
-        }}
-        style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
-        className={`
-          w-full flex items-center justify-between
-          ${currentSize.button}
-          bg-white dark:bg-[#0B0C15] 
-          border border-slate-200 dark:border-white/10 
-          rounded-xl
-          text-slate-700 dark:text-slate-300
-          hover:border-indigo-300 dark:hover:border-indigo-500/50
-          focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
-          transition-all duration-200
-          cursor-pointer
-          ${isOpen ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-500/20' : ''}
-        `}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`${buttonClasses} ${currentSize.button} ${isOpen ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-500/20' : ''}`}
       >
-        <div className="flex items-center gap-2">
-          <Globe className={currentSize.icon} />
-          <span className="font-medium truncate max-w-[120px]">
-            {currentCountry.label}
+        <div className="flex items-center gap-3 flex-1 overflow-hidden">
+          <span className={currentSize.flag}>{selectedCountry.flag || '🌍'}</span>
+          <span className="flex flex-col items-start text-left overflow-hidden">
+            <span className="font-medium truncate leading-tight">{selectedCountry.label}</span>
+            {variant === 'default' && selectedCountry.nativeLabel && selectedCountry.nativeLabel !== selectedCountry.label && (
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5">
+                {selectedCountry.nativeLabel}
+              </span>
+            )}
           </span>
         </div>
-        <ChevronDown
-          className={`${currentSize.icon} text-slate-400 transition-transform duration-200 ${
-            isOpen ? 'transform rotate-180' : ''
-          }`}
-        />
+        <ChevronDown className={`flex-shrink-0 ${currentSize.icon} transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} text-slate-400`} />
       </button>
 
-      {/* 使用 Portal 将下拉菜单渲染到 body */}
-      {isOpen && typeof window !== 'undefined' && buttonRef.current && createPortal(
-        <>
-          {/* 透明遮罩层 */}
-          <div
-            className="fixed inset-0 z-[99998] bg-transparent"
-            onClick={() => setIsOpen(false)}
-          />
-          {/* 下拉菜单主体 */}
-          <div
-            className="fixed z-[99999] bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent"
-            style={{
-              top: `${dropdownPosition.top || (buttonRef.current.getBoundingClientRect().bottom + window.scrollY + 4)}px`,
-              left: `${dropdownPosition.left || (buttonRef.current.getBoundingClientRect().left + window.scrollX)}px`,
-              minWidth: `${Math.max(dropdownPosition.width || buttonRef.current.offsetWidth, 240)}px`, // 国家名称较长，给一个更大的最小宽度
-            }}
-          >
-            <div className="py-2">
-              {COUNTRIES.map((country) => {
-                const isSelected = (country.code || country.id) === value;
-                return (
-                  <button
-                    key={country.code || country.id}
-                    type="button"
-                    onClick={() => handleCountryChange(country)}
-                    className={`
-                      w-full flex items-center justify-between
-                      ${currentSize.item}
-                      text-left
-                      transition-colors duration-150
-                      ${isSelected
-                        ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5'
-                      }
-                    `}
-                  >
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="font-medium leading-none mb-0.5 truncate">{country.label}</span>
-                      {country.nativeLabel && country.nativeLabel !== country.label && (
-                        <span className="text-xs text-slate-500 dark:text-slate-400 leading-none truncate">
-                          {country.nativeLabel}
-                        </span>
-                      )}
-                    </div>
-                    {isSelected && (
-                      <Check className={`${currentSize.icon} text-indigo-600 dark:text-indigo-400 flex-shrink-0 ml-2`} />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>,
+      {/* 使用 Portal 渲染下拉菜单到 document.body */}
+      {isOpen && typeof window !== 'undefined' && createPortal(
+        dropdownContent,
         document.body
       )}
     </div>
   );
-}
+};
+
+export default CountrySwitcher;

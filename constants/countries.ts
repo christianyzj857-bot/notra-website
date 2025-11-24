@@ -1,9 +1,12 @@
 // Global country/region list for onboarding
+export type CountryId = string;
+
 export interface Country {
-  id: string;
+  id: CountryId;
   label: string;
   code?: string; // ISO country code if needed
   nativeLabel?: string; // Native name of the country (e.g., "中国" for China)
+  flag?: string; // Country flag emoji (e.g., "🇬🇧" for UK)
 }
 
 export const COUNTRIES: Country[] = [
