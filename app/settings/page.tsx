@@ -278,12 +278,6 @@ export default function SettingsPage() {
                         size="lg"
                         includeOther={true} // 确保包含 "Other"
                       />
-                      {/* 移除教育模式显示，但保留状态逻辑 */}
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                        Affects localized content and educational examples.
-                        <br />
-                        影响本地化内容和教育示例。
-                      </p>
                     </div>
                   </div>
                 </div>

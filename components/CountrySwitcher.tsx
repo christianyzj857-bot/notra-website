@@ -53,15 +53,23 @@ const CountrySwitcher: React.FC<CountrySwitcherProps> = ({
 
   // 当菜单打开时更新位置，并监听窗口变化
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && buttonRef.current) {
+      // 立即计算位置
       updatePosition();
+      // 使用 setTimeout 确保 DOM 已更新
+      const timer = setTimeout(() => {
+        updatePosition();
+      }, 0);
+      
       window.addEventListener('resize', updatePosition);
       window.addEventListener('scroll', updatePosition);
+      
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('scroll', updatePosition);
+      };
     }
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition);
-    };
   }, [isOpen]);
 
   const filteredCountries = availableCountries.filter(country => {
@@ -199,7 +207,18 @@ const CountrySwitcher: React.FC<CountrySwitcherProps> = ({
       <button
         ref={buttonRef} // 绑定 ref
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const newIsOpen = !isOpen;
+          setIsOpen(newIsOpen);
+          // 立即计算位置
+          if (newIsOpen && buttonRef.current) {
+            setTimeout(() => {
+              updatePosition();
+            }, 0);
+          }
+        }}
         className={`${buttonClasses} ${currentSize.button} ${isOpen ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-500/20' : ''}`}
       >
         <div className="flex items-center gap-3 flex-1 overflow-hidden">
@@ -217,7 +236,7 @@ const CountrySwitcher: React.FC<CountrySwitcherProps> = ({
       </button>
 
       {/* 使用 Portal 渲染下拉菜单到 document.body */}
-      {isOpen && typeof window !== 'undefined' && createPortal(
+      {isOpen && typeof window !== 'undefined' && buttonRef.current && createPortal(
         dropdownContent,
         document.body
       )}
