@@ -8,6 +8,9 @@ import { getVideoTranscript } from '@/lib/videoTranscripts';
 import { detectVideoPlatform, extractVideoId } from '@/lib/videoPlatforms';
 import { generateLearningAsset } from "@/lib/learning-asset-generator";
 
+// Use Node.js runtime for database operations
+export const runtime = "nodejs";
+
 // Note: generateStructuredContent has been moved to lib/learning-asset-generator.ts
 // This file now uses the unified generator function
 

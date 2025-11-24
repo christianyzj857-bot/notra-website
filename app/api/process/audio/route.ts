@@ -10,6 +10,9 @@ import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
 import { generateLearningAsset } from "@/lib/learning-asset-generator";
 
+// Use Node.js runtime for file system operations
+export const runtime = "nodejs";
+
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 // Transcribe audio using Whisper API

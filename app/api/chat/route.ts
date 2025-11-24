@@ -71,8 +71,10 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-    // Get user plan (use provided userPlan or get from server-side function)
-    const currentUserPlan = userPlan || getCurrentUserPlan();
+    // Get user plan (use provided userPlan or default to "free" in Edge runtime)
+    // Note: getCurrentUserPlan() uses window object which doesn't exist in Edge runtime
+    // So we default to "free" if userPlan is not provided
+    const currentUserPlan = userPlan || "free";
     
     // Model selection and permission check
     const requestedModel = (model || "gpt-4o-mini") as ModelKey;

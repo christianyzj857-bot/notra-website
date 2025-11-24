@@ -8,6 +8,8 @@ export function getCurrentUserPlan(): UserPlan {
   // 🚧 Now hardcoded as "free"
   // When real auth / billing is integrated, read from session / token / DB
   
+  // ⚠️ WARNING: This function uses window/localStorage which only works in browser/client-side
+  // For server-side (Edge runtime), always return "free" as default
   // Optional: Check localStorage for testing (client-side only)
   if (typeof window !== 'undefined') {
     const plan = localStorage.getItem('user_plan') as UserPlan | null;
@@ -16,5 +18,6 @@ export function getCurrentUserPlan(): UserPlan {
     }
   }
   
+  // Default to "free" for server-side
   return "free";
 }

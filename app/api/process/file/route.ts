@@ -6,6 +6,9 @@ import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
 import { generateLearningAsset } from "@/lib/learning-asset-generator";
 
+// Use Node.js runtime for file system operations
+export const runtime = "nodejs";
+
 // Extract text from different file types
 async function extractTextFromFile(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
