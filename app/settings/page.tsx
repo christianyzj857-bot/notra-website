@@ -56,17 +56,27 @@ export default function SettingsPage() {
   }, []);
   
   const handleUILanguageChange = (lang: string) => {
+    // Normalize language code (handle zh-CN vs zh-cn)
+    const normalizedLang = lang === 'zh-CN' ? 'zh-cn' : 
+                           lang === 'zh-TW' ? 'zh-tw' : 
+                           lang.toLowerCase();
+    
     // Save to both ui_language and content_language (they're the same now)
-    localStorage.setItem('ui_language', lang);
-    localStorage.setItem('content_language', lang);
-    localStorage.setItem('onboarding_content_language', lang);
-    setUILanguage(lang);
+    localStorage.setItem('ui_language', normalizedLang);
+    localStorage.setItem('content_language', normalizedLang);
+    localStorage.setItem('onboarding_content_language', normalizedLang);
+    setUILanguage(normalizedLang);
+    
+    console.log('Language changed to:', normalizedLang);
+    
     // Dispatch custom event for language change
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('languagechange'));
     }
     // Reload page to apply language change
-    window.location.reload();
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
   
   const handleCountryChange = (newCountry: string) => {

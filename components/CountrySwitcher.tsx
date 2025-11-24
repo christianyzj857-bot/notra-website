@@ -110,7 +110,7 @@ export default function CountrySwitcher({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl max-h-96 overflow-y-auto">
+        <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl max-h-96 overflow-y-auto">
           <div className="py-2">
             {COUNTRIES.map((country) => {
               const isSelected = (country.code || country.id) === value;

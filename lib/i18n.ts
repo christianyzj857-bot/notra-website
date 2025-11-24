@@ -74,18 +74,31 @@ export function t(key: string, params?: Record<string, string>): string {
     const translations = getTranslations(lang);
     
     // Support nested keys like "dashboard.title"
-    let text = getNestedValue(translations, key) || key;
+    let text = getNestedValue(translations, key);
+    
+    // If not found, try with fallback to English
+    if (!text || text === key) {
+      if (lang !== 'en') {
+        const enTranslations = getTranslations('en');
+        text = getNestedValue(enTranslations, key);
+      }
+    }
+    
+    // Final fallback to key itself
+    if (!text || text === key) {
+      text = key;
+    }
 
     // Replace parameters
-    if (params) {
+    if (params && typeof text === 'string') {
       Object.entries(params).forEach(([k, v]) => {
         text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
       });
     }
 
-    return text;
+    return text as string;
   } catch (error) {
-    console.warn(`Translation not found for key: ${key}, language: ${lang}`);
+    console.warn(`Translation error for key: ${key}, language: ${lang}`, error);
     return key; // Fallback to key
   }
 }
