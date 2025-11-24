@@ -8,9 +8,9 @@ import {
 } from 'lucide-react';
 import NotraLogo from '@/components/NotraLogo';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import CountrySwitcher from '@/components/CountrySwitcher';
 import { t, getUILanguage } from '@/lib/i18n';
 import { getEducationModeByCountry, type EducationMode } from '@/lib/educationMode';
-import { COUNTRIES } from '@/constants/countries';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<{
@@ -22,7 +22,6 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('space');
   const [uiLanguage, setUILanguage] = useState('en');
-  const [contentLanguage, setContentLanguage] = useState('en');
   const [country, setCountry] = useState<string>('');
   const [educationMode, setEducationMode] = useState<EducationMode>('western');
 
@@ -36,13 +35,9 @@ export default function SettingsPage() {
       const savedUILang = localStorage.getItem('ui_language') || 
                           localStorage.getItem('onboarding_content_language') || 
                           'en';
-      const savedContentLang = localStorage.getItem('content_language') || 
-                               localStorage.getItem('onboarding_content_language') || 
-                               'en';
       const savedCountry = localStorage.getItem('onboarding_country') || '';
       
       setUILanguage(savedUILang === 'other' ? 'en' : savedUILang);
-      setContentLanguage(savedContentLang === 'other' ? 'en' : savedContentLang);
       setCountry(savedCountry);
       
       // Set education mode based on country
@@ -61,7 +56,10 @@ export default function SettingsPage() {
   }, []);
   
   const handleUILanguageChange = (lang: string) => {
+    // Save to both ui_language and content_language (they're the same now)
     localStorage.setItem('ui_language', lang);
+    localStorage.setItem('content_language', lang);
+    localStorage.setItem('onboarding_content_language', lang);
     setUILanguage(lang);
     // Dispatch custom event for language change
     if (typeof window !== 'undefined') {
@@ -69,13 +67,6 @@ export default function SettingsPage() {
     }
     // Reload page to apply language change
     window.location.reload();
-  };
-  
-  const handleContentLanguageChange = (lang: string) => {
-    localStorage.setItem('content_language', lang);
-    setContentLanguage(lang);
-    // Show notification (no page reload needed)
-    alert(t('settings.contentLanguageChanged'));
   };
   
   const handleCountryChange = (newCountry: string) => {
@@ -291,6 +282,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-6">
+                    {/* Single Language Switcher - controls both UI and Content language */}
                     <div>
                       <LanguageSwitcher
                         value={uiLanguage}
@@ -300,37 +292,17 @@ export default function SettingsPage() {
                         showLabel={true}
                       />
                       <p className="text-xs text-slate-400 mt-2">
-                        {t('settings.uiLanguageHint')}
+                        {t('settings.uiLanguageHint')} {t('settings.contentLanguageHint')}
                       </p>
                     </div>
+                    {/* Country Switcher */}
                     <div>
-                      <LanguageSwitcher
-                        value={contentLanguage}
-                        onChange={handleContentLanguageChange}
-                        variant="dropdown"
+                      <CountrySwitcher
+                        value={country}
+                        onChange={handleCountryChange}
                         size="md"
                         showLabel={true}
                       />
-                      <p className="text-xs text-slate-400 mt-2">
-                        {t('settings.contentLanguageHint')}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-3">
-                        {t('settings.country')}
-                      </label>
-                      <select 
-                        value={country}
-                        onChange={(e) => handleCountryChange(e.target.value)}
-                        className="w-full bg-[#0B0C15] border border-white/10 rounded-xl px-4 py-3 text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
-                      >
-                        <option value="">{t('settings.country')}</option>
-                        {COUNTRIES.map(c => (
-                          <option key={c.code || c.id} value={c.code || c.id}>
-                            {c.label}
-                          </option>
-                        ))}
-                      </select>
                       {educationMode && (
                         <p className="text-xs text-slate-400 mt-2">
                           {t('settings.educationMode')}: {t(`settings.mode.${educationMode.toLowerCase()}`)}

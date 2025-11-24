@@ -19,7 +19,7 @@ import NotraLogo from '@/components/NotraLogo';
 import { getCurrentUserPlan } from '@/lib/userPlan';
 import { USAGE_LIMITS } from '@/config/usageLimits';
 import NextLink from 'next/link';
-import { t } from '@/lib/i18n';
+import { t, getUILanguage } from '@/lib/i18n';
 
 // Type definitions
 type ProjectType = 'document' | 'audio' | 'video';
@@ -79,14 +79,19 @@ export default function Dashboard() {
     chatToday: number;
   } | null>(null);
   const [limits, setLimits] = useState(USAGE_LIMITS.free);
+  const [currentLang, setCurrentLang] = useState<string>('en'); // Track language for re-render
 
-  // Check if user is onboarded
+  // Check if user is onboarded and get initial language
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
         window.location.href = '/onboarding/step1';
       }
+      
+      // Get initial language
+      const lang = getUILanguage();
+      setCurrentLang(lang);
       
       // Get user plan and usage
       const plan = getCurrentUserPlan();
@@ -104,6 +109,36 @@ export default function Dashboard() {
         .catch(err => console.error('Failed to fetch usage:', err));
     }
   }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleLanguageChange = () => {
+        const newLang = getUILanguage();
+        if (newLang !== currentLang) {
+          setCurrentLang(newLang);
+          // Force re-render by reloading page
+          window.location.reload();
+        }
+      };
+
+      // Listen for storage changes (when language is changed in another tab)
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'ui_language' || e.key === 'onboarding_content_language') {
+          handleLanguageChange();
+        }
+      };
+
+      // Listen for custom language change event
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('languagechange', handleLanguageChange);
+
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('languagechange', handleLanguageChange);
+      };
+    }
+  }, [currentLang]);
 
   // Load recent sessions on mount
   useEffect(() => {
