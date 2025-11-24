@@ -106,36 +106,46 @@ export async function generateLearningAsset(
     processedText = truncatedText.substring(0, 6000) + "\n\n[Content continues but truncated for processing]";
   }
 
-  const prompt = `You are an AI learning assistant specialized in creating Turbo-level educational content. Analyze the following ${contentDescription} and generate comprehensive, highly structured study materials.
+  const prompt = `You are an expert AI learning assistant specialized in creating Turbo-level, high-quality educational content. Your goal is to transform raw content into comprehensive, well-structured, and academically rigorous study materials.
 
 ${typeSpecificInstructions}
 
-Content:
+IMPORTANT: Analyze the content deeply and generate materials that are:
+- **Comprehensive**: Cover all major concepts and topics
+- **Detailed**: Provide thorough explanations, not just summaries
+- **Structured**: Use clear hierarchy and organization
+- **Academic**: Maintain high academic standards
+- **Practical**: Include real-world examples and applications
+
+Content to analyze:
 ${processedText}${preprocessingNote}
 
 CRITICAL REQUIREMENTS - Generate Turbo-quality content:
 
-1. **NOTES (Generate 5-10 sections)**:
-   - Each note must have a clear heading (use ## for main sections, ### for subsections in Markdown)
-   - Rich content with explanations, not just bullet points
-   - Include formulas in LaTeX format (e.g., $E = mc^2$ or $$\\int_0^1 x dx$$)
-   - Add examples with step-by-step solutions where applicable
-   - Create summary tables using Markdown table format when comparing concepts
-   - Include concept explanations, applications, and common mistakes
-   - Use structured formatting: headings, paragraphs, lists, tables
+1. **NOTES (Generate 6-10 comprehensive sections)**:
+   - Each note must have a clear, descriptive heading (use ## for main sections, ### for subsections in Markdown)
+   - **Rich, detailed content**: Write full paragraphs explaining concepts thoroughly, not just bullet points
+   - **Formulas**: Include formulas in LaTeX format when relevant (e.g., $E = mc^2$ or $$\\int_0^1 x dx$$)
+   - **Examples**: Add detailed examples with step-by-step solutions where applicable
+   - **Tables**: Create summary tables using Markdown table format when comparing concepts
+   - **Depth**: Include concept explanations, real-world applications, and common mistakes students make
+   - **Structure**: Use proper formatting: headings, paragraphs, numbered lists, bullet lists, tables
+   - **Quality**: Each section should be substantial (at least 3-5 sentences of explanation)
 
-2. **QUIZZES (Generate 5-10 questions)**:
+2. **QUIZZES (Generate 6-10 high-quality questions)**:
    - Multiple choice questions (4 options: A, B, C, D)
-   - Questions should test understanding, not just recall
-   - Include clear explanations for correct answers
-   - Vary difficulty levels (easy, medium, hard)
-   - Questions should cover different aspects of the content
+   - **Test deep understanding**: Questions should require comprehension, analysis, and application, not just memorization
+   - **Detailed explanations**: Provide thorough explanations for why the correct answer is right AND why other options are wrong
+   - **Difficulty variety**: Include a mix of easy, medium, and hard questions
+   - **Coverage**: Questions should cover different aspects, concepts, and applications from the content
+   - **Quality**: Each question should be well-crafted and educational
 
-3. **FLASHCARDS (Generate 10-15 cards)**:
-   - Front: Concise question or term
-   - Back: Clear, academic definition or explanation
-   - Tag: Category or topic for organization
-   - Cover key concepts, definitions, formulas, and important facts
+3. **FLASHCARDS (Generate 12-15 comprehensive cards)**:
+   - **Front**: Concise but clear question or term
+   - **Back**: Detailed, academic definition or explanation (2-3 sentences minimum)
+   - **Tag**: Category or topic for organization
+   - **Coverage**: Cover key concepts, definitions, formulas, important facts, and applications
+   - **Quality**: Each card should be informative and educational
 
 4. **SUMMARY_FOR_CHAT**:
    - 2-3 sentences summarizing key concepts
@@ -192,14 +202,17 @@ Please return a JSON object with the following EXACT structure:
   "summaryForChat": "2-3 sentence summary of key concepts for AI chat context"
 }
 
-QUALITY STANDARDS:
-- All content must be educational, accurate, and well-structured
-- Notes should be comprehensive with proper formatting
-- Quizzes should test deep understanding
-- Flashcards should be concise but informative
-- Use Markdown formatting throughout (headings, bold, lists, tables)
-- Include LaTeX formulas where applicable
-- Make content engaging and easy to understand`;
+QUALITY STANDARDS (CRITICAL):
+- **Accuracy**: All content must be factually correct and educationally sound
+- **Comprehensiveness**: Cover all major topics and concepts from the content
+- **Depth**: Provide detailed explanations, not superficial summaries
+- **Structure**: Use proper Markdown formatting (headings, bold, lists, tables)
+- **Formulas**: Include LaTeX formulas where applicable ($inline$ or $$block$$)
+- **Examples**: Include practical examples and real-world applications
+- **Engagement**: Make content engaging, clear, and easy to understand
+- **Academic rigor**: Maintain high academic standards throughout
+
+Remember: Quality over quantity. Generate fewer but more comprehensive sections if needed to maintain high quality.`;
 
   try {
     console.log('[LearningAssetGenerator] Calling OpenAI API, model:', DEFAULT_MODEL, 'text length:', text.length);
@@ -213,8 +226,8 @@ QUALITY STANDARDS:
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 4000, // Increased for more comprehensive content
+      temperature: 0.5, // Lower temperature for more consistent, focused output
+      max_tokens: 6000, // Increased significantly for comprehensive content
     });
 
     const responseText = completion.choices[0]?.message?.content || '{}';
