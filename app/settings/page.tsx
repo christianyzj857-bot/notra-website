@@ -267,8 +267,8 @@ export default function SettingsPage() {
             </section>
 
             {/* Preferences Section */}
-            <section id="preferences" className={`space-y-6 ${activeTab !== 'preferences' && 'hidden lg:block'}`}>
-              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl">
+            <section id="preferences" className={`space-y-6 ${activeTab !== 'preferences' && 'hidden lg:block'} relative`}>
+              <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-6 border border-white/10 shadow-xl relative">
                 <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                   <Globe className="text-blue-400" size={24} /> Appearance & Language
                 </h2>

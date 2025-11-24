@@ -108,9 +108,15 @@ export default function CountrySwitcher({
         />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu - Use fixed positioning to avoid being clipped */}
       {isOpen && (
-        <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl max-h-96 overflow-y-auto">
+        <>
+          {/* Backdrop to close on click outside */}
+          <div 
+            className="fixed inset-0 z-[9998]" 
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute z-[9999] w-full mt-2 bg-white dark:bg-[#0B0C15] border border-slate-200 dark:border-white/10 rounded-xl shadow-2xl max-h-96 overflow-y-auto">
           <div className="py-2">
             {COUNTRIES.map((country) => {
               const isSelected = (country.code || country.id) === value;
@@ -139,6 +145,7 @@ export default function CountrySwitcher({
             })}
           </div>
         </div>
+        </>
       )}
     </div>
   );
