@@ -251,31 +251,7 @@ const Navbar = () => {
 const Hero = () => {
   return (
     <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-screen flex flex-col justify-center">
-      {/* Batch 3: Sci-fi Dark Background & Particles */}
-      <div className="absolute inset-0 -z-20 bg-[#0B0C15]" /> {/* Deep dark base */}
-      
-      {/* Glowing Gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen" />
-      
-      {/* Grid & Particles */}
-      <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.03] bg-center"></div>
-      
-      {/* AI Dust / Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <div 
-            key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `particle-float ${10 + Math.random() * 20}s infinite linear`,
-              animationDelay: `${Math.random() * 5}s`
-            }}
-          />
-        ))}
-      </div>
+      {/* 移除原有的背景代码，由 MagicBackground 全局组件接管 */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
         <FadeIn>
@@ -368,7 +344,7 @@ const Hero = () => {
 };
 
 const SocialProof = () => (
-  <div className="bg-[#0B0C15] border-y border-white/5">
+  <div className="bg-transparent border-y border-white/5">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <p className="text-center text-sm font-semibold text-slate-500 uppercase tracking-widest mb-10">
         Trusted by 50,000+ students from top universities worldwide
@@ -390,7 +366,8 @@ const Features = () => {
       desc: "Record your lectures or meetings directly. Notra filters out silence and filler words, identifies speakers, and converts hours of audio into concise, structured notes in minutes.",
       icon: Mic,
       bullets: ["Speaker Identification", "Smart Noise Reduction", "Timestamp Linking"],
-      image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2940&auto=format&fit=crop"
+      // 🌟 图片更新：写实风格，戴耳机的学生
+      image: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=2940&auto=format&fit=crop"
     },
     {
       title: "Document Analysis",
@@ -407,7 +384,8 @@ const Features = () => {
       desc: "Paste a video link from platforms like YouTube, Bilibili or classroom recordings, and Notra will generate summaries, key concepts, quizzes and flashcards from the content.",
       icon: Video,
       bullets: ["YouTube & Bilibili Support", "Key Moment Extraction", "Auto-generated Quizzes"],
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2940&auto=format&fit=crop"
+      // 🌟 图片更新：写实风格，观看屏幕学习
+      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2940&auto=format&fit=crop"
     },
     {
       title: "Context-Aware Tutor",
@@ -420,7 +398,7 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-32 bg-[#0F111A]"> {/* Darker bg for section distinction */}
+    <section id="features" className="py-32 bg-transparent relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-24">
           <SectionBadge>Core Capabilities</SectionBadge>
@@ -492,12 +470,7 @@ const BenefitsGrid = () => {
   ];
 
   return (
-    <section className="py-32 bg-[#0B0C15] relative overflow-hidden">
-      {/* Background Orbs for Benefits */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-blue-600 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-indigo-600 rounded-full blur-[120px]"></div>
-      </div>
+    <section className="py-32 bg-transparent relative overflow-hidden">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-20">
@@ -523,7 +496,7 @@ const BenefitsGrid = () => {
 };
 
 const HowItWorks = () => (
-  <section className="py-32 bg-[#0F111A]">
+  <section className="py-32 bg-transparent">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center mb-20">
         <SectionBadge>Workflow</SectionBadge>
@@ -537,8 +510,8 @@ const HowItWorks = () => (
           { step: "03", title: "Master & Review", desc: "Receive structured notes, take quizzes, and chat with your materials." },
         ].map((item, idx) => (
           <FadeIn key={idx} delay={idx * 200}>
-            <div className="relative bg-[#0F111A] group p-4">
-               <div className="w-24 h-24 mx-auto bg-[#0B0C15] border-4 border-indigo-900/50 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-400 mb-8 shadow-lg group-hover:scale-110 group-hover:border-indigo-500/50 transition-transform duration-300">
+            <div className="relative bg-transparent group p-4">
+               <div className="w-24 h-24 mx-auto bg-white/5 border-4 border-indigo-900/50 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-400 mb-8 shadow-lg group-hover:scale-110 group-hover:border-indigo-500/50 transition-transform duration-300">
                  {item.step}
                </div>
                <h3 className="text-xl font-bold text-white mb-4 text-center">{item.title}</h3>
@@ -552,7 +525,7 @@ const HowItWorks = () => (
 );
 
 const FAQ = () => (
-  <section id="faq" className="py-24 bg-[#0B0C15] border-t border-white/5">
+  <section id="faq" className="py-24 bg-transparent border-t border-white/5">
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 className="text-3xl font-bold text-white mb-12 text-center">Frequently Asked Questions</h2>
       <div className="space-y-4">
@@ -577,7 +550,7 @@ const FAQ = () => (
 );
 
 const Footer = () => (
-  <footer className="bg-[#050508] text-slate-400 py-16 border-t border-white/5">
+  <footer className="bg-[#050508]/80 backdrop-blur-lg text-slate-400 py-16 border-t border-white/5 relative z-10">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid md:grid-cols-4 gap-12 mb-16">
         <div className="col-span-1 md:col-span-1">
@@ -628,9 +601,15 @@ const Footer = () => (
 
 export default function LandingPage() {
   const [isChecking, setIsChecking] = useState(true);
+  const [bookAnimation, setBookAnimation] = useState('magic-book-enter');
   
-  // Check onboarding status on mount
   useEffect(() => {
+    // 触发魔法书开场动画
+    setTimeout(() => {
+      setBookAnimation('magic-book-active');
+    }, 100);
+    
+    // Check onboarding status on mount
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
@@ -646,7 +625,7 @@ export default function LandingPage() {
   // Show loading state with onboarding background during check
   if (isChecking) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
         </div>
@@ -655,17 +634,20 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0C15] font-sans selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
-      <Navbar />
-      <main>
-        <Hero />
-        <SocialProof />
-        <Features />
-        <BenefitsGrid />
-        <HowItWorks />
-        <FAQ />
-      </main>
-      <Footer />
+    // 使用 perspective-container 包装整个页面以实现 3D 效果
+    <div className="perspective-container bg-transparent font-sans selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
+      <div className={bookAnimation}>
+        <Navbar />
+        <main>
+          <Hero />
+          <SocialProof />
+          <Features />
+          <BenefitsGrid />
+          <HowItWorks />
+          <FAQ />
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

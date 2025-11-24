@@ -271,17 +271,8 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0C15] relative overflow-hidden">
-      {/* Sci-fi Dark Background with Particles */}
-      <div className="absolute inset-0 -z-20 bg-[#0B0C15]" />
-      
-      {/* Glowing Gradients */}
-      <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-indigo-600/20 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[120px] mix-blend-screen" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '12s' }} />
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.03] bg-center"></div>
+    <div className="min-h-screen bg-transparent relative overflow-hidden">
+      {/* 移除背景代码，由 MagicBackground 全局组件接管 */}
       
       {/* 3D Floating Notebooks - Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">

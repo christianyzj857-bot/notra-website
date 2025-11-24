@@ -99,13 +99,8 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0C15] text-slate-200 font-sans selection:bg-indigo-500/30">
-      {/* Background Ambience */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-indigo-900/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03]"></div>
-      </div>
+    <div className="min-h-screen bg-transparent text-slate-200 font-sans selection:bg-indigo-500/30">
+      {/* 移除背景代码，由 MagicBackground 全局组件接管 */}
 
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0B0C15]/80 backdrop-blur-xl">

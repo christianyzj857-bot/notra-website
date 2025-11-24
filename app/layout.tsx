@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import MagicBackground from "@/components/MagicBackground"; // 引入新组件
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +30,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-purple-50 via-indigo-50 to-pink-50`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* 全局魔法星空背景，层级最底 */}
+        <MagicBackground />
+        
+        {/* 页面内容 */}
+        <div className="relative z-10">
+          {children}
+        </div>
       </body>
     </html>
   );
