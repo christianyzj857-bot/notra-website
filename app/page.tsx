@@ -617,14 +617,18 @@ export default function LandingPage() {
         router.replace('/onboarding/step1');
         return;
       }
-      // Only set shouldRender to true if user is onboarded
+      // User is onboarded, show homepage immediately
       setShouldRender(true);
       setIsChecking(false);
       
+      // Scroll to top immediately to show Hero section
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      
       // 触发魔法书开场动画（只在确认显示 homepage 后）
-      setTimeout(() => {
+      // Use requestAnimationFrame for smoother transition
+      requestAnimationFrame(() => {
         setBookAnimation('magic-book-active');
-      }, 100);
+      });
     }
   }, [router]);
 
