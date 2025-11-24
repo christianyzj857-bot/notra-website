@@ -7,9 +7,8 @@ import {
   ChevronRight, Shield, ChevronLeft, Users, Settings as SettingsIcon
 } from 'lucide-react';
 import NotraLogo from '@/components/NotraLogo';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import CountrySwitcher from '@/components/CountrySwitcher';
-import { t, getUILanguage } from '@/lib/i18n';
+import { t } from '@/lib/i18n';
 import { getEducationModeByCountry, type EducationMode } from '@/lib/educationMode';
 
 export default function SettingsPage() {
@@ -21,23 +20,20 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('account');
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('space');
-  const [uiLanguage, setUILanguage] = useState('en');
-  const [contentLanguage, setContentLanguage] = useState('en');
   const [country, setCountry] = useState<string>('');
   const [educationMode, setEducationMode] = useState<EducationMode>('western');
 
-  // 在客户端挂载后初始化语言状态，避免服务端渲染不匹配
+  // Initialize state on client mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Set default language to English
+      localStorage.setItem('ui_language', 'en');
+      localStorage.setItem('content_language', 'en');
+      localStorage.setItem('onboarding_content_language', 'en');
+      
       const email = localStorage.getItem('user_email');
       const displayName = localStorage.getItem('user_display_name') || 'User';
       const plan = localStorage.getItem('user_plan') || 'free';
-      
-      // 使用 getUILanguage() 获取初始语言状态
-      const currentLang = getUILanguage();
-      setUILanguage(currentLang);
-      // 内容语言默认与 UI 语言一致，也可以单独从 localStorage 获取
-      setContentLanguage(localStorage.getItem('content_language') || currentLang);
       
       const savedCountry = localStorage.getItem('onboarding_country') || '';
       setCountry(savedCountry);
@@ -56,44 +52,6 @@ export default function SettingsPage() {
       }
     }
   }, []);
-  
-  // 处理 UI 语言变更的函数
-  const handleUILanguageChange = (lang: string) => {
-    // 1. 规范化语言代码为小写格式 (如 'zh-cn')
-    let normalizedLang = lang.toLowerCase();
-    if (normalizedLang === 'zhcn') normalizedLang = 'zh-cn';
-    if (normalizedLang === 'zhtw') normalizedLang = 'zh-tw';
-
-    console.log('[Settings] Changing UI language to:', normalizedLang);
-
-    // 2. 保存到相关的 localStorage 键
-    localStorage.setItem('ui_language', normalizedLang);
-    // 通常 UI 语言改变时，偏好的内容语言也会随之改变
-    localStorage.setItem('content_language', normalizedLang);
-    // 也可以更新 onboarding 语言选项作为备份
-    localStorage.setItem('onboarding_content_language', normalizedLang);
-
-    // 更新状态
-    setUILanguage(normalizedLang);
-    setContentLanguage(normalizedLang);
-
-    // 3. 刷新页面以应用新的语言设置
-    // 使用短暂延迟确保 localStorage 已成功写入
-    setTimeout(() => {
-      window.location.reload();
-    }, 100);
-  };
-  
-  // 处理内容语言变更 (如果需要单独设置)
-  const handleContentLanguageChange = (lang: string) => {
-     // 同样进行规范化
-    let normalizedLang = lang.toLowerCase();
-    if (normalizedLang === 'zhcn') normalizedLang = 'zh-cn';
-    if (normalizedLang === 'zhtw') normalizedLang = 'zh-tw';
-    localStorage.setItem('content_language', normalizedLang);
-    setContentLanguage(normalizedLang);
-    // 内容语言改变通常不需要刷新整个页面
-  };
   
   const handleCountryChange = (newCountry: string) => {
     localStorage.setItem('onboarding_country', newCountry);
@@ -308,19 +266,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-6">
-                    {/* Single Language Switcher - controls both UI and Content language */}
-                    <div>
-                      <LanguageSwitcher
-                        value={uiLanguage}
-                        onChange={handleUILanguageChange}
-                        variant="dropdown"
-                        size="md"
-                        showLabel={true}
-                      />
-                      <p className="text-xs text-slate-400 mt-2">
-                        {t('settings.uiLanguageHint')} {t('settings.contentLanguageHint')}
-                      </p>
-                    </div>
                     {/* Country Switcher */}
                     <div>
                       <CountrySwitcher

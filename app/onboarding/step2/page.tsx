@@ -19,16 +19,23 @@ export default function OnboardingStep2() {
     if (typeof window !== 'undefined') {
       const stage = localStorage.getItem('onboarding_stage') as OnboardingRole;
       const country = localStorage.getItem('onboarding_country');
-      const contentLanguage = localStorage.getItem('onboarding_content_language');
       
-      // Must have completed step1 and step2-location
+      // Must have completed step1 and step2-country
       if (!stage) {
         window.location.href = '/onboarding/step1';
         return;
       }
       
-      // Optional: Check country and language are set
-      if (!country || !contentLanguage) {
+      // Set default language to English if not set
+      if (!localStorage.getItem('ui_language')) {
+        localStorage.setItem('ui_language', 'en');
+      }
+      if (!localStorage.getItem('onboarding_content_language')) {
+        localStorage.setItem('onboarding_content_language', 'en');
+      }
+      
+      // Check country is set
+      if (!country) {
         // If missing, go back to step2-country (country selection)
         window.location.href = '/onboarding/step2-country';
         return;

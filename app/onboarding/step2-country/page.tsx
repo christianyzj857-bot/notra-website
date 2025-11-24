@@ -51,9 +51,15 @@ export default function OnboardingStep2Country() {
       localStorage.setItem('onboarding_country', selectedCountry);
     }
     
-    // Navigate to Step 2-language (Content Language) after animation
+    // Set default language to English
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('ui_language', 'en');
+      localStorage.setItem('onboarding_content_language', 'en');
+    }
+    
+    // Navigate directly to Step 2 (skip language selection) after animation
     setTimeout(() => {
-      window.location.href = '/onboarding/step2-language';
+      window.location.href = '/onboarding/step2';
     }, 300);
   };
 
