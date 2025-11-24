@@ -22,22 +22,24 @@ export default function SettingsPage() {
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('space');
   const [uiLanguage, setUILanguage] = useState('en');
+  const [contentLanguage, setContentLanguage] = useState('en');
   const [country, setCountry] = useState<string>('');
   const [educationMode, setEducationMode] = useState<EducationMode>('western');
 
+  // 在客户端挂载后初始化语言状态，避免服务端渲染不匹配
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const email = localStorage.getItem('user_email');
       const displayName = localStorage.getItem('user_display_name') || 'User';
       const plan = localStorage.getItem('user_plan') || 'free';
       
-      // Load language preferences
-      const savedUILang = localStorage.getItem('ui_language') || 
-                          localStorage.getItem('onboarding_content_language') || 
-                          'en';
-      const savedCountry = localStorage.getItem('onboarding_country') || '';
+      // 使用 getUILanguage() 获取初始语言状态
+      const currentLang = getUILanguage();
+      setUILanguage(currentLang);
+      // 内容语言默认与 UI 语言一致，也可以单独从 localStorage 获取
+      setContentLanguage(localStorage.getItem('content_language') || currentLang);
       
-      setUILanguage(savedUILang === 'other' ? 'en' : savedUILang);
+      const savedCountry = localStorage.getItem('onboarding_country') || '';
       setCountry(savedCountry);
       
       // Set education mode based on country
@@ -55,28 +57,42 @@ export default function SettingsPage() {
     }
   }, []);
   
+  // 处理 UI 语言变更的函数
   const handleUILanguageChange = (lang: string) => {
-    // Normalize language code (handle zh-CN vs zh-cn)
-    const normalizedLang = lang === 'zh-CN' ? 'zh-cn' : 
-                           lang === 'zh-TW' ? 'zh-tw' : 
-                           lang.toLowerCase();
-    
-    // Save to both ui_language and content_language (they're the same now)
+    // 1. 规范化语言代码为小写格式 (如 'zh-cn')
+    let normalizedLang = lang.toLowerCase();
+    if (normalizedLang === 'zhcn') normalizedLang = 'zh-cn';
+    if (normalizedLang === 'zhtw') normalizedLang = 'zh-tw';
+
+    console.log('[Settings] Changing UI language to:', normalizedLang);
+
+    // 2. 保存到相关的 localStorage 键
     localStorage.setItem('ui_language', normalizedLang);
+    // 通常 UI 语言改变时，偏好的内容语言也会随之改变
     localStorage.setItem('content_language', normalizedLang);
+    // 也可以更新 onboarding 语言选项作为备份
     localStorage.setItem('onboarding_content_language', normalizedLang);
+
+    // 更新状态
     setUILanguage(normalizedLang);
-    
-    console.log('Language changed to:', normalizedLang);
-    
-    // Dispatch custom event for language change
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new Event('languagechange'));
-    }
-    // Reload page to apply language change
+    setContentLanguage(normalizedLang);
+
+    // 3. 刷新页面以应用新的语言设置
+    // 使用短暂延迟确保 localStorage 已成功写入
     setTimeout(() => {
       window.location.reload();
     }, 100);
+  };
+  
+  // 处理内容语言变更 (如果需要单独设置)
+  const handleContentLanguageChange = (lang: string) => {
+     // 同样进行规范化
+    let normalizedLang = lang.toLowerCase();
+    if (normalizedLang === 'zhcn') normalizedLang = 'zh-cn';
+    if (normalizedLang === 'zhtw') normalizedLang = 'zh-tw';
+    localStorage.setItem('content_language', normalizedLang);
+    setContentLanguage(normalizedLang);
+    // 内容语言改变通常不需要刷新整个页面
   };
   
   const handleCountryChange = (newCountry: string) => {

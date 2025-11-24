@@ -38,28 +38,29 @@ export function getUILanguage(): string {
     return 'en';
   }
 
-  // Get language from localStorage
-  // Priority: ui_language > onboarding_content_language > default 'en'
-  let uiLang = localStorage.getItem('ui_language') ||
-               localStorage.getItem('onboarding_content_language') ||
-               'en';
+  // 1. 优先从 localStorage 获取用户设置的 UI 语言
+  let uiLang = localStorage.getItem('ui_language');
 
-  // Handle 'other' option - default to English
-  if (uiLang === 'other') {
+  // 2. 如果没有 UI 语言，尝试获取 onboarding 期间选择的内容语言作为默认值
+  if (!uiLang) {
+    uiLang = localStorage.getItem('onboarding_content_language');
+  }
+
+  // 3. 默认回退到英文
+  if (!uiLang || uiLang === 'other') {
     return 'en';
   }
 
-  // Normalize language code (handle both zh-CN and zh-cn)
+  // 4. 规范化：强制转换为小写，处理可能的格式差异
   uiLang = uiLang.toLowerCase();
-  
-  // Debug log (only in development)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.log('[i18n] Current language:', uiLang, 'from localStorage:', {
-      ui_language: localStorage.getItem('ui_language'),
-      onboarding_content_language: localStorage.getItem('onboarding_content_language'),
-    });
+  if (uiLang === 'zhcn') uiLang = 'zh-cn';
+  if (uiLang === 'zhtw') uiLang = 'zh-tw';
+
+  // 开发环境调试日志
+  if (process.env.NODE_ENV === 'development') {
+    // console.log('[i18n] getUILanguage resolved to:', uiLang);
   }
-  
+
   return uiLang;
 }
 
@@ -79,32 +80,36 @@ function getNestedValue(obj: any, path: string): string | undefined {
 
 // Get translation text
 export function t(key: string, params?: Record<string, string>): string {
-  const lang = getUILanguage();
+  // 1. 获取规范化的当前语言 ID (如 'zh-cn')
+  const langId = getUILanguage();
+
+  // 2. 映射到 locales 文件夹名称 (如 'zh-CN')
+  // 如果没有映射，默认使用 langId，如果 langId 也没有则回退到 'en'
+  const localeFolder = LANGUAGE_MAP[langId] || langId || 'en';
 
   try {
-    const translations = getTranslations(lang);
-    
-    // Support nested keys like "dashboard.title"
+    // 3. 获取翻译文件内容
+    const translations = getTranslations(localeFolder);
     let text: string | undefined = getNestedValue(translations, key);
-    
-    // If not found, try with fallback to English
-    if (!text || text === key) {
-      if (lang !== 'en') {
-        const enTranslations = getTranslations('en');
-        text = getNestedValue(enTranslations, key);
+
+    // 4. 如果没找到翻译，尝试回退到英文
+    if ((!text || text === key) && localeFolder !== 'en') {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[i18n] Missing translation for key: "${key}" in language: "${localeFolder}". Falling back to English.`);
       }
-    }
-    
-    // Final fallback to key itself
-    if (!text || text === key) {
-      text = key;
+      const enTranslations = getTranslations('en');
+      text = getNestedValue(enTranslations, key);
     }
 
-    // Ensure text is a string
-    let result = typeof text === 'string' ? text : key;
+    // 5. 如果英文也没找到，直接返回键名
+    if (!text || typeof text !== 'string') {
+      return key;
+    }
 
-    // Replace parameters
-    if (params && typeof result === 'string') {
+    let result = text;
+
+    // 6. 替换动态参数
+    if (params) {
       Object.entries(params).forEach(([k, v]) => {
         result = result.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
       });
@@ -112,8 +117,8 @@ export function t(key: string, params?: Record<string, string>): string {
 
     return result;
   } catch (error) {
-    console.warn(`Translation error for key: ${key}, language: ${lang}`, error);
-    return key; // Fallback to key
+    console.error(`[i18n] Error translating key "${key}":`, error);
+    return key; // 发生错误时安全回退到键名
   }
 }
 
