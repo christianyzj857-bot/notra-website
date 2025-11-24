@@ -370,14 +370,14 @@ export default function OnboardingStep2() {
                 ? 'bg-indigo-200/0' 
                 : bookState === 'hovering'
                 ? 'bg-indigo-400/30'
-                : bookState === 'feeding'
+                : bookState === 'loading'
                 ? 'bg-purple-500/50 animate-pulse'
-                : bookState === 'digesting'
-                ? 'bg-indigo-500/60 animate-pulse'
-                : 'bg-green-400/40'
+                : bookState === 'complete'
+                ? 'bg-green-400/40'
+                : 'bg-indigo-500/60 animate-pulse'
             }`}
             style={{
-              transform: `scale(${bookState === 'hovering' ? 1.05 : bookState === 'feeding' ? 1.1 : 1})`,
+              transform: `scale(${bookState === 'hovering' ? 1.05 : bookState === 'loading' ? 1.1 : 1})`,
               transition: 'all 0.3s ease-out'
             }}
           />
@@ -388,8 +388,7 @@ export default function OnboardingStep2() {
               relative w-full max-w-4xl h-[500px] md:h-[600px]
               transition-all duration-500
               ${isDragging ? 'scale-105' : ''}
-              ${bookState === 'feeding' ? 'animate-pulse' : ''}
-              ${bookState === 'digesting' ? 'animate-pulse' : ''}
+              ${bookState === 'loading' ? 'animate-pulse' : ''}
             `}
             style={{
               transformStyle: 'preserve-3d',
@@ -408,7 +407,7 @@ export default function OnboardingStep2() {
                 }
               `}
               style={{
-                transform: `perspective(1000px) rotateY(${bookState === 'digesting' ? '-5deg' : '0deg'})`,
+                transform: `perspective(1000px) rotateY(${bookState === 'loading' ? '-5deg' : '0deg'})`,
                 transformOrigin: 'right center',
                 boxShadow: bookState !== 'idle' 
                   ? `-10px 0 30px rgba(139, 92, 246, 0.3), inset -5px 0 10px rgba(0, 0, 0, 0.1)`
@@ -422,12 +421,12 @@ export default function OnboardingStep2() {
                   <div
                     key={i}
                     className={`absolute left-8 right-4 h-px transition-all duration-300 ${
-                      bookState === 'digesting' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
+                      bookState === 'loading' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
                     }`}
                     style={{
                       top: `${5 + i * 3.5}%`,
                       opacity: bookState === 'idle' ? 0.2 : bookState === 'hovering' ? 0.4 : 0.6,
-                      transform: bookState === 'digesting' ? `translateX(${Math.sin(i * 0.5) * 3}px)` : 'none'
+                      transform: bookState === 'loading' ? `translateX(${Math.sin(i * 0.5) * 3}px)` : 'none'
                     }}
                   />
                 ))}
@@ -558,7 +557,7 @@ export default function OnboardingStep2() {
                 }
               `}
               style={{
-                transform: `perspective(1000px) rotateY(${bookState === 'digesting' ? '5deg' : '0deg'})`,
+                transform: `perspective(1000px) rotateY(${bookState === 'loading' ? '5deg' : '0deg'})`,
                 transformOrigin: 'left center',
                 boxShadow: bookState !== 'idle' 
                   ? `10px 0 30px rgba(139, 92, 246, 0.3), inset 5px 0 10px rgba(0, 0, 0, 0.1)`
@@ -572,12 +571,12 @@ export default function OnboardingStep2() {
                   <div
                     key={i}
                     className={`absolute left-4 right-8 h-px transition-all duration-300 ${
-                      bookState === 'digesting' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
+                      bookState === 'loading' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
                     }`}
                     style={{
                       top: `${5 + i * 3.5}%`,
                       opacity: bookState === 'idle' ? 0.2 : bookState === 'hovering' ? 0.4 : 0.6,
-                      transform: bookState === 'digesting' ? `translateX(${Math.sin(i * 0.5) * -3}px)` : 'none'
+                      transform: bookState === 'loading' ? `translateX(${Math.sin(i * 0.5) * -3}px)` : 'none'
                     }}
                   />
                 ))}
@@ -729,9 +728,9 @@ export default function OnboardingStep2() {
                 {[...Array(30)].map((_, i) => (
                   <div
                     key={i}
-                    className={`absolute w-1.5 h-1.5 rounded-full bg-indigo-400 ${
-                      bookState === 'feeding' || bookState === 'digesting' ? 'animate-ping' : ''
-                    }`}
+                          className={`absolute w-1.5 h-1.5 rounded-full bg-indigo-400 ${
+                            bookState === 'loading' ? 'animate-ping' : ''
+                          }`}
                     style={{
                       left: `${Math.random() * 100}%`,
                       top: `${Math.random() * 100}%`,
