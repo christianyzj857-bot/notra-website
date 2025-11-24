@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import NotraLogo from '@/components/NotraLogo';
 
 // ---------------------------------------------------------
@@ -15,16 +16,18 @@ const Link = ({ href, children, className, ...props }: any) => {
 };
 
 export default function NotraApp() {
+  const router = useRouter();
+  
   // Check onboarding status on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
         // Redirect to onboarding step 1 if not completed
-        window.location.href = '/onboarding/step1';
+        router.replace('/onboarding/step1');
       }
     }
-  }, []);
+  }, [router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-50">

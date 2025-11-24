@@ -36,6 +36,7 @@ const testimonials: Testimonial[] = [
 ];
 
 export default function OnboardingStep7() {
+  const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function OnboardingStep7() {
     if (typeof window !== 'undefined') {
       const stage = localStorage.getItem('onboarding_stage');
       if (!stage) {
-        window.location.href = '/onboarding/step1';
+        router.replace('/onboarding/step1');
       }
     }
 
@@ -53,14 +54,14 @@ export default function OnboardingStep7() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [router]);
 
   const handleJoinNow = () => {
     // Set onboarding as complete
     if (typeof window !== 'undefined') {
       localStorage.setItem('onboarding_complete', 'true');
       // Navigate to signup page (not homepage)
-      window.location.href = '/signup';
+      router.push('/signup');
     }
   };
 

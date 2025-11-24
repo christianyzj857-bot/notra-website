@@ -17,6 +17,7 @@ import { getCurrentUserPlan } from "@/lib/userPlan";
 import NextLink from 'next/link';
 
 function NotraConsoleContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   
   // Check onboarding status on mount
@@ -672,11 +673,13 @@ function NotraConsoleContent() {
                 </button>
                 <button
                   onClick={() => {
-                    if (!urlSessionId) {
-                      alert("You need to open this from a specific study session to chat with that note.");
-                      return;
+                    if (urlSessionId) {
+                      // If we have a sessionId, switch to note mode in current page
+                      setMode("note");
+                    } else {
+                      // If no sessionId, navigate to the dedicated Chat with Note page
+                      router.push('/chat/note');
                     }
-                    setMode("note");
                   }}
                   className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                     mode === "note"

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -30,6 +31,7 @@ const categories = [
 ];
 
 export default function OnboardingStep1() {
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -38,10 +40,10 @@ export default function OnboardingStep1() {
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded === 'true') {
-        window.location.href = '/';
+        router.replace('/');
       }
     }
-  }, []);
+  }, [router]);
 
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -54,7 +56,7 @@ export default function OnboardingStep1() {
     
     // Navigate to Step 2-country (Country selection) after animation
     setTimeout(() => {
-      window.location.href = '/onboarding/step2-country';
+      router.push('/onboarding/step2-country');
     }, 300);
   };
 
