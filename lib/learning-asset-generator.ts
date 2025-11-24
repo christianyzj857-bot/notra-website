@@ -61,12 +61,10 @@ export async function generateLearningAsset(
 
   const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-  // Truncate text to save tokens (keep first 8000 characters)
-  const truncatedText = text.substring(0, 8000);
-  const truncationNote = text.length > 8000 
-    ? "\n\nNote: Content has been truncated for processing. Only the first 8000 characters were analyzed."
-    : "";
-
+  // Smart text processing: use more context for better quality
+  // For Turbo quality, we need more context (up to 12000 characters)
+  const MAX_CONTEXT_LENGTH = 12000;
+  
   // Build context-aware prompt based on type
   let contentDescription = "";
   let typeSpecificInstructions = "";
@@ -76,34 +74,38 @@ export async function generateLearningAsset(
       contentDescription = options.metadata?.fileName 
         ? `document file: ${options.metadata.fileName}`
         : "document";
-      typeSpecificInstructions = "Focus on extracting key concepts, definitions, and structured information from the document.";
+      typeSpecificInstructions = "Focus on extracting key concepts, definitions, and structured information from the document. Provide comprehensive analysis and detailed explanations.";
       break;
     
     case "audio":
       contentDescription = options.metadata?.duration
         ? `audio lecture/recording (approximately ${Math.round(options.metadata.duration / 60)} minutes)`
         : "audio lecture/recording";
-      typeSpecificInstructions = "Focus on capturing the main points, explanations, and key takeaways from the lecture.";
+      typeSpecificInstructions = "Focus on capturing the main points, explanations, and key takeaways from the lecture. Organize content logically and provide detailed notes.";
       break;
     
     case "video":
       contentDescription = options.metadata?.videoUrl
         ? `video content from ${options.metadata.platform || 'video platform'}: ${options.metadata.videoUrl}`
         : "video content";
-      typeSpecificInstructions = "Focus on summarizing key moments, concepts discussed, and important information presented in the video.";
+      typeSpecificInstructions = "Focus on summarizing key moments, concepts discussed, and important information presented in the video. Create comprehensive study materials.";
       break;
   }
 
   // Smart text preprocessing: handle short/long text
-  let processedText = truncatedText;
+  let processedText = text;
   let preprocessingNote = "";
   
   if (text.length < 500) {
-    preprocessingNote = "\n\nNote: Content is relatively short. Please generate comprehensive learning materials based on what is available, and feel free to expand on concepts if needed.";
-  } else if (text.length > 8000) {
-    preprocessingNote = truncationNote;
-    // For very long content, create a summary first
-    processedText = truncatedText.substring(0, 6000) + "\n\n[Content continues but truncated for processing]";
+    preprocessingNote = "\n\nNote: Content is relatively short. Please generate comprehensive, detailed learning materials based on what is available. Expand on concepts, provide examples, and create thorough explanations even if the source material is brief.";
+    processedText = text;
+  } else if (text.length > MAX_CONTEXT_LENGTH) {
+    // For very long content, use first part (most important content usually at the beginning)
+    processedText = text.substring(0, 10000);
+    preprocessingNote = `\n\nNote: Content has been truncated for processing. Only the first ${MAX_CONTEXT_LENGTH} characters were analyzed. Please generate comprehensive materials based on this portion.`;
+  } else {
+    // Use full text for better quality
+    processedText = text;
   }
 
   const prompt = `You are an expert AI learning assistant specialized in creating Turbo-level, high-quality educational content. Your goal is to transform raw content into comprehensive, well-structured, and academically rigorous study materials.
