@@ -39,6 +39,7 @@ export function getUILanguage(): string {
   }
 
   // Get language from localStorage
+  // Priority: ui_language > onboarding_content_language > default 'en'
   const uiLang = localStorage.getItem('ui_language') ||
                  localStorage.getItem('onboarding_content_language') ||
                  'en';
@@ -89,19 +90,60 @@ export function t(key: string, params?: Record<string, string>): string {
   }
 }
 
-// Import translation files statically
+// Import all translation files statically
 import enTranslations from '@/locales/en/common.json';
 import zhCNTranslations from '@/locales/zh-CN/common.json';
+import zhTWTranslations from '@/locales/zh-TW/common.json';
+import esTranslations from '@/locales/es/common.json';
+import frTranslations from '@/locales/fr/common.json';
+import deTranslations from '@/locales/de/common.json';
+import jaTranslations from '@/locales/ja/common.json';
+import koTranslations from '@/locales/ko/common.json';
+import ptTranslations from '@/locales/pt/common.json';
+import ruTranslations from '@/locales/ru/common.json';
+import hiTranslations from '@/locales/hi/common.json';
+import arTranslations from '@/locales/ar/common.json';
+import itTranslations from '@/locales/it/common.json';
+import nlTranslations from '@/locales/nl/common.json';
+import plTranslations from '@/locales/pl/common.json';
+import trTranslations from '@/locales/tr/common.json';
+import viTranslations from '@/locales/vi/common.json';
+import thTranslations from '@/locales/th/common.json';
+import idTranslations from '@/locales/id/common.json';
+import msTranslations from '@/locales/ms/common.json';
 
 // Translation cache
 const translationCache: Record<string, Record<string, any>> = {};
 
+// Language code mapping: onboarding language id -> translation file key
+const LANGUAGE_MAP: Record<string, string> = {
+  'en': 'en',
+  'zh-cn': 'zh-CN',
+  'zh-tw': 'zh-TW',
+  'es': 'es',
+  'fr': 'fr',
+  'de': 'de',
+  'ja': 'ja',
+  'ko': 'ko',
+  'pt': 'pt',
+  'ru': 'ru',
+  'hi': 'hi',
+  'ar': 'ar',
+  'it': 'it',
+  'nl': 'nl',
+  'pl': 'pl',
+  'tr': 'tr',
+  'vi': 'vi',
+  'th': 'th',
+  'id': 'id',
+  'ms': 'ms',
+  'other': 'en', // 'other' defaults to English
+};
+
 // Get translations for a language
 function getTranslations(lang: string): Record<string, any> {
-  // Normalize language code
-  const normalizedLang = lang === 'zh-cn' ? 'zh-CN' : 
-                         lang === 'zh-tw' ? 'zh-TW' :
-                         lang === 'other' ? 'en' : lang;
+  // Normalize language code using mapping
+  const normalizedLang = LANGUAGE_MAP[lang.toLowerCase()] || lang || 'en';
   
   // Check cache first
   if (translationCache[normalizedLang]) {
@@ -111,29 +153,69 @@ function getTranslations(lang: string): Record<string, any> {
   let translations: Record<string, any> = {};
   
   try {
-    // Use static imports for client-side (Next.js will bundle them)
-    if (typeof window !== 'undefined') {
-      // Client-side: use static imports
-      switch (normalizedLang) {
-        case 'zh-CN':
-          translations = zhCNTranslations as any;
-          break;
-        case 'en':
-        default:
-          translations = enTranslations as any;
-          break;
-      }
-    } else {
-      // Server-side: use static imports
-      switch (normalizedLang) {
-        case 'zh-CN':
-          translations = zhCNTranslations as any;
-          break;
-        case 'en':
-        default:
-          translations = enTranslations as any;
-          break;
-      }
+    // Use static imports for all languages
+    switch (normalizedLang) {
+      case 'zh-CN':
+        translations = zhCNTranslations as any;
+        break;
+      case 'zh-TW':
+        translations = zhTWTranslations as any;
+        break;
+      case 'es':
+        translations = esTranslations as any;
+        break;
+      case 'fr':
+        translations = frTranslations as any;
+        break;
+      case 'de':
+        translations = deTranslations as any;
+        break;
+      case 'ja':
+        translations = jaTranslations as any;
+        break;
+      case 'ko':
+        translations = koTranslations as any;
+        break;
+      case 'pt':
+        translations = ptTranslations as any;
+        break;
+      case 'ru':
+        translations = ruTranslations as any;
+        break;
+      case 'hi':
+        translations = hiTranslations as any;
+        break;
+      case 'ar':
+        translations = arTranslations as any;
+        break;
+      case 'it':
+        translations = itTranslations as any;
+        break;
+      case 'nl':
+        translations = nlTranslations as any;
+        break;
+      case 'pl':
+        translations = plTranslations as any;
+        break;
+      case 'tr':
+        translations = trTranslations as any;
+        break;
+      case 'vi':
+        translations = viTranslations as any;
+        break;
+      case 'th':
+        translations = thTranslations as any;
+        break;
+      case 'id':
+        translations = idTranslations as any;
+        break;
+      case 'ms':
+        translations = msTranslations as any;
+        break;
+      case 'en':
+      default:
+        translations = enTranslations as any;
+        break;
     }
 
     // Cache translations

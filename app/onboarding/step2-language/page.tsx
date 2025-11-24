@@ -48,7 +48,9 @@ export default function OnboardingStep2Language() {
     setIsAnimating(true);
     
     // Store in localStorage
+    // Save to both ui_language (for UI) and onboarding_content_language (for content generation)
     if (typeof window !== 'undefined') {
+      localStorage.setItem('ui_language', selectedLanguage);
       localStorage.setItem('onboarding_content_language', selectedLanguage);
     }
     

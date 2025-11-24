@@ -63,6 +63,10 @@ export default function SettingsPage() {
   const handleUILanguageChange = (lang: string) => {
     localStorage.setItem('ui_language', lang);
     setUILanguage(lang);
+    // Dispatch custom event for language change
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('languagechange'));
+    }
     // Reload page to apply language change
     window.location.reload();
   };
