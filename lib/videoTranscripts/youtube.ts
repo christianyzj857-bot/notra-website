@@ -7,14 +7,14 @@ export async function getYouTubeTranscript(videoId: string): Promise<string> {
   try {
     // 方法 1: 使用 youtube-transcript 库（免费，无需 API key）
     // 这个库可以直接获取 YouTube 的自动生成字幕
-    const { YouTubeTranscript } = await import('youtube-transcript');
+    const { YoutubeTranscript } = await import('youtube-transcript');
     
-    const transcriptItems = await YouTubeTranscript.fetchTranscript(videoId, {
+    const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId, {
       lang: 'en', // 优先英文，如果没有会自动选择
     });
     
     const transcript = transcriptItems
-      .map(item => item.text)
+      .map((item: any) => item.text)
       .join(' ')
       .trim();
     
