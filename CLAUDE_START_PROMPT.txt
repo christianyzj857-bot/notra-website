@@ -1,0 +1,2 @@
+Please read CLAUDE_PROMPT_PHASE1_FILE_API.md and enhance app/api/process-file/route.ts to add OpenAI note generation functionality. Follow the requirements in the file step by step.
+

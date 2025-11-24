@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   FileText, 
   Mic, 
@@ -64,6 +65,7 @@ const formatRelativeTime = (timestamp: number): string => {
 };
 
 export default function Dashboard() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -80,13 +82,16 @@ export default function Dashboard() {
   } | null>(null);
   const [limits, setLimits] = useState(USAGE_LIMITS.free);
   const [currentLang, setCurrentLang] = useState<string>('en'); // Track language for re-render
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if user is onboarded and get initial language
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
-        window.location.href = '/onboarding/step1';
+        router.replace('/onboarding/step1');
+        return;
       }
       
       // Get initial language
@@ -180,45 +185,154 @@ export default function Dashboard() {
   };
 
   // Handle document upload
-  const handleDocumentUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'document',
-      createdAt: Date.now(),
-      summary: generateDocumentSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleDocumentUpload = async (file: File) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/process/file', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Failed to upload file. Please try again.';
+        setError(errorMessage);
+        alert(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // 重新加载 sessions 列表
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+      
+      // 导航到详情页
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      const errorMessage = error.message || 'Failed to upload file. Please try again.';
+      setError(errorMessage);
+      alert(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   // Handle audio upload
-  const handleAudioUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'audio',
-      createdAt: Date.now(),
-      summary: generateAudioSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleAudioUpload = async (file: File) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const formData = new FormData();
+      formData.append('audio', file);
+      
+      const response = await fetch('/api/process/audio', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Failed to upload audio. Please try again.';
+        setError(errorMessage);
+        alert(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // 重新加载 sessions 列表
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+      
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('Audio upload error:', error);
+      const errorMessage = error.message || 'Failed to upload audio. Please try again.';
+      setError(errorMessage);
+      alert(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   // Handle video link
-  const handleVideoLink = () => {
+  const handleVideoLink = async () => {
     if (!videoUrl.trim()) return;
     
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: `Video: ${videoUrl.substring(0, 30)}...`,
-      type: 'video',
-      createdAt: Date.now(),
-      summary: generateVideoSummary(videoUrl)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
-    setVideoUrl('');
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/process/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoUrl })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        const errorMessage = errorData.message || errorData.error || 'Failed to process video. Please try again.';
+        setError(errorMessage);
+        alert(errorMessage);
+        setIsLoading(false);
+        return;
+      }
+      
+      const data = await response.json();
+      
+      // 重新加载 sessions 列表
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+      
+      setVideoUrl('');
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('Video processing error:', error);
+      const errorMessage = error.message || 'Failed to process video. Please try again.';
+      setError(errorMessage);
+      alert(errorMessage);
+      setIsLoading(false);
+    }
   };
 
   // Drag and drop handlers
@@ -269,6 +383,18 @@ export default function Dashboard() {
         return <Video className="w-4 h-4" />;
     }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Processing your file...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-transparent relative overflow-hidden">
@@ -669,7 +795,7 @@ export default function Dashboard() {
                   </div>
 
                   <button
-                    onClick={() => window.location.href = `/dashboard/${selectedProject.id}`}
+                    onClick={() => router.push(`/dashboard/${selectedProject.id}`)}
                     className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center gap-2"
                   >
                     {t('dashboard.openFullView')}

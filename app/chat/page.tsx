@@ -485,35 +485,25 @@ function NotraConsoleContent() {
         const formData = new FormData();
         formData.append("file", file);
         
-        console.log("Sending file to process-file API:", file.name, file.type, file.size);
-        const res = await fetch("/api/process-file", { 
+        console.log("Sending file to process/file API:", file.name, file.type, file.size);
+        const res = await fetch("/api/process/file", { 
           method: "POST", 
           body: formData 
         });
         
-        console.log("Process-file API response status:", res.status);
+        console.log("Process/file API response status:", res.status);
         const data = await res.json();
-        console.log("Process-file API response data:", { 
-          hasText: !!data.text, 
-          textLength: data.text?.length, 
+        console.log("Process/file API response data:", { 
+          sessionId: data.sessionId,
           error: data.error,
           message: data.message 
         });
         
-        if (res.ok && data.text && data.text.trim()) {
-          // 文件内容提取成功，发送给AI分析
-          const fileContent = data.text;
-          console.log("File content extracted successfully, length:", fileContent.length);
+        if (res.ok && data.sessionId) {
+          // 文件处理成功，生成笔记并保存到数据库
+          console.log("File processed successfully, sessionId:", data.sessionId);
           sendMessage(
-            `Below is the content extracted from the file "${file.name}". Please analyze and summarize it:\n\n${fileContent}`,
-            'file',
-            undefined,
-            file.name
-          );
-        } else if (data.error === "PDF_PARSER_NOT_AVAILABLE") {
-          // PDF解析库未安装
-          sendMessage(
-            `PDF文件 "${file.name}" 需要安装pdf-parse库才能解析。\n\n请运行: npm install pdf-parse\n\n或者您可以：\n1. 复制PDF中的文本内容后直接粘贴\n2. 将PDF转换为TXT文件后上传`,
+            `File "${file.name}" has been processed and notes have been generated. You can view the full notes in the Dashboard or ask me questions about the content.`,
             'file',
             undefined,
             file.name

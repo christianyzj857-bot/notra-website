@@ -28,19 +28,27 @@ async function extractTextFromFile(file: File): Promise<string> {
     } catch (error) {
       throw new Error('Failed to parse PDF file');
     }
-  } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+  } else if (fileName.endsWith('.docx')) {
     try {
       const mammothModule = await import("mammoth");
       const mammoth = (mammothModule as any).default || mammothModule;
+      // Convert Buffer to ArrayBuffer correctly
       const arrayBuffer = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
       );
       const result = await mammoth.extractRawText({ arrayBuffer });
+      if (!result || !result.value) {
+        throw new Error('No text extracted from Word document');
+      }
       return result.value;
-    } catch (error) {
-      throw new Error('Failed to parse Word document');
+    } catch (error: any) {
+      console.error('Word parsing error:', error);
+      throw new Error(`Failed to parse Word document: ${error.message || 'Unknown error'}`);
     }
+  } else if (fileName.endsWith('.doc')) {
+    // .doc files (old format) are not supported by mammoth
+    throw new Error('Old Word format (.doc) is not supported. Please convert to .docx or PDF format.');
   } else if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
     return buffer.toString('utf-8');
   } else {
@@ -227,8 +235,27 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('File processing error:', error);
+    const errorMessage = error.message || 'Failed to process file';
+    
+    // Provide specific error codes for different error types
+    let errorCode = 'PROCESSING_ERROR';
+    if (errorMessage.includes('parse') || errorMessage.includes('Parse')) {
+      if (errorMessage.includes('Word') || errorMessage.includes('word')) {
+        errorCode = 'WORD_PARSE_ERROR';
+      } else if (errorMessage.includes('PDF') || errorMessage.includes('pdf')) {
+        errorCode = 'PDF_PARSE_ERROR';
+      } else {
+        errorCode = 'PARSE_ERROR';
+      }
+    } else if (errorMessage.includes('Unsupported') || errorMessage.includes('unsupported')) {
+      errorCode = 'UNSUPPORTED_FILE_TYPE';
+    }
+    
     return NextResponse.json(
-      { error: error.message || 'Failed to process file' },
+      { 
+        error: errorCode,
+        message: errorMessage
+      },
       { status: 500 }
     );
   }

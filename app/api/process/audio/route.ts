@@ -27,9 +27,19 @@ async function transcribeAudio(audioFile: File): Promise<string> {
   await writeFile(tempPath, buffer);
 
   try {
-    // Create a File object for Whisper API
-    const fileForApi = new File([buffer], audioFile.name, { type: audioFile.type || 'audio/webm' });
+    // Whisper API requires a File-like object
+    // Create a File object from the buffer
+    const fileForApi = new File([buffer], audioFile.name, { 
+      type: audioFile.type || 'audio/webm' 
+    });
     
+    // Use FormData for Whisper API (it expects a file)
+    const formData = new FormData();
+    formData.append('file', fileForApi);
+    formData.append('model', 'whisper-1');
+    formData.append('prompt', 'This is an educational lecture or audio content. Please transcribe accurately.');
+    
+    // Call OpenAI Whisper API
     const transcription = await openai.audio.transcriptions.create({
       file: fileForApi as any,
       model: "whisper-1",
@@ -39,16 +49,29 @@ async function transcribeAudio(audioFile: File): Promise<string> {
 
     const transcriptText = typeof transcription === 'string' 
       ? transcription 
-      : transcription.text;
+      : (transcription as any).text || '';
+
+    if (!transcriptText || transcriptText.trim().length === 0) {
+      throw new Error('Transcription result is empty. The audio file might be corrupted, format not supported, or content too short.');
+    }
 
     // Cleanup
     await unlink(tempPath).catch(() => {});
 
     return transcriptText;
-  } catch (error) {
+  } catch (error: any) {
     // Cleanup on error
     await unlink(tempPath).catch(() => {});
-    throw new Error('Failed to transcribe audio');
+    console.error('Audio transcription error:', error);
+    
+    // Provide more specific error messages
+    if (error.message && error.message.includes('empty')) {
+      throw new Error('EMPTY_TRANSCRIPTION: Transcription result is empty. The audio file might be corrupted, format not supported, or content too short. Please check the audio file.');
+    }
+    if (error.message && error.message.includes('format')) {
+      throw new Error('UNSUPPORTED_AUDIO_FORMAT: Audio format not supported. Please use MP3, WAV, M4A, or WebM format.');
+    }
+    throw new Error(`Failed to transcribe audio: ${error.message || 'Unknown error'}`);
   }
 }
 
