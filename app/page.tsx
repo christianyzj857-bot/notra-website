@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { 
   Sparkles, 
   Mic, 
@@ -602,6 +603,7 @@ const Footer = () => (
 // --- Main Layout ---
 
 export default function LandingPage() {
+  const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
   const [bookAnimation, setBookAnimation] = useState('magic-book-enter');
   
@@ -617,12 +619,12 @@ export default function LandingPage() {
       if (onboarded !== 'true') {
         // Redirect to onboarding step 1 if not completed
         // Use replace to avoid showing homepage background
-        window.location.replace('/onboarding/step1');
+        router.replace('/onboarding/step1');
         return;
       }
       setIsChecking(false);
     }
-  }, []);
+  }, [router]);
 
   // Show loading state with onboarding background during check
   if (isChecking) {

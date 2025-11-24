@@ -3,7 +3,7 @@
 import React, { FormEvent, useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
-  Send, Menu, X, BookOpen, Sparkles, History, Plus
+  Send, Menu, X, BookOpen, Sparkles, History, Plus, MessageSquare, Lock
 } from "lucide-react";
 import { 
   NotraLogo, ThinkingIndicator, MessageBubble, Link,
@@ -51,6 +51,9 @@ function ChatWithNoteContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userPlan, setUserPlan] = useState<'free' | 'pro'>('free');
   const [isPro, setIsPro] = useState(false);
+  const [model, setModel] = useState<"gpt-4o-mini" | "gpt-4o" | "gpt-5.1">("gpt-4o-mini");
+  const [provider, setProvider] = useState<"openai-mini" | "openai" | "openai-5">("openai-mini");
+  const [showProModelHint, setShowProModelHint] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -137,7 +140,7 @@ function ChatWithNoteContent() {
           })),
           mode: "note",
           sessionId: selectedSessionId,
-          model: "gpt-4o-mini",
+          model: model,
           userPlan
         })
       });
@@ -270,8 +273,70 @@ function ChatWithNoteContent() {
     );
   };
 
+  // Model Button Component
+  const ModelBtn = ({ id, label, isProReq }: { id: "openai-mini" | "openai" | "openai-5", label: string, isProReq?: boolean }) => {
+    const active = provider === id;
+    const locked = isProReq && !isPro;
+    
+    // Map provider to model
+    const modelMap: { [key: string]: "gpt-4o-mini" | "gpt-4o" | "gpt-5.1" } = {
+      "openai-mini": "gpt-4o-mini",
+      "openai": "gpt-4o",
+      "openai-5": "gpt-5.1",
+    };
+    
+    return (
+      <button 
+        onClick={() => { 
+          if (!locked) {
+            setProvider(id);
+            setModel(modelMap[id] || "gpt-4o-mini");
+            setShowProModelHint(false);
+          } else {
+            setShowProModelHint(true);
+            setTimeout(() => setShowProModelHint(false), 5000);
+          }
+        }}
+        className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all border flex items-center gap-2 ${active ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-500/50 shadow-md shadow-purple-500/30' : (locked) ? 'bg-white/5 text-slate-500 border-white/10 cursor-not-allowed' : 'bg-white/5 text-slate-300 border-white/10 hover:border-purple-500/30 hover:text-purple-300 hover:bg-white/10'}`}>
+        {label}
+        {isProReq && !isPro && <Lock size={12} className="text-amber-500" />}
+      </button>
+    );
+  };
+
   return (
-    <div className="h-screen flex bg-[#1A1B26] text-white overflow-hidden">
+    <div className="flex h-screen bg-[#0B0C15] font-sans overflow-hidden relative">
+      {/* Enhanced Background with Dynamic Effects - Similar to General Chat */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Animated gradient orbs */}
+        <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-gradient-to-br from-blue-400/40 via-indigo-400/30 to-cyan-400/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{animationDuration: '8s'}}/>
+        {/* Dark Purple-Tinted Background - Academic & Futuristic */}
+        <div className="absolute inset-0 -z-20 bg-[#0B0C15]" />
+        
+        {/* Purple-tinted Glowing Gradients */}
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-purple-600/25 rounded-full blur-[150px] mix-blend-screen animate-pulse duration-[8s]" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/15 rounded-full blur-[100px] mix-blend-screen animate-pulse" style={{ animationDuration: '12s' }} />
+        
+        {/* Grid pattern overlay for academic tech feel */}
+        <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-[0.04] bg-center"></div>
+        
+        {/* Floating academic particles - subtle purple glow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          {[...Array(12)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animation: `particle-float ${10 + Math.random() * 20}s infinite linear`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
       {/* Left Sidebar - Notes List */}
       <NotesSidebar 
         isOpen={sidebarOpen} 
@@ -283,11 +348,12 @@ function ChatWithNoteContent() {
 
       <div className="flex-1 flex flex-col h-full relative min-w-0 z-10">
         
-        {/* Header - Lighter theme */}
-        <header className="h-auto min-h-[80px] flex flex-col gap-3 px-6 md:px-8 py-3 bg-[#252836]/90 backdrop-blur-xl border-b border-white/10 shadow-sm relative">
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 via-indigo-500/30 to-transparent"></div>
+        {/* Header - Similar to General Chat */}
+        <header className="h-auto min-h-[80px] flex flex-col gap-3 px-6 md:px-8 py-3 bg-[#0F111A]/90 backdrop-blur-xl border-b border-white/10 shadow-sm relative z-10">
+          {/* Subtle animated border glow - purple tinted */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 via-indigo-500/50 to-transparent"></div>
           
-          {/* Top row: Logo and Plan Info */}
+          {/* Top row: Logo and Model Selection */}
           <div className="flex items-center justify-between">
            <div className="flex items-center gap-4">
              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 bg-white/10 rounded-lg border border-white/10">
@@ -302,33 +368,68 @@ function ChatWithNoteContent() {
            
            <div className="flex items-center gap-4">
              <div className="hidden md:flex items-center gap-2 text-xs font-medium bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-               {isPro ? 
-                 <span className="text-amber-400 flex items-center gap-1"><Sparkles className="w-3 h-3" /> PRO Active</span> : 
-                 <span className="text-slate-300">Free Plan</span>
-               }
-               {!isPro && <Link href="/pricing" className="text-purple-400 underline hover:text-purple-300 ml-2">Upgrade</Link>}
+                 {isPro ? 
+                   <span className="text-amber-400 flex items-center gap-1"><Sparkles className="w-3 h-3" /> PRO Active</span> : 
+                   <span className="text-slate-400">Free Plan</span>
+                 }
+                 {!isPro && <Link href="/pricing" className="text-purple-400 underline hover:text-purple-300 ml-2">Upgrade</Link>}
+             </div>
+
+             <div className="flex gap-2 bg-white/5 p-1 rounded-2xl backdrop-blur-sm border border-white/10">
+               <ModelBtn id="openai-mini" label="4o-Mini" />
+               <ModelBtn id="openai" label="GPT-4o" isProReq />
+               <ModelBtn id="openai-5" label="GPT-5.1" isProReq />
              </div>
            </div>
           </div>
           
-          {/* Bottom row: Selected Note Info */}
-          <div className="flex items-center gap-4 flex-wrap">
-            {selectedSessionTitle && (
-              <div className="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-purple-200 flex items-center gap-2">
-                <BookOpen className="w-4 h-4" />
-                {selectedSessionTitle}
+          {/* Bottom row: Mode Selection & Selected Note Info */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="flex gap-2 bg-white/5 p-1 rounded-xl backdrop-blur-sm border border-white/10">
+                <button
+                  onClick={() => router.push('/chat')}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:bg-white/10"
+                >
+                  <MessageSquare className="w-4 h-4 inline-block mr-2" />
+                  General Chat
+                </button>
+                <button
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-500/30"
+                >
+                  <BookOpen className="w-4 h-4 inline-block mr-2" />
+                  Chat with this Note
+                </button>
               </div>
-            )}
-            {!selectedSessionId && (
-              <div className="px-4 py-2 bg-slate-500/20 border border-slate-500/30 rounded-lg text-sm text-slate-300">
-                Please select a note from the sidebar to start chatting
-              </div>
-            )}
+              
+              {selectedSessionTitle && (
+                <div className="px-3 py-1 bg-purple-500/20 border border-purple-500/30 rounded-lg text-sm text-purple-300">
+                  From: {selectedSessionTitle}
+                </div>
+              )}
+            </div>
+
+            {/* Plan & Model Info */}
+            <div className="flex items-center gap-4 flex-wrap">
+              {userPlan === 'free' ? (
+                <p className="text-sm text-slate-400">
+                  Free plan – Using GPT-4o-mini. <Link href="/pricing" className="text-purple-400 hover:text-purple-300 hover:underline">Upgrade</Link> to unlock GPT-4o & GPT-5.1.
+                </p>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  Pro plan – You have access to GPT-4o & GPT-5.1.
+                </p>
+              )}
+              
+              <p className="text-sm text-slate-500 italic">
+                You are chatting with Notra about your notes.
+              </p>
+            </div>
           </div>
         </header>
 
-        {/* Messages Area - Lighter theme */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-none bg-[#1A1B26]">
+        {/* Messages Area - Similar to General Chat */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-none bg-[#0B0C15]">
           <div className="max-w-4xl mx-auto pb-4">
              {messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)}
              
@@ -344,10 +445,14 @@ function ChatWithNoteContent() {
           </div>
         </div>
 
-        {/* Input Area - Text only, lighter theme */}
-        <div className="p-6 pb-8 bg-[#1A1B26]">
+        {/* Input Area - Text only, Similar to General Chat */}
+        <div className="p-6 pb-8 bg-[#0B0C15]">
           <div className="max-w-4xl mx-auto relative">
-             <div className="bg-[#252836]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-2xl p-2 transition-all focus-within:ring-2 focus-within:ring-purple-500/30 focus-within:scale-[1.01] focus-within:shadow-purple-500/20 focus-within:border-purple-500/30 relative overflow-hidden">
+             <div className="bg-slate-800/90 backdrop-blur-xl border border-slate-600/50 rounded-[2rem] shadow-2xl shadow-blue-900/20 p-2 transition-all focus-within:ring-2 focus-within:ring-blue-500/50 focus-within:scale-[1.01] focus-within:shadow-blue-500/30 focus-within:border-blue-500/50 relative overflow-hidden">
+               {/* Subtle animated gradient border - blue tinted */}
+               <div className="absolute inset-0 rounded-[2rem] opacity-0 focus-within:opacity-100 transition-opacity pointer-events-none">
+                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-blue-600/20 rounded-[2rem] blur-xl"></div>
+               </div>
                <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex flex-col relative z-10">
                   <textarea 
                     value={input}
@@ -366,7 +471,7 @@ function ChatWithNoteContent() {
                       className={`p-3 rounded-full transition-all shadow-sm ${
                         (!input.trim() || !selectedSessionId) 
                           ? "bg-slate-700/50 text-slate-500 border border-slate-600/50" 
-                          : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:scale-105 shadow-lg shadow-purple-500/40 border border-purple-500/30"
+                          : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-105 shadow-lg shadow-blue-500/40 border border-blue-500/30"
                       }`}
                     >
                       <Send size={18} />
