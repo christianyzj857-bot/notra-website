@@ -604,12 +604,31 @@ const Footer = () => (
 
 export default function LandingPage() {
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true);
+  // Initialize state based on localStorage check (only on client)
+  const [isChecking, setIsChecking] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const onboarded = localStorage.getItem('onboarding_complete');
+      return onboarded !== 'true'; // Only checking if not onboarded
+    }
+    return true; // Default to checking on server
+  });
   const [bookAnimation, setBookAnimation] = useState('magic-book-enter');
-  const [shouldRender, setShouldRender] = useState(false);
+  const [shouldRender, setShouldRender] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const onboarded = localStorage.getItem('onboarding_complete');
+      if (onboarded === 'true') {
+        // User is onboarded, scroll to top and trigger animation immediately
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        });
+        return true; // Render immediately
+      }
+    }
+    return false;
+  });
   
   useEffect(() => {
-    // Check onboarding status immediately, before any rendering
+    // Check onboarding status immediately
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
