@@ -291,17 +291,27 @@ export default function Dashboard() {
       setIsLoading(true);
       setError(null);
       
+      // Clean and validate URL before sending
+      let cleanedUrl = videoUrl.trim();
+      if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
+        cleanedUrl = 'https://' + cleanedUrl;
+      }
+      
+      console.log('Sending video URL to API:', cleanedUrl);
+      
       const response = await fetch('/api/process/video', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: videoUrl })
+        body: JSON.stringify({ url: cleanedUrl })
       });
       
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || errorData.error || 'Failed to process video. Please try again.';
+        console.error('Video processing API error:', responseData);
+        const errorMessage = responseData.message || responseData.error || 'Failed to process video. Please try again.';
         setError(errorMessage);
         alert(errorMessage);
         setIsLoading(false);

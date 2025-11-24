@@ -12,15 +12,22 @@ export async function getVideoTranscript(url: string): Promise<{
   title: string;
   description: string;
 }> {
-  const platform = detectVideoPlatform(url);
-  const videoId = extractVideoId(url, platform);
+  console.log('getVideoTranscript called with URL:', url);
   
-  if (!videoId) {
-    throw new Error('Invalid video URL or unable to extract video ID');
-  }
+  const platform = detectVideoPlatform(url);
+  console.log('Detected platform:', platform);
   
   if (platform === 'unknown') {
-    throw new Error('Unsupported video platform. Currently supported: YouTube, Bilibili');
+    throw new Error(`Unsupported video platform. URL: ${url}. Currently supported: YouTube (youtube.com, youtu.be), Bilibili (bilibili.com)`);
+  }
+  
+  const videoId = extractVideoId(url, platform);
+  console.log('Extracted video ID:', videoId, 'from platform:', platform);
+  
+  if (!videoId) {
+    throw new Error(`Unable to extract video ID from URL: ${url}. Please ensure the URL is in a valid format:
+- YouTube: https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID
+- Bilibili: https://www.bilibili.com/video/BVxxxxx or https://www.bilibili.com/video/avxxxxx`);
   }
   
   try {

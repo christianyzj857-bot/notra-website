@@ -121,18 +121,39 @@ Generate 4-6 note sections, 3-5 quiz questions, and 4-6 flashcards. Focus on key
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { url } = body;
+    let { url } = body;
 
     if (!url || typeof url !== 'string') {
-      return NextResponse.json({ error: 'No video URL provided' }, { status: 400 });
+      return NextResponse.json({ 
+        error: 'NO_URL_PROVIDED',
+        message: 'No video URL provided. Please provide a YouTube or Bilibili video URL.'
+      }, { status: 400 });
+    }
+
+    // Clean and normalize URL
+    url = url.trim();
+    
+    // Add https:// if missing
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
     }
 
     // Validate URL format
+    let validatedUrl: URL;
     try {
-      new URL(url);
-    } catch {
-      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
+      validatedUrl = new URL(url);
+    } catch (error: any) {
+      console.error('URL validation error:', error, 'URL:', url);
+      return NextResponse.json({ 
+        error: 'INVALID_URL_FORMAT',
+        message: `Invalid URL format. Please provide a valid YouTube or Bilibili video URL. Examples:
+- YouTube: https://www.youtube.com/watch?v=VIDEO_ID
+- Bilibili: https://www.bilibili.com/video/BVxxxxx`
+      }, { status: 400 });
     }
+    
+    // Log URL for debugging
+    console.log('Processing video URL:', url, 'Hostname:', validatedUrl.hostname);
 
     // Check usage limits
     const plan = getCurrentUserPlan();
