@@ -208,8 +208,13 @@ export default function SignupPage() {
                   localStorage.setItem('user_email', 'user@example.com');
                   localStorage.setItem('user_display_name', 'Google User');
                   localStorage.setItem('user_logged_in', 'true');
-                  // Redirect to HOME page (not chat or dashboard)
-                  router.push('/');
+                  // Check if user has completed onboarding
+                  const onboarded = localStorage.getItem('onboarding_complete');
+                  if (onboarded === 'true') {
+                    router.push('/');
+                  } else {
+                    router.push('/onboarding/step1');
+                  }
                 }
               }, 1000);
             }}
