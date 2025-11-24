@@ -84,7 +84,7 @@ export default function CountrySwitcher({
   const currentSize = sizeClasses[size];
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} style={{ zIndex: 1 }}>
       {showLabel && (
         <label className="block text-sm font-medium text-slate-300 dark:text-slate-400 mb-3">
           Country / Region / 国家/地区
@@ -93,7 +93,12 @@ export default function CountrySwitcher({
       <button
         ref={buttonRef} // 绑定 ref
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        style={{ pointerEvents: 'auto', position: 'relative', zIndex: 10 }}
         className={`
           w-full flex items-center justify-between
           ${currentSize.button}
@@ -104,6 +109,7 @@ export default function CountrySwitcher({
           hover:border-indigo-300 dark:hover:border-indigo-500/50
           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
           transition-all duration-200
+          cursor-pointer
           ${isOpen ? 'border-indigo-500 dark:border-indigo-400 ring-2 ring-indigo-500/20' : ''}
         `}
       >

@@ -265,9 +265,9 @@ export default function SettingsPage() {
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-6" style={{ position: 'relative', zIndex: 1 }}>
                     {/* Country Switcher */}
-                    <div>
+                    <div style={{ position: 'relative', zIndex: 10 }}>
                       <CountrySwitcher
                         value={country}
                         onChange={handleCountryChange}
