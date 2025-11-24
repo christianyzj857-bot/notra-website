@@ -206,12 +206,13 @@ export default function OnboardingStep2() {
           </p>
         </div>
 
-        {/* Magic Book Drop Zone */}
+        {/* Magic Book Drop Zone - Realistic Open Book Design */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className="relative mb-8 flex items-center justify-center"
+          className="relative mb-8 flex items-center justify-center perspective-1000"
+          style={{ perspective: '1000px' }}
         >
           <input
             ref={fileInputRef}
@@ -221,172 +222,311 @@ export default function OnboardingStep2() {
             disabled
           />
           
-          {/* Magic Book Container */}
-          <div className="relative">
-            {/* Glow Effect */}
-            <div 
-              className={`absolute inset-0 rounded-3xl blur-2xl transition-all duration-500 ${
-                bookState === 'idle' 
-                  ? 'bg-indigo-200/0' 
-                  : bookState === 'hovering'
-                  ? 'bg-indigo-400/40'
-                  : bookState === 'feeding'
-                  ? 'bg-purple-500/60 animate-pulse'
-                  : bookState === 'digesting'
-                  ? 'bg-indigo-500/70 animate-pulse'
-                  : 'bg-green-400/50'
-              }`}
-              style={{
-                transform: `scale(${bookState === 'hovering' ? 1.1 : bookState === 'feeding' ? 1.15 : 1})`,
-                transition: 'all 0.3s ease-out'
-              }}
-            />
-            
-            {/* Book */}
+          {/* Glow Effect Behind Book */}
+          <div 
+            className={`absolute inset-0 blur-3xl transition-all duration-500 ${
+              bookState === 'idle' 
+                ? 'bg-indigo-200/0' 
+                : bookState === 'hovering'
+                ? 'bg-indigo-400/30'
+                : bookState === 'feeding'
+                ? 'bg-purple-500/50 animate-pulse'
+                : bookState === 'digesting'
+                ? 'bg-indigo-500/60 animate-pulse'
+                : 'bg-green-400/40'
+            }`}
+            style={{
+              transform: `scale(${bookState === 'hovering' ? 1.05 : bookState === 'feeding' ? 1.1 : 1})`,
+              transition: 'all 0.3s ease-out'
+            }}
+          />
+          
+          {/* Open Book Container - 3D Effect */}
+          <div 
+            className={`
+              relative w-full max-w-4xl h-[500px] md:h-[600px]
+              transition-all duration-500
+              ${isDragging ? 'scale-105' : ''}
+              ${bookState === 'feeding' ? 'animate-pulse' : ''}
+              ${bookState === 'digesting' ? 'animate-pulse' : ''}
+            `}
+            style={{
+              transformStyle: 'preserve-3d',
+            }}
+          >
+            {/* Left Page */}
             <div 
               className={`
-                relative w-80 h-96 md:w-96 md:h-[28rem] rounded-3xl
-                bg-gradient-to-br from-slate-800 via-indigo-900 to-purple-900
-                border-2 transition-all duration-500
+                absolute left-0 top-0 w-1/2 h-full
+                bg-gradient-to-br from-slate-50 via-indigo-50/50 to-purple-50/30
+                rounded-l-3xl border-2 border-r-0
+                transition-all duration-500
                 ${isDragging 
-                  ? 'border-indigo-400 shadow-2xl shadow-indigo-500/50 scale-105' 
-                  : 'border-slate-300/30 shadow-xl'
+                  ? 'border-indigo-400 shadow-2xl shadow-indigo-500/30' 
+                  : 'border-slate-200/50'
                 }
-                ${bookState === 'feeding' ? 'animate-pulse' : ''}
-                ${bookState === 'digesting' ? 'animate-pulse' : ''}
+              `}
+              style={{
+                transform: `perspective(1000px) rotateY(${bookState === 'digesting' ? '-5deg' : '0deg'})`,
+                transformOrigin: 'right center',
+                boxShadow: bookState !== 'idle' 
+                  ? `-10px 0 30px rgba(139, 92, 246, 0.3), inset -5px 0 10px rgba(0, 0, 0, 0.1)`
+                  : 'inset -5px 0 10px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              {/* Page Texture - Left */}
+              <div className="absolute inset-0 overflow-hidden rounded-l-3xl">
+                {/* Page lines */}
+                {[...Array(25)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`absolute left-8 right-4 h-px transition-all duration-300 ${
+                      bookState === 'digesting' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
+                    }`}
+                    style={{
+                      top: `${5 + i * 3.5}%`,
+                      opacity: bookState === 'idle' ? 0.2 : bookState === 'hovering' ? 0.4 : 0.6,
+                      transform: bookState === 'digesting' ? `translateX(${Math.sin(i * 0.5) * 3}px)` : 'none'
+                    }}
+                  />
+                ))}
+                
+                {/* Decorative corner ornament */}
+                <div className="absolute top-8 left-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
+                <div className="absolute bottom-8 left-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
+              </div>
+              
+              {/* Left Page Content */}
+              <div className="relative h-full flex flex-col items-center justify-center p-8 text-center z-10">
+                {bookState === 'idle' && (
+                  <>
+                    <div className="mb-6">
+                      <BookOpen className="w-16 h-16 text-indigo-400/60" />
+                    </div>
+                    <p className="text-xl font-semibold text-slate-700 mb-2">
+                      Ancient Knowledge
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      Awaits your contribution
+                    </p>
+                  </>
+                )}
+                {bookState === 'hovering' && (
+                  <>
+                    <div className="mb-6 animate-bounce">
+                      <Sparkles className="w-16 h-16 text-indigo-500" />
+                    </div>
+                    <p className="text-xl font-bold text-indigo-600 mb-2 animate-pulse">
+                      Ready to Receive!
+                    </p>
+                    <p className="text-sm text-indigo-500">
+                      Release the file now
+                    </p>
+                  </>
+                )}
+                {(bookState === 'feeding' || bookState === 'digesting') && (
+                  <>
+                    <div className="mb-6">
+                      <Sparkles className="w-16 h-16 text-purple-500 animate-spin" />
+                    </div>
+                    <p className="text-xl font-bold text-purple-600 mb-2">
+                      {bookState === 'feeding' ? 'Absorbing...' : 'Processing...'}
+                    </p>
+                    <p className="text-sm text-purple-500">
+                      {bookState === 'feeding' ? 'Knowledge flowing in' : 'Pages turning'}
+                    </p>
+                  </>
+                )}
+                {bookState === 'complete' && (
+                  <>
+                    <div className="mb-6">
+                      <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                        <span className="text-3xl">✓</span>
+                      </div>
+                    </div>
+                    <p className="text-xl font-bold text-green-600 mb-2">
+                      Complete!
+                    </p>
+                    <p className="text-sm text-green-500">
+                      Knowledge absorbed
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {/* Book Spine (Center) */}
+            <div 
+              className={`
+                absolute left-1/2 top-0 w-2 h-full -translate-x-1/2
+                bg-gradient-to-b from-slate-700 via-indigo-800 to-purple-800
+                transition-all duration-500
+                ${bookState !== 'idle' ? 'shadow-lg' : ''}
               `}
               style={{
                 boxShadow: bookState !== 'idle' 
-                  ? `0 0 ${bookGlow}px rgba(139, 92, 246, 0.6), 0 0 ${bookGlow * 1.5}px rgba(99, 102, 241, 0.4)`
-                  : undefined
+                  ? `0 0 20px rgba(139, 92, 246, 0.5), inset -2px 0 10px rgba(0, 0, 0, 0.3)`
+                  : 'inset -2px 0 10px rgba(0, 0, 0, 0.3)',
               }}
             >
-              {/* Book Pages Effect */}
-              <div className="absolute inset-0 overflow-hidden rounded-3xl">
+              {/* Spine decorative lines */}
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute left-0 right-0 h-px bg-indigo-600/30"
+                  style={{
+                    top: `${10 + i * 10}%`,
+                  }}
+                />
+              ))}
+            </div>
+            
+            {/* Right Page */}
+            <div 
+              className={`
+                absolute right-0 top-0 w-1/2 h-full
+                bg-gradient-to-bl from-slate-50 via-indigo-50/50 to-purple-50/30
+                rounded-r-3xl border-2 border-l-0
+                transition-all duration-500
+                ${isDragging 
+                  ? 'border-indigo-400 shadow-2xl shadow-indigo-500/30' 
+                  : 'border-slate-200/50'
+                }
+              `}
+              style={{
+                transform: `perspective(1000px) rotateY(${bookState === 'digesting' ? '5deg' : '0deg'})`,
+                transformOrigin: 'left center',
+                boxShadow: bookState !== 'idle' 
+                  ? `10px 0 30px rgba(139, 92, 246, 0.3), inset 5px 0 10px rgba(0, 0, 0, 0.1)`
+                  : 'inset 5px 0 10px rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              {/* Page Texture - Right */}
+              <div className="absolute inset-0 overflow-hidden rounded-r-3xl">
                 {/* Page lines */}
-                {[...Array(15)].map((_, i) => (
+                {[...Array(25)].map((_, i) => (
                   <div
                     key={i}
-                    className={`absolute left-8 right-8 h-px bg-white/10 transition-all duration-300 ${
-                      bookState === 'digesting' ? 'animate-pulse' : ''
+                    className={`absolute left-4 right-8 h-px transition-all duration-300 ${
+                      bookState === 'digesting' ? 'bg-indigo-300/20 animate-pulse' : 'bg-slate-300/30'
                     }`}
                     style={{
-                      top: `${8 + i * 5}%`,
-                      opacity: bookState === 'idle' ? 0.1 : bookState === 'hovering' ? 0.3 : 0.5,
-                      transform: bookState === 'digesting' ? `translateX(${Math.sin(i) * 2}px)` : 'none'
+                      top: `${5 + i * 3.5}%`,
+                      opacity: bookState === 'idle' ? 0.2 : bookState === 'hovering' ? 0.4 : 0.6,
+                      transform: bookState === 'digesting' ? `translateX(${Math.sin(i * 0.5) * -3}px)` : 'none'
+                    }}
+                  />
+                ))}
+                
+                {/* Decorative corner ornament */}
+                <div className="absolute top-8 right-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
+                <div className="absolute bottom-8 right-8 w-16 h-16 border-2 border-indigo-200/30 rounded-lg" />
+              </div>
+              
+              {/* Right Page Content - Main Message */}
+              <div className="relative h-full flex flex-col items-center justify-center p-8 text-center z-10">
+                {bookState === 'idle' && (
+                  <>
+                    <div className="mb-8">
+                      <div className="text-6xl mb-4">📖</div>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+                      Feed Me Knowledge
+                    </h2>
+                    <p className="text-lg text-slate-600 mb-2">
+                      Drag the file below
+                    </p>
+                    <p className="text-sm text-slate-500">
+                      into this magic book
+                    </p>
+                  </>
+                )}
+                {bookState === 'hovering' && (
+                  <>
+                    <div className="mb-8 animate-bounce">
+                      <div className="text-6xl">✨</div>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-indigo-600 mb-4 animate-pulse">
+                      Yes! Feed me! 📖
+                    </h2>
+                    <p className="text-lg text-indigo-500 mb-2">
+                      Release to feed the book
+                    </p>
+                    <p className="text-sm text-indigo-400">
+                      I'm ready to absorb!
+                    </p>
+                  </>
+                )}
+                {bookState === 'feeding' && (
+                  <>
+                    <div className="mb-8">
+                      <Sparkles className="w-16 h-16 text-purple-500 animate-spin mx-auto" />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-purple-600 mb-4">
+                      Feeding...
+                    </h2>
+                    <p className="text-lg text-purple-500 mb-2">
+                      The book is consuming
+                    </p>
+                    <p className="text-sm text-purple-400">
+                      your knowledge
+                    </p>
+                  </>
+                )}
+                {bookState === 'digesting' && (
+                  <>
+                    <div className="mb-8">
+                      <div className="w-16 h-16 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto" />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-indigo-600 mb-4">
+                      Digesting...
+                    </h2>
+                    <p className="text-lg text-indigo-500 mb-2">
+                      Pages are turning
+                    </p>
+                    <p className="text-sm text-indigo-400">
+                      Knowledge is being absorbed
+                    </p>
+                  </>
+                )}
+                {bookState === 'complete' && (
+                  <>
+                    <div className="mb-8">
+                      <div className="text-6xl">✅</div>
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-green-600 mb-4">
+                      ✓ Knowledge Absorbed!
+                    </h2>
+                    <p className="text-lg text-green-500 mb-2">
+                      Ready to create
+                    </p>
+                    <p className="text-sm text-green-400">
+                      your notes...
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {/* Magic Particles Overlay */}
+            {bookState !== 'idle' && (
+              <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-3xl">
+                {[...Array(30)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={`absolute w-1.5 h-1.5 rounded-full bg-indigo-400 ${
+                      bookState === 'feeding' || bookState === 'digesting' ? 'animate-ping' : ''
+                    }`}
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      animationDuration: `${1 + Math.random()}s`
                     }}
                   />
                 ))}
               </div>
-              
-              {/* Book Content */}
-              <div className="relative h-full flex flex-col items-center justify-center p-8 text-center">
-                {/* Book Icon */}
-                <div className={`
-                  mb-6 transition-all duration-500
-                  ${bookState === 'hovering' ? 'scale-110' : ''}
-                  ${bookState === 'feeding' ? 'scale-125 animate-bounce' : ''}
-                  ${bookState === 'digesting' ? 'scale-110 rotate-12' : ''}
-                  ${bookState === 'complete' ? 'scale-100' : ''}
-                `}>
-                  <BookOpen 
-                    className={`w-20 h-20 md:w-24 md:h-24 transition-colors duration-300 ${
-                      bookState === 'idle' 
-                        ? 'text-indigo-300/50' 
-                        : bookState === 'hovering'
-                        ? 'text-indigo-400'
-                        : bookState === 'feeding'
-                        ? 'text-purple-400'
-                        : bookState === 'digesting'
-                        ? 'text-indigo-400 animate-pulse'
-                        : 'text-green-400'
-                    }`}
-                  />
-                </div>
-                
-                {/* Status Text */}
-                <div className="space-y-2">
-                  {bookState === 'idle' && (
-                    <>
-                      <p className="text-2xl font-bold text-white mb-2">
-                        Feed Me Knowledge
-                      </p>
-                      <p className="text-indigo-200/80 text-sm">
-                        Drag the file below into this book
-                      </p>
-                    </>
-                  )}
-                  {bookState === 'hovering' && (
-                    <>
-                      <p className="text-2xl font-bold text-indigo-300 mb-2 animate-pulse">
-                        Yes! Feed me! 📖
-                      </p>
-                      <p className="text-indigo-200/80 text-sm">
-                        Release to feed the book
-                      </p>
-                    </>
-                  )}
-                  {bookState === 'feeding' && (
-                    <>
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <Sparkles className="w-6 h-6 text-purple-400 animate-spin" />
-                        <p className="text-2xl font-bold text-purple-300">
-                          Feeding...
-                        </p>
-                        <Sparkles className="w-6 h-6 text-purple-400 animate-spin" />
-                      </div>
-                      <p className="text-purple-200/80 text-sm">
-                        The book is consuming your knowledge
-                      </p>
-                    </>
-                  )}
-                  {bookState === 'digesting' && (
-                    <>
-                      <div className="flex items-center justify-center gap-2 mb-2">
-                        <Sparkles className="w-6 h-6 text-indigo-400 animate-pulse" />
-                        <p className="text-2xl font-bold text-indigo-300">
-                          Digesting...
-                        </p>
-                        <Sparkles className="w-6 h-6 text-indigo-400 animate-pulse" />
-                      </div>
-                      <p className="text-indigo-200/80 text-sm">
-                        Pages are turning, knowledge is being absorbed
-                      </p>
-                    </>
-                  )}
-                  {bookState === 'complete' && (
-                    <>
-                      <p className="text-2xl font-bold text-green-400 mb-2">
-                        ✓ Knowledge Absorbed!
-                      </p>
-                      <p className="text-green-200/80 text-sm">
-                        Ready to create your notes...
-                      </p>
-                    </>
-                  )}
-                </div>
-                
-                {/* Magic Particles */}
-                {bookState !== 'idle' && (
-                  <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
-                    {[...Array(20)].map((_, i) => (
-                      <div
-                        key={i}
-                        className={`absolute w-1 h-1 rounded-full bg-indigo-400 ${
-                          bookState === 'feeding' || bookState === 'digesting' ? 'animate-ping' : ''
-                        }`}
-                        style={{
-                          left: `${Math.random() * 100}%`,
-                          top: `${Math.random() * 100}%`,
-                          animationDelay: `${Math.random() * 2}s`,
-                          animationDuration: `${1 + Math.random()}s`
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         </div>
 
