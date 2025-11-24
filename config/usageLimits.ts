@@ -15,7 +15,7 @@ export const USAGE_LIMITS: Record<UserPlan, UsageLimitConfig> = {
   free: {
     maxFileSessionsPerMonth: 15,
     maxAudioSessionsPerMonth: 10,
-    maxVideoSessionsPerMonth: 5,
+    maxVideoSessionsPerMonth: 3, // Free plan: 3 videos per month
     maxChatMessagesPerDay: 50,
     maxPagesPerFile: 20,
     maxAudioMinutesPerSession: 5,

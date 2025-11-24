@@ -5,42 +5,10 @@ import { NotraSession, NoteSection, QuizItem, Flashcard } from "@/types/notra";
 import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
+import { getVideoTranscript } from '@/lib/videoTranscripts';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const DEFAULT_MODEL = "gpt-4o-mini";
-
-// For now, we'll use a dummy transcript approach
-// In production, you would integrate with YouTube API, Bilibili API, etc.
-async function getVideoTranscript(url: string): Promise<string> {
-  // TODO: Implement actual video transcript extraction
-  // For now, return a placeholder that simulates video content
-  // This should be replaced with actual video platform APIs
-  
-  // Simulate video content based on URL
-  const dummyTranscript = `This is a placeholder transcript for the video at ${url}. 
-
-In a real implementation, this would:
-1. Extract video metadata (title, description)
-2. Fetch available transcripts/captions from the platform
-3. Use speech-to-text if transcripts are not available
-4. Return the full transcript text
-
-For now, this serves as a demonstration of the video processing flow. The actual implementation would require:
-- YouTube Data API v3 for YouTube videos
-- Bilibili API for Bilibili videos  
-- TikTok API for TikTok videos
-- Or web scraping with proper permissions
-
-Key concepts covered in this video:
-- Introduction to the topic
-- Main concepts and explanations
-- Examples and applications
-- Summary and conclusions
-
-This transcript would be used to generate structured notes, quizzes, and flashcards.`;
-
-  return dummyTranscript;
-}
 
 // Generate structured content (same as file/audio processing)
 async function generateStructuredContent(text: string, videoUrl: string): Promise<{
@@ -176,7 +144,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error: "limit_reached",
-          message: "You have reached your monthly limit for video processing on the free plan.",
+          message: `You have reached your monthly limit for video processing (${limits.maxVideoSessionsPerMonth} videos/month on ${plan} plan). Upgrade to Pro for unlimited video processing.`,
           plan,
           scope: "video",
           limit: limits.maxVideoSessionsPerMonth,
@@ -185,8 +153,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get video transcript (placeholder for now)
-    const transcript = await getVideoTranscript(url);
+    // Get video transcript from platform API
+    const videoData = await getVideoTranscript(url);
+    const transcript = videoData.transcript;
+    const videoTitle = videoData.title;
+    const videoDescription = videoData.description;
     
     // Generate content hash
     const contentHash = generateContentHash(transcript);
@@ -208,7 +179,7 @@ export async function POST(req: Request) {
     // Create new session
     const newSession = await createSession({
       type: "video",
-      title: structuredContent.title || `Video: ${url.substring(0, 50)}`,
+      title: structuredContent.title || videoTitle || `Video: ${url.substring(0, 50)}`,
       contentHash,
       notes: structuredContent.notes,
       quizzes: structuredContent.quizzes,
