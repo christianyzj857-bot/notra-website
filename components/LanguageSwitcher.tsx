@@ -31,17 +31,20 @@ export default function LanguageSwitcher({
   // Filter out 'other' option and map to actual languages
   const availableLanguages = LANGUAGES.filter(lang => lang.id !== 'other');
 
-  // Find current language
+  // Find current language - match by id first (e.g., 'zh-cn'), then by code (e.g., 'zh-CN')
   const currentLanguage = availableLanguages.find(
-    lang => lang.code === value || lang.id === value
-  ) || availableLanguages.find(lang => lang.code === 'en') || availableLanguages[0];
+    lang => lang.id === value || lang.id === value.toLowerCase() || 
+            lang.code === value || lang.code?.toLowerCase() === value?.toLowerCase()
+  ) || availableLanguages.find(lang => lang.id === 'en' || lang.code === 'en') || availableLanguages[0];
 
   // Handle 'other' option - default to English
   const handleLanguageChange = (lang: Language) => {
     if (lang.id === 'other') {
       onChange('en'); // Default to English for 'other'
     } else {
-      onChange(lang.code || lang.id);
+      // Always use lang.id (e.g., 'zh-cn') instead of lang.code (e.g., 'zh-CN')
+      // This matches what's stored in localStorage from onboarding
+      onChange(lang.id);
     }
     setIsOpen(false);
   };
