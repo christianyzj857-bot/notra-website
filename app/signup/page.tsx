@@ -62,8 +62,15 @@ export default function SignupPage() {
         }
       }
 
-      // Redirect to HOME page
-      window.location.href = '/';
+      // Check if user has completed onboarding
+      const onboarded = localStorage.getItem('onboarding_complete');
+      if (onboarded === 'true') {
+        // If onboarded, go to homepage
+        router.push('/');
+      } else {
+        // If not onboarded, go to onboarding
+        router.push('/onboarding/step1');
+      }
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
       setIsLoading(false);

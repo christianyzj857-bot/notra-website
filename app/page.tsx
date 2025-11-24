@@ -606,30 +606,32 @@ export default function LandingPage() {
   const router = useRouter();
   const [isChecking, setIsChecking] = useState(true);
   const [bookAnimation, setBookAnimation] = useState('magic-book-enter');
+  const [shouldRender, setShouldRender] = useState(false);
   
   useEffect(() => {
-    // 触发魔法书开场动画
-    setTimeout(() => {
-      setBookAnimation('magic-book-active');
-    }, 100);
-    
-    // Check onboarding status on mount
+    // Check onboarding status immediately, before any rendering
     if (typeof window !== 'undefined') {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
-        // Redirect to onboarding step 1 if not completed
-        // Use replace to avoid showing homepage background
+        // Redirect to onboarding step 1 immediately, don't render homepage
         router.replace('/onboarding/step1');
         return;
       }
+      // Only set shouldRender to true if user is onboarded
+      setShouldRender(true);
       setIsChecking(false);
+      
+      // 触发魔法书开场动画（只在确认显示 homepage 后）
+      setTimeout(() => {
+        setBookAnimation('magic-book-active');
+      }, 100);
     }
   }, [router]);
 
-  // Show loading state with onboarding background during check
-  if (isChecking) {
+  // Don't render anything if checking or if user should be redirected
+  if (isChecking || !shouldRender) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#0B0C15]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
         </div>
@@ -642,7 +644,7 @@ export default function LandingPage() {
     <div className="perspective-container bg-transparent font-sans selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
       <div className={bookAnimation}>
         <Navbar />
-        <main>
+        <main className="scroll-smooth">
           <Hero />
           <SocialProof />
           <Features />
