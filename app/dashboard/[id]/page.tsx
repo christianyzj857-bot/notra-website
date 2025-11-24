@@ -90,7 +90,7 @@ export default function SessionDetailPage() {
   };
 
   const handleChatWithNote = () => {
-    router.push(`/chat?sessionId=${sessionId}`);
+    router.push(`/chat/note?sessionId=${sessionId}`);
   };
 
   if (loading) {

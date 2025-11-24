@@ -20,13 +20,15 @@ import WelcomeUser from '@/components/WelcomeUser';
 import NotraLogo from '@/components/NotraLogo';
 
 // ---------------------------------------------------------
-// 🔧 修复：使用自定义 Link 组件替代 next/link 以适应预览环境
+// 🔧 使用 Next.js Link 组件以优化跳转性能
 // ---------------------------------------------------------
-const Link = ({ href, children, className, ...props }: any) => {
+import NextLink from 'next/link';
+
+const Link = ({ href, children, className, prefetch = true, ...props }: any) => {
   return (
-    <a href={href} className={className} {...props}>
+    <NextLink href={href} prefetch={prefetch} className={className} {...props}>
       {children}
-    </a>
+    </NextLink>
   );
 };
 

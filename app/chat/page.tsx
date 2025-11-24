@@ -25,7 +25,7 @@ function NotraConsoleContent() {
       const onboarded = localStorage.getItem('onboarding_complete');
       if (onboarded !== 'true') {
         // Redirect to onboarding step 1 if not completed
-        window.location.href = '/onboarding/step1';
+        window.location.replace('/onboarding/step1');
       }
     }
   }, []);

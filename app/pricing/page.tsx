@@ -50,13 +50,13 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto">
           {/* Hero Section */}
           <section className="text-center py-16 md:py-24">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-6">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-lg">
               Notes for a new era of learning
             </h1>
-            <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-4 leading-relaxed">
+            <p className="text-xl md:text-2xl text-slate-200 max-w-3xl mx-auto mb-4 leading-relaxed drop-shadow-md">
               Notra helps you turn lectures, PDFs, and messy ideas into clean study notes, quizzes, and flashcards – in seconds.
             </p>
-            <p className="text-lg text-slate-500 max-w-2xl mx-auto mb-12">
+            <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-12 drop-shadow-sm">
               Start for free, upgrade only when you're ready to go all in.
             </p>
             
