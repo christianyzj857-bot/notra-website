@@ -269,8 +269,8 @@ export default function SettingsPage() {
                   <div className="space-y-6" style={{ position: 'relative', zIndex: 1 }}>
                     {/* Country Switcher */}
                     <div style={{ position: 'relative', zIndex: 10 }}>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Country / Region / 国家/地区
+                      <label className="block text-sm font-semibold text-slate-300 mb-3">
+                        Country / Region
                       </label>
                       <CountrySwitcher
                         value={country}
