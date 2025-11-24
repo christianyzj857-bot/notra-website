@@ -20,6 +20,7 @@ import { getCurrentUserPlan } from '@/lib/userPlan';
 import { USAGE_LIMITS } from '@/config/usageLimits';
 import NextLink from 'next/link';
 import { t, getUILanguage } from '@/lib/i18n';
+import MagicBookUpload from '@/components/MagicBookUpload';
 
 // Type definitions
 type ProjectType = 'document' | 'audio' | 'video';
@@ -80,6 +81,14 @@ export default function Dashboard() {
   } | null>(null);
   const [limits, setLimits] = useState(USAGE_LIMITS.free);
   const [currentLang, setCurrentLang] = useState<string>('en'); // Track language for re-render
+
+  // Magic Book Upload states
+  const [showMagicBook, setShowMagicBook] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStep, setUploadStep] = useState('');
+  const [uploadType, setUploadType] = useState<'file' | 'audio' | 'video'>('file');
+  const [uploadFileName, setUploadFileName] = useState('');
+  const [notePreview, setNotePreview] = useState<any>(null);
 
   // Check if user is onboarded and get initial language
   useEffect(() => {
@@ -179,10 +188,58 @@ export default function Dashboard() {
     setSelectedProject(newProject);
   };
 
+  // Simulate upload progress with steps
+  const simulateUploadProgress = async (
+    type: 'file' | 'audio' | 'video',
+    fileName: string
+  ): Promise<string> => {
+    const steps = [
+      { text: 'Uploading...', progress: 0, delay: 500 },
+      { text: 'Extracting content...', progress: 30, delay: 800 },
+      { text: 'Analyzing structure...', progress: 50, delay: 1000 },
+      { text: 'Generating notes...', progress: 70, delay: 1200 },
+      { text: 'Creating quizzes...', progress: 85, delay: 800 },
+      { text: 'Almost ready...', progress: 100, delay: 500 },
+    ];
+
+    for (const step of steps) {
+      setUploadStep(step.text);
+      setUploadProgress(step.progress);
+      await new Promise(resolve => setTimeout(resolve, step.delay));
+    }
+
+    // Generate note preview
+    const preview = {
+      title: fileName,
+      subtitle: 'Auto-generated notes from your content',
+      overview: 'This is a comprehensive summary of your uploaded content. The AI has extracted key concepts, main ideas, and important details to help you learn more effectively.',
+      keyConcepts: [
+        'Main Topic and Overview',
+        'Key Definitions and Terminology',
+        'Important Examples and Applications',
+        'Summary and Conclusions'
+      ]
+    };
+    setNotePreview(preview);
+
+    // Return mock session ID
+    return `session-${Date.now()}`;
+  };
+
   // Handle document upload
-  const handleDocumentUpload = (file: File) => {
+  const handleDocumentUpload = async (file: File) => {
+    // Show magic book
+    setShowMagicBook(true);
+    setUploadType('file');
+    setUploadFileName(file.name);
+    setUploadProgress(0);
+
+    // Simulate upload and processing
+    const sessionId = await simulateUploadProgress('file', file.name);
+
+    // Create project in list
     const newProject: Project = {
-      id: `project-${Date.now()}`,
+      id: sessionId,
       title: file.name,
       type: 'document',
       createdAt: Date.now(),
@@ -193,9 +250,19 @@ export default function Dashboard() {
   };
 
   // Handle audio upload
-  const handleAudioUpload = (file: File) => {
+  const handleAudioUpload = async (file: File) => {
+    // Show magic book
+    setShowMagicBook(true);
+    setUploadType('audio');
+    setUploadFileName(file.name);
+    setUploadProgress(0);
+
+    // Simulate upload and processing
+    const sessionId = await simulateUploadProgress('audio', file.name);
+
+    // Create project in list
     const newProject: Project = {
-      id: `project-${Date.now()}`,
+      id: sessionId,
       title: file.name,
       type: 'audio',
       createdAt: Date.now(),
@@ -206,12 +273,24 @@ export default function Dashboard() {
   };
 
   // Handle video link
-  const handleVideoLink = () => {
+  const handleVideoLink = async () => {
     if (!videoUrl.trim()) return;
-    
+
+    const videoTitle = `Video: ${videoUrl.substring(0, 30)}...`;
+
+    // Show magic book
+    setShowMagicBook(true);
+    setUploadType('video');
+    setUploadFileName(videoTitle);
+    setUploadProgress(0);
+
+    // Simulate upload and processing
+    const sessionId = await simulateUploadProgress('video', videoTitle);
+
+    // Create project in list
     const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: `Video: ${videoUrl.substring(0, 30)}...`,
+      id: sessionId,
+      title: videoTitle,
       type: 'video',
       createdAt: Date.now(),
       summary: generateVideoSummary(videoUrl)
@@ -270,10 +349,28 @@ export default function Dashboard() {
     }
   };
 
+  // Handle magic book completion
+  const handleMagicBookComplete = (sessionId: string) => {
+    // Navigate to the session page
+    window.location.href = `/dashboard/${sessionId}`;
+  };
+
   return (
     <div className="min-h-screen bg-transparent relative overflow-hidden">
+      {/* Magic Book Upload Modal */}
+      <MagicBookUpload
+        isOpen={showMagicBook}
+        type={uploadType}
+        fileName={uploadFileName}
+        progress={uploadProgress}
+        loadingStep={uploadStep}
+        notePreview={notePreview}
+        onComplete={handleMagicBookComplete}
+        onClose={() => setShowMagicBook(false)}
+      />
+
       {/* 移除背景代码，由 MagicBackground 全局组件接管 */}
-      
+
       {/* 3D Floating Notebooks - Decorative Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         {/* Notebook 1 - Top Right */}
