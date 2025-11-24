@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-import { getSessionById } from "@/lib/db";
-import { pickRelevantSections, trimMessages } from "@/lib/chat-utils";
+import { trimMessages } from "@/lib/chat-utils";
+import { retrieveRelevantSections, formatSectionsForPrompt } from "@/lib/rag-search";
 import { ChatRequestBody, ChatMode } from "@/types/notra";
-import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
-import { PRO_ONLY_MODELS, isProOnlyModel, type ModelKey } from "@/config/models";
+import { isProOnlyModel, type ModelKey } from "@/config/models";
 import { getUsage, incrementUsage, getDayKey } from "@/lib/usage";
 
 export const runtime = "edge";
@@ -128,53 +127,29 @@ export async function POST(req: Request) {
           .filter(m => m.role === "user")
           .pop()?.content || "";
 
-        // Enhanced RAG: Pick relevant note sections (more sections for pro users)
-        const maxSections = currentUserPlan === "free" ? 3 : 5;
-        const relevantSections = pickRelevantSections(session.notes, latestUserMessage, maxSections);
+        // Enhanced RAG: Use minisearch to retrieve relevant sections (3-6 sections based on plan)
+        const maxSections = currentUserPlan === "free" ? 3 : 6;
+        const relevantSections = retrieveRelevantSections(session.notes || [], latestUserMessage, maxSections);
 
-        // Build context-aware system prompt with enhanced context
-        let contextText = `Summary: ${session.summaryForChat}\n\n`;
-        
-        if (relevantSections.length > 0) {
-          contextText += "Relevant sections from the study material:\n\n";
-          relevantSections.forEach((section: any, idx: number) => {
-            contextText += `## ${section.heading}\n`;
-            contextText += `${section.content.substring(0, 300)}${section.content.length > 300 ? '...' : ''}\n`;
-            
-            // Include bullets if available
-            if (section.bullets && section.bullets.length > 0) {
-              contextText += `Key points: ${section.bullets.slice(0, 3).join(', ')}\n`;
-            }
-            
-            // Include formula if available and relevant
-            if (section.formulaDerivation && (latestUserMessage.toLowerCase().includes('formula') || latestUserMessage.toLowerCase().includes('equation'))) {
-              contextText += `Formula: ${section.formulaDerivation}\n`;
-            }
-            
-            // Include example if available and relevant
-            if (section.example && (latestUserMessage.toLowerCase().includes('example') || latestUserMessage.toLowerCase().includes('instance'))) {
-              contextText += `Example: ${section.example.substring(0, 200)}\n`;
-            }
-            
-            contextText += '\n';
-          });
-        } else {
-          // Fallback: Use summary and first few sections
-          contextText += "Key concepts from the study material:\n";
-          if (session.notes && session.notes.length > 0) {
-            session.notes.slice(0, 2).forEach((section: any) => {
-              contextText += `- ${section.heading}: ${section.content.substring(0, 150)}\n`;
-            });
-          }
-        }
+        // Format sections for prompt injection (RAG context, limit to ~2000 chars for cost control)
+        const maxContextLength = currentUserPlan === "free" ? 1500 : 2000;
+        const formattedSections = formatSectionsForPrompt(relevantSections, maxContextLength);
 
-        systemMessage = `You are Notra, an AI learning assistant.
+        // Build context-aware system prompt with RAG context
+        const contextText = `Summary: ${session.summaryForChat || 'Educational content covering key concepts and topics.'}\n\n` +
+          (formattedSections ? `Relevant sections from the study material:\n\n${formattedSections}\n` : '');
+
+        systemMessage = `You are Notra, an AI learning assistant specialized in helping students understand study materials.
 The user is asking questions about THIS STUDY MATERIAL:
 
 ${contextText}
 
-Answer concisely, focusing only on this material, unless the user explicitly asks general questions.
-If the question is not related to the study material, politely redirect to the material or answer briefly.`;
+INSTRUCTIONS:
+- Answer concisely and accurately based ONLY on the provided study material
+- If the question is not related to the material, politely redirect to the material or answer briefly
+- Use the relevant sections to provide specific, detailed answers
+- Include examples, formulas, or key points from the material when relevant
+- Keep responses focused and educational`;
       } catch (err) {
         // If session fetch fails, fall back to general mode
         console.error('Failed to fetch session:', err);
@@ -188,7 +163,8 @@ If the question is not related to the study material, politely redirect to the m
       }
     }
 
-    // Trim messages to save tokens (keep recent 3 rounds for free, 5 for pro)
+    // Trim messages to save tokens (keep recent N rounds based on plan)
+    // Free: 3 rounds, Pro: 5 rounds
     const maxRounds = currentUserPlan === "free" ? 3 : 5;
     const trimmedMessages = trimMessages(conversationMessages, maxRounds);
 
@@ -202,6 +178,7 @@ If the question is not related to the study material, politely redirect to the m
     ];
 
     // Set max_tokens for cost control (based on plan)
+    // Free: shorter responses (512 tokens), Pro: longer responses (1024 tokens)
     const maxTokens = currentUserPlan === "free" ? 512 : 1024;
 
     const completion = await openai.chat.completions.create({

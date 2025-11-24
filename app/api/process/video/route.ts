@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
 import { createSession, findSessionByHash, generateContentHash } from "@/lib/db";
-import { NotraSession, VideoSource } from "@/types/notra";
+import { VideoSource } from "@/types/notra";
 import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
 import { getVideoTranscript } from '@/lib/videoTranscripts';
-import { detectVideoPlatform, extractVideoId } from '@/lib/videoPlatforms';
+import { detectVideoPlatform, extractVideoId, type VideoPlatform } from '@/lib/videoPlatforms';
 import { generateLearningAsset } from "@/lib/learning-asset-generator";
+import { estimateTokens } from "@/lib/text-processor";
 
 // Use Node.js runtime for database operations
 export const runtime = "nodejs";
+
+// Allowed video providers (from environment variable)
+const ALLOWED_VIDEO_PROVIDERS = (process.env.ALLOWED_VIDEO_PROVIDERS || 'YouTube,Bilibili,Douyin')
+  .split(',')
+  .map(p => p.trim().toLowerCase());
 
 // Note: generateStructuredContent has been moved to lib/learning-asset-generator.ts
 // This file now uses the unified generator function
@@ -49,7 +55,52 @@ export async function POST(req: Request) {
     }
     
     // Log URL for debugging
-    console.log('Processing video URL:', url, 'Hostname:', validatedUrl.hostname);
+    console.log('[Video API] Processing video URL:', url, 'Hostname:', validatedUrl.hostname);
+
+    // Detect platform and validate
+    const platform = detectVideoPlatform(url);
+    const videoId = extractVideoId(url, platform);
+    
+    if (platform === 'unknown') {
+      return NextResponse.json(
+        {
+          error: 'UNSUPPORTED_PLATFORM',
+          message: `Unsupported video platform. Currently supported: ${ALLOWED_VIDEO_PROVIDERS.join(', ')}`,
+          hint: 'Please provide a YouTube, Bilibili, or Douyin video URL.',
+        },
+        { status: 400 }
+      );
+    }
+    
+    // Check if platform is allowed
+    const platformName = platform === 'youtube' ? 'youtube' : 
+                         platform === 'bilibili' ? 'bilibili' : 
+                         platform === 'douyin' ? 'douyin' : 'unknown';
+    
+    if (!ALLOWED_VIDEO_PROVIDERS.includes(platformName)) {
+      return NextResponse.json(
+        {
+          error: 'PLATFORM_NOT_ALLOWED',
+          message: `Video platform "${platformName}" is not currently enabled.`,
+          hint: `Currently allowed platforms: ${ALLOWED_VIDEO_PROVIDERS.join(', ')}`,
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (!videoId) {
+      return NextResponse.json(
+        {
+          error: 'INVALID_VIDEO_ID',
+          message: `Unable to extract video ID from URL: ${url}`,
+          hint: `Please ensure the URL is in a valid format:
+- YouTube: https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID
+- Bilibili: https://www.bilibili.com/video/BVxxxxx
+- Douyin: https://www.douyin.com/video/VIDEO_ID`,
+        },
+        { status: 400 }
+      );
+    }
 
     // Check usage limits
     const plan = getCurrentUserPlan();
@@ -70,16 +121,35 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get video transcript from platform API
+    // Get video transcript from platform API (with fallback to Whisper for YouTube)
     let videoData;
     try {
+      console.log(`[Video API] Fetching transcript for ${platform}:${videoId}`);
       videoData = await getVideoTranscript(url);
+      console.log(`[Video API] Transcript received, length: ${videoData.transcript.length}, estimated tokens: ${estimateTokens(videoData.transcript)}`);
     } catch (error: any) {
-      console.error('Video transcript error:', error);
+      console.error('[Video API] Video transcript error:', error);
+      
+      // Provide specific error messages
+      let errorCode = 'TRANSCRIPT_ERROR';
+      let hint = 'Please ensure the video has captions/subtitles enabled.';
+      
+      if (error.message && error.message.includes('Whisper')) {
+        errorCode = 'TRANSCRIPTION_FALLBACK_FAILED';
+        hint = 'Official subtitles unavailable and automatic transcription failed. Please ensure the video has captions/subtitles enabled, or try a different video.';
+      } else if (error.message && error.message.includes('Bilibili')) {
+        errorCode = 'BILIBILI_API_ERROR';
+        hint = 'Bilibili API error. Please check if the video has subtitles or try a different video.';
+      } else if (platform === 'douyin') {
+        errorCode = 'DOUYIN_NOT_SUPPORTED';
+        hint = 'Douyin video transcription is not yet fully supported. Please try a YouTube or Bilibili video.';
+      }
+      
       return NextResponse.json(
         { 
-          error: 'TRANSCRIPT_ERROR',
-          message: error.message || 'Failed to get video transcript. Please ensure the video has captions/subtitles enabled.'
+          error: errorCode,
+          message: error.message || 'Failed to get video transcript.',
+          hint,
         },
         { status: 500 }
       );
@@ -103,10 +173,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Detect platform and extract video ID
-    const platform = detectVideoPlatform(url);
-    const videoId = extractVideoId(url, platform);
-    
     // Generate structured content using unified generator (ONE LLM call)
     console.log('[Video API] Starting learning asset generation, transcript length:', transcript.length);
     let structuredContent;
@@ -115,12 +181,17 @@ export async function POST(req: Request) {
         type: "video",
         metadata: {
           videoUrl: url,
-          platform: platform === 'youtube' ? 'youtube' : 
-                    platform === 'bilibili' ? 'bilibili' : 
-                    platform === 'douyin' ? 'douyin' : 'other',
+          platform: platformName,
+          videoId,
+          title: videoTitle,
         }
       });
-      console.log('[Video API] Learning asset generated successfully');
+      console.log('[Video API] Learning asset generated successfully:', {
+        title: structuredContent.title,
+        notesCount: structuredContent.notes.length,
+        quizzesCount: structuredContent.quizzes.length,
+        flashcardsCount: structuredContent.flashcards.length,
+      });
     } catch (genError: any) {
       console.error('[Video API] Learning asset generation failed:', genError);
       throw new Error(`Failed to generate learning assets: ${genError.message || 'Unknown error'}`);
@@ -129,10 +200,8 @@ export async function POST(req: Request) {
     // Prepare source information
     const source: VideoSource = {
       videoUrl: url,
-      platform: platform === 'youtube' ? 'youtube' : 
-                platform === 'bilibili' ? 'bilibili' : 
-                platform === 'douyin' ? 'douyin' : 'other',
-      videoId: videoId || undefined,
+      platform: platformName as 'youtube' | 'bilibili' | 'douyin' | 'other',
+      videoId,
       title: videoTitle || undefined,
     };
 
@@ -158,9 +227,30 @@ export async function POST(req: Request) {
       createdAt: newSession.createdAt,
     });
   } catch (error: any) {
-    console.error('Video processing error:', error);
+    console.error('[Video API] Processing error:', error);
+    const errorMessage = error.message || 'Failed to process video';
+    
+    // Provide specific error codes with hints
+    let errorCode = 'VIDEO_PROCESSING_ERROR';
+    let hint = 'Please try again or contact support if the problem persists.';
+    
+    if (errorMessage.includes('transcript') || errorMessage.includes('Transcript')) {
+      errorCode = 'TRANSCRIPT_ERROR';
+      hint = 'Failed to get video transcript. Please ensure the video has captions/subtitles enabled.';
+    } else if (errorMessage.includes('platform') || errorMessage.includes('Platform')) {
+      errorCode = 'UNSUPPORTED_PLATFORM';
+      hint = 'Unsupported video platform. Currently supported: YouTube, Bilibili, Douyin.';
+    } else if (errorMessage.includes('video ID') || errorMessage.includes('videoId')) {
+      errorCode = 'INVALID_VIDEO_ID';
+      hint = 'Unable to extract video ID from URL. Please check the URL format.';
+    }
+    
     return NextResponse.json(
-      { error: error.message || 'Failed to process video' },
+      { 
+        error: errorCode,
+        message: errorMessage,
+        hint,
+      },
       { status: 500 }
     );
   }

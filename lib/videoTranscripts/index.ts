@@ -122,7 +122,8 @@ export async function getVideoTranscript(url: string): Promise<{
     
     switch (platform) {
       case 'youtube':
-        transcript = await getYouTubeTranscript(videoId);
+        // Try official subtitles first, fallback to Whisper if needed
+        transcript = await getYouTubeTranscript(videoId, url, true);
         const youtubeMeta = await getYouTubeMetadata(videoId);
         title = youtubeMeta.title;
         description = youtubeMeta.description;

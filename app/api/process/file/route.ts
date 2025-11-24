@@ -124,8 +124,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check usage limits (plan already retrieved above)
-    const limits = USAGE_LIMITS[plan];
+    // Check usage limits
     const monthKey = getMonthKey();
     const used = await getUsage("file", monthKey);
 

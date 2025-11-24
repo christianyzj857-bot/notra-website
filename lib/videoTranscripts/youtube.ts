@@ -3,41 +3,64 @@
  * 优先使用免费库，失败时使用 YouTube Data API v3
  */
 
-export async function getYouTubeTranscript(videoId: string): Promise<string> {
+import { transcribeYouTubeVideoFallback } from '../video-processor';
+
+/**
+ * Get YouTube transcript with fallback to Whisper transcription
+ * Priority: Official subtitles (free) → Whisper transcription (cost: $0.006/min)
+ */
+export async function getYouTubeTranscript(
+  videoId: string,
+  videoUrl?: string,
+  useFallback: boolean = true
+): Promise<string> {
   try {
-    // 方法 1: 使用 youtube-transcript 库（免费，无需 API key）
-    // 这个库可以直接获取 YouTube 的自动生成字幕
+    // Priority 1: Try official subtitles (free, 0 cost)
     const { YoutubeTranscript } = await import('youtube-transcript');
-    
     const transcriptItems = await YoutubeTranscript.fetchTranscript(videoId, {
-      lang: 'en', // 优先英文，如果没有会自动选择
+      lang: 'en',
     });
-    
-    const transcript = transcriptItems
-      .map((item: any) => item.text)
-      .join(' ')
-      .trim();
-    
-    if (!transcript || transcript.length === 0) {
-      throw new Error('No transcript available for this video');
+    const transcript = transcriptItems.map((item: any) => item.text).join(' ').trim();
+    if (transcript && transcript.length > 0) {
+      console.log('[YouTube] Using official subtitles (free)');
+      return transcript;
     }
-    
-    return transcript;
+    throw new Error('No official subtitles available');
   } catch (error: any) {
-    console.error('YouTube transcript fetch error:', error);
+    console.error('[YouTube] Official subtitle fetch failed:', error.message);
     
-    // 方法 2: 如果方法 1 失败，尝试使用 YouTube Data API v3 获取字幕
-    // 注意：这需要 API key，但通常方法 1 就足够了
+    // Priority 2: Fallback to YouTube Data API v3 if API key is available
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (apiKey) {
       try {
-        return await getYouTubeTranscriptViaAPI(videoId, apiKey);
+        const apiTranscript = await getYouTubeTranscriptViaAPI(videoId, apiKey);
+        if (apiTranscript && apiTranscript.trim().length > 0) {
+          console.log('[YouTube] Using YouTube Data API v3 transcript');
+          return apiTranscript;
+        }
       } catch (apiError) {
-        console.error('YouTube API transcript error:', apiError);
+        console.error('[YouTube] YouTube Data API v3 transcript error:', apiError);
       }
     }
     
-    throw new Error(`Failed to get YouTube transcript: ${error.message || 'Unknown error'}`);
+    // Priority 3: Fallback to Whisper transcription (extract audio → transcribe)
+    if (useFallback && videoUrl) {
+      console.log('[YouTube] Falling back to Whisper transcription (cost: $0.006/min)');
+      try {
+        return await transcribeYouTubeVideoFallback(videoUrl);
+      } catch (whisperError: any) {
+        console.error('[YouTube] Whisper transcription failed:', whisperError);
+        throw new Error(
+          `Failed to get transcript: Official subtitles unavailable and Whisper transcription failed. ` +
+          `Please ensure the video has captions/subtitles enabled. Error: ${whisperError.message}`
+        );
+      }
+    }
+    
+    throw new Error(
+      `Failed to get YouTube transcript: ${error.message || 'Unknown error'}. ` +
+      `Please ensure the video has captions/subtitles enabled.`
+    );
   }
 }
 

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { createSession, findSessionByHash, generateContentHash } from "@/lib/db";
-import { NotraSession, AudioSource } from "@/types/notra";
+import { AudioSource } from "@/types/notra";
 import { writeFile, unlink } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -9,90 +8,14 @@ import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
 import { generateLearningAsset } from "@/lib/learning-asset-generator";
+import { transcribeAudioWithChunking, cleanTranscript, validateAudioFormat, getAudioDuration } from "@/lib/audio-processor";
+import { estimateTokens } from "@/lib/text-processor";
 
 // Use Node.js runtime for file system operations
 export const runtime = "nodejs";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-// Clean and structure transcript text (Turbo-style preprocessing)
-function cleanTranscript(text: string): string {
-  // Remove excessive whitespace
-  let cleaned = text.replace(/\s+/g, ' ').trim();
-  
-  // Fix common transcription issues
-  cleaned = cleaned.replace(/\b(um|uh|er|ah)\b/gi, ''); // Remove filler words
-  cleaned = cleaned.replace(/\s+/g, ' '); // Normalize spaces again
-  
-  // Ensure proper sentence endings
-  cleaned = cleaned.replace(/([.!?])\s*([A-Z])/g, '$1 $2');
-  
-  return cleaned.trim();
-}
-
-// Transcribe audio using Whisper API
-async function transcribeAudio(audioFile: File): Promise<string> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured');
-  }
-
-  const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-  // Save file temporarily
-  const bytes = await audioFile.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const tempPath = join(tmpdir(), `audio-${Date.now()}.${audioFile.name.split('.').pop()}`);
-  await writeFile(tempPath, buffer);
-
-  try {
-    // Whisper API requires a File-like object
-    // Create a File object from the buffer
-    const fileForApi = new File([buffer], audioFile.name, { 
-      type: audioFile.type || 'audio/webm' 
-    });
-    
-    // Enhanced prompt for better transcription quality
-    const transcriptionPrompt = "This is an educational lecture, presentation, or academic audio content. Please transcribe accurately with proper punctuation, capitalization, and sentence structure. Include technical terms and academic vocabulary as spoken.";
-    
-    // Call OpenAI Whisper API
-    const transcription = await openai.audio.transcriptions.create({
-      file: fileForApi as any,
-      model: "whisper-1",
-      language: undefined, // Auto-detect
-      prompt: transcriptionPrompt,
-      temperature: 0, // Lower temperature for more consistent transcription
-    });
-
-    let transcriptText = typeof transcription === 'string' 
-      ? transcription 
-      : (transcription as any).text || '';
-
-    if (!transcriptText || transcriptText.trim().length === 0) {
-      throw new Error('Transcription result is empty. The audio file might be corrupted, format not supported, or content too short.');
-    }
-
-    // Clean and structure the transcript (Turbo-style)
-    transcriptText = cleanTranscript(transcriptText);
-
-    // Cleanup
-    await unlink(tempPath).catch(() => {});
-
-    return transcriptText;
-  } catch (error: any) {
-    // Cleanup on error
-    await unlink(tempPath).catch(() => {});
-    console.error('Audio transcription error:', error);
-    
-    // Provide more specific error messages
-    if (error.message && error.message.includes('empty')) {
-      throw new Error('EMPTY_TRANSCRIPTION: Transcription result is empty. The audio file might be corrupted, format not supported, or content too short. Please check the audio file.');
-    }
-    if (error.message && error.message.includes('format')) {
-      throw new Error('UNSUPPORTED_AUDIO_FORMAT: Audio format not supported. Please use MP3, WAV, M4A, or WebM format.');
-    }
-    throw new Error(`Failed to transcribe audio: ${error.message || 'Unknown error'}`);
-  }
-}
+const MAX_AUDIO_MB = parseInt(process.env.MAX_FILE_MB || '25', 10);
+const TRANSCRIBE_CHUNK_SEC = parseInt(process.env.TRANSCRIBE_CHUNK_SEC || '90', 10);
 
 // Note: generateStructuredContent has been moved to lib/learning-asset-generator.ts
 // This file now uses the unified generator function
@@ -106,15 +29,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
     }
 
-    // Check file size (Whisper API limit: 25MB)
-    const WHISPER_MAX_SIZE = 25 * 1024 * 1024; // 25MB
-    if (file.size > WHISPER_MAX_SIZE) {
+    // Check file size limits
+    const maxFileSize = MAX_AUDIO_MB * 1024 * 1024;
+    if (file.size > maxFileSize) {
       return NextResponse.json(
         {
           error: 'FILE_TOO_LARGE',
-          message: `Audio file size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Whisper API limit (25MB). Please compress or split the audio.`,
-          maxSize: WHISPER_MAX_SIZE,
+          message: `Audio file size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the limit (${MAX_AUDIO_MB}MB). Please compress or split the audio.`,
+          maxSize: maxFileSize,
           actualSize: file.size,
+          hint: `Maximum audio file size is ${MAX_AUDIO_MB}MB. For longer recordings, consider splitting into smaller segments.`,
         },
         { status: 400 }
       );
@@ -157,8 +81,66 @@ export async function POST(req: Request) {
       );
     }
 
-    // Transcribe audio
-    const transcript = await transcribeAudio(file);
+    // Save file temporarily for processing
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const tempPath = join(tmpdir(), `audio-${Date.now()}.${file.name.split('.').pop() || 'mp3'}`);
+    await writeFile(tempPath, buffer);
+
+    let transcript: string;
+    let estimatedDuration: number | undefined;
+    let format: string | undefined;
+
+    try {
+      // Validate audio format and get metadata
+      const validation = await validateAudioFormat(tempPath);
+      if (!validation.isValid) {
+        throw new Error(`Invalid audio format: ${validation.error || 'Unknown format'}`);
+      }
+      format = validation.format;
+
+      // Get actual duration
+      estimatedDuration = await getAudioDuration(tempPath);
+
+      // Check duration limits
+      const plan = getCurrentUserPlan();
+      const limits = USAGE_LIMITS[plan];
+      const maxDurationSeconds = limits.maxAudioMinutesPerSession * 60;
+      
+      if (estimatedDuration > maxDurationSeconds) {
+        return NextResponse.json(
+          {
+            error: 'AUDIO_TOO_LONG',
+            message: `Audio duration (${Math.round(estimatedDuration / 60)} minutes) exceeds the limit of ${limits.maxAudioMinutesPerSession} minutes for ${plan} plan.`,
+            duration: estimatedDuration,
+            maxDuration: maxDurationSeconds,
+            hint: `Upgrade to Pro for up to ${USAGE_LIMITS.pro.maxAudioMinutesPerSession} minutes per session.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Transcribe with chunking support (for long audio)
+      console.log(`[Audio API] Starting transcription, duration: ${estimatedDuration}s, chunk threshold: ${TRANSCRIBE_CHUNK_SEC}s`);
+      transcript = await transcribeAudioWithChunking(tempPath, (stage, progress) => {
+        console.log(`[Audio API] Progress: ${stage} ${(progress * 100).toFixed(0)}%`);
+      });
+
+      // Clean transcript
+      transcript = cleanTranscript(transcript);
+
+      if (!transcript || transcript.trim().length === 0) {
+        throw new Error('Transcription result is empty. The audio file might be corrupted, format not supported, or content too short.');
+      }
+
+      console.log(`[Audio API] Transcription completed, length: ${transcript.length}, estimated tokens: ${estimateTokens(transcript)}`);
+    } catch (error: any) {
+      await unlink(tempPath).catch(() => {});
+      throw error;
+    } finally {
+      // Cleanup temp file
+      await unlink(tempPath).catch(() => {});
+    }
     
     // Generate content hash
     const contentHash = generateContentHash(transcript);
@@ -175,9 +157,6 @@ export async function POST(req: Request) {
     }
 
     // Generate structured content using unified generator (ONE LLM call)
-    // Estimate duration if possible (this is a placeholder - actual duration would come from audio metadata)
-    const estimatedDuration = file.size > 0 ? Math.round(file.size / 16000) : undefined; // Rough estimate
-    
     console.log('[Audio API] Starting learning asset generation, transcript length:', transcript.length);
     let structuredContent;
     try {
@@ -186,10 +165,15 @@ export async function POST(req: Request) {
         metadata: {
           fileName: file.name,
           duration: estimatedDuration,
-          format: file.type,
+          format: format || file.type,
         }
       });
-      console.log('[Audio API] Learning asset generated successfully');
+      console.log('[Audio API] Learning asset generated successfully:', {
+        title: structuredContent.title,
+        notesCount: structuredContent.notes.length,
+        quizzesCount: structuredContent.quizzes.length,
+        flashcardsCount: structuredContent.flashcards.length,
+      });
     } catch (genError: any) {
       console.error('[Audio API] Learning asset generation failed:', genError);
       throw new Error(`Failed to generate learning assets: ${genError.message || 'Unknown error'}`);
@@ -199,7 +183,7 @@ export async function POST(req: Request) {
     const source: AudioSource = {
       fileName: file.name,
       duration: estimatedDuration,
-      format: file.type,
+      format: format || file.type,
     };
 
     // Create new session with source information
@@ -224,23 +208,32 @@ export async function POST(req: Request) {
       createdAt: newSession.createdAt,
     });
   } catch (error: any) {
-    console.error('Audio processing error:', error);
+    console.error('[Audio API] Processing error:', error);
     const errorMessage = error.message || 'Failed to process audio';
     
     // Extract error code from message if present
     let errorCode = 'AUDIO_PROCESSING_ERROR';
-    if (errorMessage.includes('EMPTY_TRANSCRIPTION')) {
+    let hint = 'Please try again or contact support if the problem persists.';
+    
+    if (errorMessage.includes('EMPTY_TRANSCRIPTION') || errorMessage.includes('empty')) {
       errorCode = 'EMPTY_TRANSCRIPTION';
-    } else if (errorMessage.includes('UNSUPPORTED_AUDIO_FORMAT')) {
+      hint = 'The audio file might be corrupted, format not supported, or content too short. Please check the audio file.';
+    } else if (errorMessage.includes('UNSUPPORTED_AUDIO_FORMAT') || errorMessage.includes('Invalid audio format')) {
       errorCode = 'UNSUPPORTED_AUDIO_FORMAT';
+      hint = 'Supported formats: MP3, WAV, WebM, M4A. Please convert your audio file to one of these formats.';
     } else if (errorMessage.includes('transcribe') || errorMessage.includes('Transcribe')) {
       errorCode = 'TRANSCRIPTION_ERROR';
+      hint = 'Failed to transcribe audio. Please ensure the audio file is not corrupted and contains clear speech.';
+    } else if (errorMessage.includes('AUDIO_TOO_LONG') || errorMessage.includes('duration')) {
+      errorCode = 'AUDIO_TOO_LONG';
+      hint = 'Audio duration exceeds the limit for your plan. Please split the audio into shorter segments or upgrade to Pro.';
     }
     
     return NextResponse.json(
       { 
         error: errorCode,
-        message: errorMessage
+        message: errorMessage,
+        hint,
       },
       { status: 500 }
     );
