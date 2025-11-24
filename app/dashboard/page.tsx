@@ -20,6 +20,7 @@ import { getCurrentUserPlan } from '@/lib/userPlan';
 import { USAGE_LIMITS } from '@/config/usageLimits';
 import NextLink from 'next/link';
 import { t, getUILanguage } from '@/lib/i18n';
+import MagicBookUpload from '@/components/MagicBookUpload';
 
 // Type definitions
 type ProjectType = 'document' | 'audio' | 'video';
@@ -80,6 +81,15 @@ export default function Dashboard() {
   } | null>(null);
   const [limits, setLimits] = useState(USAGE_LIMITS.free);
   const [currentLang, setCurrentLang] = useState<string>('en'); // Track language for re-render
+
+  // Magic book upload state
+  const [magicBookOpen, setMagicBookOpen] = useState(false);
+  const [uploadType, setUploadType] = useState<'file' | 'audio' | 'video'>('file');
+  const [uploadFileName, setUploadFileName] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadLoadingStep, setUploadLoadingStep] = useState('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [generatedSessionId, setGeneratedSessionId] = useState<string | null>(null);
 
   // Check if user is onboarded and get initial language
   useEffect(() => {
@@ -180,45 +190,192 @@ export default function Dashboard() {
   };
 
   // Handle document upload
-  const handleDocumentUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'document',
-      createdAt: Date.now(),
-      summary: generateDocumentSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleDocumentUpload = async (file: File) => {
+    // Reset state
+    setUploadError(null);
+    setUploadProgress(0);
+    setGeneratedSessionId(null);
+
+    // Open magic book
+    setUploadType('file');
+    setUploadFileName(file.name);
+    setMagicBookOpen(true);
+
+    // Simulate progress updates
+    const loadingSteps = [
+      { step: 'Extracting text from document...', progress: 20 },
+      { step: 'Analyzing content...', progress: 40 },
+      { step: 'Extracting key ideas...', progress: 60 },
+      { step: 'Generating structured notes...', progress: 80 },
+      { step: 'Creating quizzes and flashcards...', progress: 95 },
+    ];
+
+    let currentStepIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (currentStepIndex < loadingSteps.length) {
+        setUploadLoadingStep(loadingSteps[currentStepIndex].step);
+        setUploadProgress(loadingSteps[currentStepIndex].progress);
+        currentStepIndex++;
+      }
+    }, 800);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userPlan', userPlan);
+      formData.append('model', 'gpt-4o-mini'); // Can be made dynamic based on user plan
+
+      const response = await fetch('/api/process-file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to process file');
+      }
+
+      const data = await response.json();
+
+      setUploadProgress(100);
+      setUploadLoadingStep('Almost ready...');
+      setGeneratedSessionId(data.sessionId);
+
+      // Wait a moment before allowing navigation
+      setTimeout(() => {
+        window.location.href = `/dashboard/${data.sessionId}`;
+      }, 2000);
+
+    } catch (error: any) {
+      clearInterval(progressInterval);
+      console.error('File upload error:', error);
+      setUploadError(error.message || 'Failed to process file. Please try again.');
+      setUploadProgress(0);
+    }
   };
 
   // Handle audio upload
-  const handleAudioUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'audio',
-      createdAt: Date.now(),
-      summary: generateAudioSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleAudioUpload = async (file: File) => {
+    // Reset state
+    setUploadError(null);
+    setUploadProgress(0);
+    setGeneratedSessionId(null);
+
+    // Open magic book
+    setUploadType('audio');
+    setUploadFileName(file.name);
+    setMagicBookOpen(true);
+
+    // Simulate progress updates
+    const loadingSteps = [
+      { step: 'Uploading audio file...', progress: 15 },
+      { step: 'Transcribing audio with Whisper...', progress: 40 },
+      { step: 'Analyzing transcript...', progress: 60 },
+      { step: 'Generating structured notes...', progress: 80 },
+      { step: 'Creating quizzes and flashcards...', progress: 95 },
+    ];
+
+    let currentStepIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (currentStepIndex < loadingSteps.length) {
+        setUploadLoadingStep(loadingSteps[currentStepIndex].step);
+        setUploadProgress(loadingSteps[currentStepIndex].progress);
+        currentStepIndex++;
+      }
+    }, 1000);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userPlan', userPlan);
+      formData.append('model', 'gpt-4o-mini'); // Can be made dynamic based on user plan
+
+      const response = await fetch('/api/process-audio', {
+        method: 'POST',
+        body: formData,
+      });
+
+      clearInterval(progressInterval);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to process audio');
+      }
+
+      const data = await response.json();
+
+      setUploadProgress(100);
+      setUploadLoadingStep('Almost ready...');
+      setGeneratedSessionId(data.sessionId);
+
+      // Wait a moment before allowing navigation
+      setTimeout(() => {
+        window.location.href = `/dashboard/${data.sessionId}`;
+      }, 2000);
+
+    } catch (error: any) {
+      clearInterval(progressInterval);
+      console.error('Audio upload error:', error);
+      setUploadError(error.message || 'Failed to process audio. Please try again.');
+      setUploadProgress(0);
+    }
   };
 
   // Handle video link
-  const handleVideoLink = () => {
+  const handleVideoLink = async () => {
     if (!videoUrl.trim()) return;
-    
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: `Video: ${videoUrl.substring(0, 30)}...`,
-      type: 'video',
-      createdAt: Date.now(),
-      summary: generateVideoSummary(videoUrl)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
-    setVideoUrl('');
+
+    // Reset state
+    setUploadError(null);
+    setUploadProgress(0);
+    setGeneratedSessionId(null);
+
+    // Open magic book
+    setUploadType('video');
+    setUploadFileName(videoUrl);
+    setMagicBookOpen(true);
+
+    setUploadLoadingStep('Processing video URL...');
+    setUploadProgress(20);
+
+    try {
+      const response = await fetch('/api/process-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          videoUrl,
+          userPlan,
+          model: 'gpt-4o-mini',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to process video');
+      }
+
+      const data = await response.json();
+
+      setUploadProgress(100);
+      setUploadLoadingStep('Almost ready...');
+      setGeneratedSessionId(data.sessionId);
+
+      // Wait a moment before allowing navigation
+      setTimeout(() => {
+        window.location.href = `/dashboard/${data.sessionId}`;
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Video processing error:', error);
+      setUploadError(error.message || 'Video processing is currently under development. Please download the video\'s audio and use the Audio Upload feature instead.');
+      setUploadProgress(0);
+    } finally {
+      setVideoUrl('');
+    }
   };
 
   // Drag and drop handlers
@@ -690,6 +847,24 @@ export default function Dashboard() {
           </div>
         </main>
       </div>
+
+      {/* Magic Book Upload Modal */}
+      <MagicBookUpload
+        isOpen={magicBookOpen}
+        type={uploadType}
+        fileName={uploadFileName}
+        progress={uploadProgress}
+        loadingStep={uploadLoadingStep}
+        error={uploadError}
+        onComplete={(sessionId) => {
+          window.location.href = `/dashboard/${sessionId}`;
+        }}
+        onClose={() => {
+          setMagicBookOpen(false);
+          setUploadError(null);
+          setUploadProgress(0);
+        }}
+      />
     </div>
   );
 }
