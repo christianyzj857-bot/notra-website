@@ -3,6 +3,7 @@ export interface Country {
   id: string;
   label: string;
   code?: string; // ISO country code if needed
+  nativeLabel?: string; // Native name of the country (e.g., "中国" for China)
 }
 
 export const COUNTRIES: Country[] = [
