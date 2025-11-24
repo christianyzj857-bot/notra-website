@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { FileText, Mic, Video, Clock, ExternalLink, MessageSquare, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { NotraSession, NoteSection, QuizItem, Flashcard } from '@/types/notra';
+import { RenderText, BulletList, SimpleTable, ExampleBox, NoteContent, NoteSectionIcon } from '@/components/NoteRenderer';
 
 type TabType = 'notes' | 'quiz' | 'flashcards';
 
@@ -192,44 +193,27 @@ export default function SessionDetailPage() {
             <div className="space-y-8">
               {session.notes.map((section: NoteSection) => (
                 <section key={section.id} className="border-b border-slate-200 pb-8 last:border-0">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-4">
-                    {section.heading}
-                  </h2>
-                  <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                    {section.content}
-                  </p>
+                  <div className="flex items-center gap-3 mb-4">
+                    <NoteSectionIcon heading={section.heading} />
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      {section.heading}
+                    </h2>
+                  </div>
+
+                  {section.content && (
+                    <NoteContent content={section.content} className="mb-4" />
+                  )}
+
                   {section.bullets && section.bullets.length > 0 && (
-                    <ul className="list-disc list-inside space-y-2 mb-4 text-slate-700">
-                      {section.bullets.map((bullet, idx) => (
-                        <li key={idx}>{bullet}</li>
-                      ))}
-                    </ul>
+                    <BulletList bullets={section.bullets} className="mb-4" />
                   )}
+
                   {section.example && (
-                    <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-xl mb-4">
-                      <p className="font-semibold text-indigo-900 mb-2">Example:</p>
-                      <p className="text-indigo-800">{section.example}</p>
-                    </div>
+                    <ExampleBox example={section.example} className="mb-4" />
                   )}
+
                   {section.tableSummary && section.tableSummary.length > 0 && (
-                    <div className="overflow-x-auto mt-4">
-                      <table className="w-full border-collapse border border-slate-300">
-                        <thead>
-                          <tr className="bg-slate-100">
-                            <th className="border border-slate-300 px-4 py-2 text-left font-semibold">Term</th>
-                            <th className="border border-slate-300 px-4 py-2 text-left font-semibold">Definition</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {section.tableSummary.map((row, idx) => (
-                            <tr key={idx}>
-                              <td className="border border-slate-300 px-4 py-2">{row.label}</td>
-                              <td className="border border-slate-300 px-4 py-2">{row.value}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <SimpleTable data={section.tableSummary} />
                   )}
                 </section>
               ))}

@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { createSession, findSessionByHash, generateContentHash } from "@/lib/db";
-import { NotraSession, NoteSection, QuizItem, Flashcard } from "@/types/notra";
 import { getCurrentUserPlan } from "@/lib/userPlan";
 import { USAGE_LIMITS } from "@/config/usageLimits";
 import { getUsage, incrementUsage, getMonthKey } from "@/lib/usage";
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const DEFAULT_MODEL = "gpt-4o-mini";
+import { generateStructuredContent, generateWithRetry } from "@/lib/noteGeneration";
 
 // For now, we'll use a dummy transcript approach
 // In production, you would integrate with YouTube API, Bilibili API, etc.
@@ -42,113 +38,6 @@ This transcript would be used to generate structured notes, quizzes, and flashca
   return dummyTranscript;
 }
 
-// Generate structured content (same as file/audio processing)
-async function generateStructuredContent(text: string, videoUrl: string): Promise<{
-  title: string;
-  notes: NoteSection[];
-  quizzes: QuizItem[];
-  flashcards: Flashcard[];
-  summaryForChat: string;
-}> {
-  if (!OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured');
-  }
-
-  const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-  const truncatedText = text.substring(0, 8000);
-
-  const prompt = `You are an AI learning assistant. Analyze the following video transcript/content and generate structured study materials.
-
-Video URL: ${videoUrl}
-Content:
-${truncatedText}
-
-Please return a JSON object with the following structure:
-{
-  "title": "A concise title for this video",
-  "notes": [
-    {
-      "id": "note-1",
-      "heading": "Section heading",
-      "content": "Main content paragraph",
-      "bullets": ["Key point 1", "Key point 2"],
-      "example": "Optional example",
-      "tableSummary": [{"label": "Term", "value": "Definition"}]
-    }
-  ],
-  "quizzes": [
-    {
-      "id": "quiz-1",
-      "question": "Question text",
-      "options": [{"label": "A", "text": "Option A"}, {"label": "B", "text": "Option B"}, {"label": "C", "text": "Option C"}, {"label": "D", "text": "Option D"}],
-      "correctIndex": 0,
-      "explanation": "Why this answer is correct",
-      "difficulty": "easy"
-    }
-  ],
-  "flashcards": [
-    {
-      "id": "card-1",
-      "front": "Question or term",
-      "back": "Answer or definition",
-      "tag": "Category"
-    }
-  ],
-  "summaryForChat": "A concise 2-3 sentence summary of the key concepts for chat context"
-}
-
-Generate 4-6 note sections, 3-5 quiz questions, and 4-6 flashcards. Focus on key moments and important takeaways from the video.`;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: DEFAULT_MODEL,
-      messages: [
-        { role: "system", content: "You are a helpful educational assistant that generates structured learning materials in JSON format." },
-        { role: "user", content: prompt }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 3000,
-    });
-
-    const responseText = completion.choices[0]?.message?.content || '{}';
-    const parsed = JSON.parse(responseText);
-
-    return {
-      title: parsed.title || "Video Content",
-      notes: (parsed.notes || []).map((note: any, idx: number) => ({
-        id: note.id || `note-${idx + 1}`,
-        heading: note.heading || "",
-        content: note.content || "",
-        bullets: note.bullets || [],
-        example: note.example,
-        tableSummary: note.tableSummary || [],
-      })) as NoteSection[],
-      quizzes: (parsed.quizzes || []).map((quiz: any, idx: number) => ({
-        id: quiz.id || `quiz-${idx + 1}`,
-        question: quiz.question || "",
-        options: (quiz.options || []).map((opt: any, optIdx: number) => ({
-          label: opt.label || String.fromCharCode(65 + optIdx),
-          text: opt.text || "",
-        })),
-        correctIndex: quiz.correctIndex ?? 0,
-        explanation: quiz.explanation || "",
-        difficulty: quiz.difficulty || "medium",
-      })) as QuizItem[],
-      flashcards: (parsed.flashcards || []).map((card: any, idx: number) => ({
-        id: card.id || `card-${idx + 1}`,
-        front: card.front || "",
-        back: card.back || "",
-        tag: card.tag,
-      })) as Flashcard[],
-      summaryForChat: parsed.summaryForChat || "Video content covering key concepts and important moments.",
-    };
-  } catch (error: any) {
-    console.error('LLM generation error:', error);
-    throw new Error('Failed to generate structured content');
-  }
-}
 
 export async function POST(req: Request) {
   try {
@@ -187,23 +76,36 @@ export async function POST(req: Request) {
 
     // Get video transcript (placeholder for now)
     const transcript = await getVideoTranscript(url);
-    
+
+    if (!transcript || transcript.trim().length === 0) {
+      return NextResponse.json(
+        { error: 'Failed to extract video transcript or video is empty' },
+        { status: 400 }
+      );
+    }
+
     // Generate content hash
     const contentHash = generateContentHash(transcript);
 
     // Check for existing session
     const existingSession = await findSessionByHash(contentHash);
     if (existingSession) {
+      console.log('Found existing session, returning cached result');
       return NextResponse.json({
         sessionId: existingSession.id,
         type: existingSession.type,
         title: existingSession.title,
         createdAt: existingSession.createdAt,
+        cached: true,
       });
     }
 
-    // Generate structured content
-    const structuredContent = await generateStructuredContent(transcript, url);
+    // Generate structured content with retry mechanism
+    const structuredContent = await generateWithRetry(
+      () => generateStructuredContent(transcript, plan, "video"),
+      3,
+      1000
+    );
 
     // Create new session
     const newSession = await createSession({
@@ -227,9 +129,30 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('Video processing error:', error);
+
+    // Provide specific error messages
+    let errorMessage = 'Failed to process video';
+    let statusCode = 500;
+
+    if (error.message?.includes('Invalid URL')) {
+      errorMessage = error.message;
+      statusCode = 400;
+    } else if (error.message?.includes('Rate limit')) {
+      errorMessage = error.message;
+      statusCode = 429;
+    } else if (error.message?.includes('empty')) {
+      errorMessage = error.message;
+      statusCode = 400;
+    } else if (error.message?.includes('transcript')) {
+      errorMessage = 'Failed to extract video transcript. Please ensure the URL is valid and the video is accessible.';
+      statusCode = 400;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
-      { error: error.message || 'Failed to process video' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }
