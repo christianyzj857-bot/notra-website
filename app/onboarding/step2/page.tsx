@@ -3,8 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FileText, Upload, Youtube, Mic, AlertCircle, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
 import { ONBOARDING_SAMPLES } from '@/sample-data/onboardingSamples';
-import { type OnboardingRole } from '@/types/notra';
-import { onboardingSamples } from '../config';
+import { onboardingSamples, type OnboardingRole } from '../config';
 import { InlineMath, BlockMath } from 'react-katex';
 
 // Import all image components
