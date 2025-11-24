@@ -130,14 +130,22 @@ export async function POST(req: Request) {
     // Estimate duration if possible (this is a placeholder - actual duration would come from audio metadata)
     const estimatedDuration = file.size > 0 ? Math.round(file.size / 16000) : undefined; // Rough estimate
     
-    const structuredContent = await generateLearningAsset(transcript, {
-      type: "audio",
-      metadata: {
-        fileName: file.name,
-        duration: estimatedDuration,
-        format: file.type,
-      }
-    });
+    console.log('[Audio API] Starting learning asset generation, transcript length:', transcript.length);
+    let structuredContent;
+    try {
+      structuredContent = await generateLearningAsset(transcript, {
+        type: "audio",
+        metadata: {
+          fileName: file.name,
+          duration: estimatedDuration,
+          format: file.type,
+        }
+      });
+      console.log('[Audio API] Learning asset generated successfully');
+    } catch (genError: any) {
+      console.error('[Audio API] Learning asset generation failed:', genError);
+      throw new Error(`Failed to generate learning assets: ${genError.message || 'Unknown error'}`);
+    }
 
     // Prepare source information
     const source: AudioSource = {

@@ -148,6 +148,7 @@ Requirements:
 - The summaryForChat should be concise but informative enough for context`;
 
   try {
+    console.log('[LearningAssetGenerator] Calling OpenAI API, model:', DEFAULT_MODEL, 'text length:', text.length);
     const completion = await openai.chat.completions.create({
       model: DEFAULT_MODEL,
       messages: [
@@ -163,7 +164,16 @@ Requirements:
     });
 
     const responseText = completion.choices[0]?.message?.content || '{}';
-    const parsed = JSON.parse(responseText);
+    console.log('[LearningAssetGenerator] OpenAI response received, length:', responseText.length);
+    
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText);
+      console.log('[LearningAssetGenerator] JSON parsed successfully');
+    } catch (parseError: any) {
+      console.error('[LearningAssetGenerator] JSON parse error:', parseError, 'Response text:', responseText.substring(0, 500));
+      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
+    }
 
     // Validate and structure the response
     return {

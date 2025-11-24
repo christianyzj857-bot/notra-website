@@ -199,10 +199,20 @@ export default function Dashboard() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = errorData.message || errorData.error || 'Failed to upload file. Please try again.';
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: `HTTP ${response.status}`, message: response.statusText };
+        }
+        const errorMessage = errorData.message || errorData.error || `Failed to upload file (HTTP ${response.status})`;
+        console.error('File upload API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
         setError(errorMessage);
-        alert(errorMessage);
+        alert(`File upload failed: ${errorMessage}\n\nStatus: ${response.status}\nPlease check the browser console for more details.`);
         setIsLoading(false);
         return;
       }
@@ -227,9 +237,14 @@ export default function Dashboard() {
       router.push(`/dashboard/${data.sessionId}`);
     } catch (error: any) {
       console.error('File upload error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       const errorMessage = error.message || 'Failed to upload file. Please try again.';
       setError(errorMessage);
-      alert(errorMessage);
+      alert(`File upload failed: ${errorMessage}\n\nPlease check the browser console for more details.`);
       setIsLoading(false);
     }
   };

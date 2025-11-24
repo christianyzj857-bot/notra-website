@@ -100,12 +100,25 @@ export async function POST(req: Request) {
     }
 
     // Generate structured content using unified generator (ONE LLM call)
-    const structuredContent = await generateLearningAsset(text, {
-      type: "file",
-      metadata: {
-        fileName: file.name,
-      }
-    });
+    console.log('[File API] Starting learning asset generation, text length:', text.length);
+    let structuredContent;
+    try {
+      structuredContent = await generateLearningAsset(text, {
+        type: "file",
+        metadata: {
+          fileName: file.name,
+        }
+      });
+      console.log('[File API] Learning asset generated successfully:', {
+        title: structuredContent.title,
+        notesCount: structuredContent.notes.length,
+        quizzesCount: structuredContent.quizzes.length,
+        flashcardsCount: structuredContent.flashcards.length,
+      });
+    } catch (genError: any) {
+      console.error('[File API] Learning asset generation failed:', genError);
+      throw new Error(`Failed to generate learning assets: ${genError.message || 'Unknown error'}`);
+    }
 
     // Prepare source information
     const source: FileSource = {
@@ -115,16 +128,29 @@ export async function POST(req: Request) {
     };
 
     // Create new session with source information
-    const newSession = await createSession({
-      type: "file",
+    console.log('[File API] Creating session with data:', {
       title: structuredContent.title || file.name,
-      contentHash,
-      notes: structuredContent.notes,
-      quizzes: structuredContent.quizzes,
-      flashcards: structuredContent.flashcards,
-      summaryForChat: structuredContent.summaryForChat,
-      source,
+      notesCount: structuredContent.notes.length,
+      quizzesCount: structuredContent.quizzes.length,
+      flashcardsCount: structuredContent.flashcards.length,
     });
+    let newSession;
+    try {
+      newSession = await createSession({
+        type: "file",
+        title: structuredContent.title || file.name,
+        contentHash,
+        notes: structuredContent.notes,
+        quizzes: structuredContent.quizzes,
+        flashcards: structuredContent.flashcards,
+        summaryForChat: structuredContent.summaryForChat,
+        source,
+      });
+      console.log('[File API] Session created successfully:', newSession.id);
+    } catch (dbError: any) {
+      console.error('[File API] Session creation failed:', dbError);
+      throw new Error(`Failed to save session: ${dbError.message || 'Unknown error'}`);
+    }
 
     // Increment usage count after successful processing
     await incrementUsage("file", monthKey, 1);

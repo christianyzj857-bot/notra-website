@@ -108,15 +108,23 @@ export async function POST(req: Request) {
     const videoId = extractVideoId(url, platform);
     
     // Generate structured content using unified generator (ONE LLM call)
-    const structuredContent = await generateLearningAsset(transcript, {
-      type: "video",
-      metadata: {
-        videoUrl: url,
-        platform: platform === 'youtube' ? 'youtube' : 
-                  platform === 'bilibili' ? 'bilibili' : 
-                  platform === 'douyin' ? 'douyin' : 'other',
-      }
-    });
+    console.log('[Video API] Starting learning asset generation, transcript length:', transcript.length);
+    let structuredContent;
+    try {
+      structuredContent = await generateLearningAsset(transcript, {
+        type: "video",
+        metadata: {
+          videoUrl: url,
+          platform: platform === 'youtube' ? 'youtube' : 
+                    platform === 'bilibili' ? 'bilibili' : 
+                    platform === 'douyin' ? 'douyin' : 'other',
+        }
+      });
+      console.log('[Video API] Learning asset generated successfully');
+    } catch (genError: any) {
+      console.error('[Video API] Learning asset generation failed:', genError);
+      throw new Error(`Failed to generate learning assets: ${genError.message || 'Unknown error'}`);
+    }
 
     // Prepare source information
     const source: VideoSource = {
