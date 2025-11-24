@@ -1,0 +1,18 @@
+Please read CLAUDE_FIX_ALL_ISSUES_PROMPT.md and fix all the issues mentioned in it.
+
+The main problems are:
+1. Dashboard upload functions (handleDocumentUpload, handleAudioUpload, handleVideoLink) don't call APIs - they just create fake local data
+2. "View Full Notes" button doesn't work because IDs are fake
+3. Chat page uses window.location.replace instead of router.replace
+4. File type support needs to be extended (add Excel .xlsx, CSV, code files, but exclude images/audio/video/compressed files like ChatGPT)
+
+Fix all issues in one go. Make sure:
+- All upload functions call the correct APIs (/api/process/file, /api/process/audio, /api/process/video)
+- After successful upload, navigate to /dashboard/{sessionId}
+- Add loading states and error handling
+- Extend file type support in app/api/process/file/route.ts
+- Update Dashboard file input accept attribute
+- Fix Chat page router usage
+
+Start by reading the detailed prompt file, then implement all fixes.
+
