@@ -1,7 +1,7 @@
 "use client";
 
 import React, { FormEvent, useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { 
   Mic, Paperclip, Send, StopCircle, Youtube, Menu, X, 
   Loader2, FileText, Image as ImageIcon, Lock, Code, Sigma, Sparkles, BarChart3, Plus, MessageSquare, BookOpen
