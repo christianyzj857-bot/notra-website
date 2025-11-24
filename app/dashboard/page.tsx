@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  FileText, 
-  Mic, 
-  Video, 
-  Plus, 
-  Upload, 
-  Menu, 
+import { useRouter } from 'next/navigation';
+import {
+  FileText,
+  Mic,
+  Video,
+  Plus,
+  Upload,
+  Menu,
   X,
   Clock,
   ExternalLink,
@@ -64,10 +65,12 @@ const formatRelativeTime = (timestamp: number): string => {
 };
 
 export default function Dashboard() {
+  const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const [videoUrl, setVideoUrl] = useState('');
@@ -180,45 +183,141 @@ export default function Dashboard() {
   };
 
   // Handle document upload
-  const handleDocumentUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'document',
-      createdAt: Date.now(),
-      summary: generateDocumentSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleDocumentUpload = async (file: File) => {
+    try {
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/process/file', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to upload file. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Reload sessions list
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+
+      setIsLoading(false);
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      alert('Failed to upload file. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   // Handle audio upload
-  const handleAudioUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'audio',
-      createdAt: Date.now(),
-      summary: generateAudioSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleAudioUpload = async (file: File) => {
+    try {
+      setIsLoading(true);
+
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      const response = await fetch('/api/process/audio', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to upload audio. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Reload sessions list
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+
+      setIsLoading(false);
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('Audio upload error:', error);
+      alert('Failed to upload audio. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   // Handle video link
-  const handleVideoLink = () => {
+  const handleVideoLink = async () => {
     if (!videoUrl.trim()) return;
-    
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: `Video: ${videoUrl.substring(0, 30)}...`,
-      type: 'video',
-      createdAt: Date.now(),
-      summary: generateVideoSummary(videoUrl)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
-    setVideoUrl('');
+
+    try {
+      setIsLoading(true);
+
+      const response = await fetch('/api/process/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoUrl })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to process video. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      // Reload sessions list
+      const sessionsResponse = await fetch('/api/sessions/recent');
+      if (sessionsResponse.ok) {
+        const sessions = await sessionsResponse.json();
+        const formattedProjects: Project[] = sessions.map((s: any) => ({
+          id: s.id,
+          title: s.title,
+          type: s.type,
+          createdAt: new Date(s.createdAt).getTime(),
+          summary: s.summaryForChat || 'No summary available'
+        }));
+        setProjects(formattedProjects);
+      }
+
+      setVideoUrl('');
+      setIsLoading(false);
+      router.push(`/dashboard/${data.sessionId}`);
+    } catch (error: any) {
+      console.error('Video processing error:', error);
+      alert('Failed to process video. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   // Drag and drop handlers
@@ -269,6 +368,18 @@ export default function Dashboard() {
         return <Video className="w-4 h-4" />;
     }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-transparent flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-400">Processing your file...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-transparent relative overflow-hidden">
@@ -531,7 +642,7 @@ export default function Dashboard() {
                   ref={fileInputRef}
                   type="file"
                   className="hidden"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                  accept=".pdf,.doc,.docx,.xlsx,.xls,.csv,.txt,.md,.json,.js,.ts,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.swift,.kt,.scala,.html,.css,.xml,.yaml,.yml,.sh,.bat,.ps1"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) handleDocumentUpload(file);
@@ -669,7 +780,7 @@ export default function Dashboard() {
                   </div>
 
                   <button
-                    onClick={() => window.location.href = `/dashboard/${selectedProject.id}`}
+                    onClick={() => router.push(`/dashboard/${selectedProject.id}`)}
                     className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-400 hover:to-purple-500 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 flex items-center gap-2"
                   >
                     {t('dashboard.openFullView')}

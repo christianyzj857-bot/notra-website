@@ -19,6 +19,7 @@ async function extractTextFromFile(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer());
   const fileName = file.name.toLowerCase();
 
+  // PDF
   if (fileName.endsWith('.pdf')) {
     try {
       const pdfParseModule = await import("pdf-parse");
@@ -28,7 +29,10 @@ async function extractTextFromFile(file: File): Promise<string> {
     } catch (error) {
       throw new Error('Failed to parse PDF file');
     }
-  } else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
+  }
+
+  // Word
+  else if (fileName.endsWith('.docx') || fileName.endsWith('.doc')) {
     try {
       const mammothModule = await import("mammoth");
       const mammoth = (mammothModule as any).default || mammothModule;
@@ -41,10 +45,64 @@ async function extractTextFromFile(file: File): Promise<string> {
     } catch (error) {
       throw new Error('Failed to parse Word document');
     }
-  } else if (fileName.endsWith('.txt') || fileName.endsWith('.md')) {
+  }
+
+  // Excel
+  else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+    try {
+      const XLSX = await import("xlsx");
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      let text = '';
+
+      // Iterate through all worksheets
+      workbook.SheetNames.forEach((sheetName) => {
+        const worksheet = workbook.Sheets[sheetName];
+        const sheetData = XLSX.utils.sheet_to_csv(worksheet);
+        text += `Sheet: ${sheetName}\n${sheetData}\n\n`;
+      });
+
+      return text;
+    } catch (error) {
+      throw new Error('Failed to parse Excel file. Please ensure the file is not corrupted.');
+    }
+  }
+
+  // CSV
+  else if (fileName.endsWith('.csv')) {
     return buffer.toString('utf-8');
-  } else {
-    throw new Error('Unsupported file type');
+  }
+
+  // PowerPoint (not yet supported, return friendly message)
+  else if (fileName.endsWith('.pptx') || fileName.endsWith('.ppt')) {
+    throw new Error('PowerPoint files are not yet supported. Please convert to PDF or export as text first.');
+  }
+
+  // Text files
+  else if (fileName.endsWith('.txt') || fileName.endsWith('.md') || fileName.endsWith('.json')) {
+    return buffer.toString('utf-8');
+  }
+
+  // Code files
+  else if (['.js', '.ts', '.py', '.java', '.cpp', '.c', '.cs', '.php', '.rb', '.go', '.rs', '.swift', '.kt', '.scala', '.html', '.css', '.xml', '.yaml', '.yml', '.sh', '.bat', '.ps1'].some(ext => fileName.endsWith(ext))) {
+    return buffer.toString('utf-8');
+  }
+
+  // Unsupported formats (ChatGPT also doesn't support these)
+  else if (['.zip', '.rar', '.7z', '.tar', '.gz', '.exe', '.dll', '.bin', '.iso', '.dmg', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.mp3', '.wav', '.m4a', '.flac', '.mp4', '.avi', '.mov', '.mkv'].some(ext => fileName.endsWith(ext))) {
+    const fileType = fileName.split('.').pop()?.toUpperCase();
+    if (['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'].some(ext => fileName.endsWith(ext))) {
+      throw new Error(`Image files (${fileType}) are not supported. Please convert to PDF or use OCR tools first.`);
+    } else if (['.mp3', '.wav', '.m4a', '.flac'].some(ext => fileName.endsWith(ext))) {
+      throw new Error(`Audio files (${fileType}) should be uploaded using the Audio Upload feature, not file upload.`);
+    } else if (['.mp4', '.avi', '.mov', '.mkv'].some(ext => fileName.endsWith(ext))) {
+      throw new Error(`Video files (${fileType}) should be processed using the Video Link feature, not file upload.`);
+    } else {
+      throw new Error(`File type ${fileType} is not supported. Supported types: PDF, Word, Excel, CSV, Text, Code files.`);
+    }
+  }
+
+  else {
+    throw new Error(`Unsupported file type: ${file.name}. Supported types: PDF, Word, Excel (.xlsx, .xls), CSV, Text (.txt, .md), Code files (.js, .ts, .py, etc.).`);
   }
 }
 
