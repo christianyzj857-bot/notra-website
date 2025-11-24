@@ -15,6 +15,21 @@ export const runtime = "nodejs";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+// Clean and structure transcript text (Turbo-style preprocessing)
+function cleanTranscript(text: string): string {
+  // Remove excessive whitespace
+  let cleaned = text.replace(/\s+/g, ' ').trim();
+  
+  // Fix common transcription issues
+  cleaned = cleaned.replace(/\b(um|uh|er|ah)\b/gi, ''); // Remove filler words
+  cleaned = cleaned.replace(/\s+/g, ' '); // Normalize spaces again
+  
+  // Ensure proper sentence endings
+  cleaned = cleaned.replace(/([.!?])\s*([A-Z])/g, '$1 $2');
+  
+  return cleaned.trim();
+}
+
 // Transcribe audio using Whisper API
 async function transcribeAudio(audioFile: File): Promise<string> {
   if (!OPENAI_API_KEY) {
@@ -36,27 +51,28 @@ async function transcribeAudio(audioFile: File): Promise<string> {
       type: audioFile.type || 'audio/webm' 
     });
     
-    // Use FormData for Whisper API (it expects a file)
-    const formData = new FormData();
-    formData.append('file', fileForApi);
-    formData.append('model', 'whisper-1');
-    formData.append('prompt', 'This is an educational lecture or audio content. Please transcribe accurately.');
+    // Enhanced prompt for better transcription quality
+    const transcriptionPrompt = "This is an educational lecture, presentation, or academic audio content. Please transcribe accurately with proper punctuation, capitalization, and sentence structure. Include technical terms and academic vocabulary as spoken.";
     
     // Call OpenAI Whisper API
     const transcription = await openai.audio.transcriptions.create({
       file: fileForApi as any,
       model: "whisper-1",
       language: undefined, // Auto-detect
-      prompt: "This is an educational lecture or audio content. Please transcribe accurately.",
+      prompt: transcriptionPrompt,
+      temperature: 0, // Lower temperature for more consistent transcription
     });
 
-    const transcriptText = typeof transcription === 'string' 
+    let transcriptText = typeof transcription === 'string' 
       ? transcription 
       : (transcription as any).text || '';
 
     if (!transcriptText || transcriptText.trim().length === 0) {
       throw new Error('Transcription result is empty. The audio file might be corrupted, format not supported, or content too short.');
     }
+
+    // Clean and structure the transcript (Turbo-style)
+    transcriptText = cleanTranscript(transcriptText);
 
     // Cleanup
     await unlink(tempPath).catch(() => {});
@@ -88,6 +104,38 @@ export async function POST(req: Request) {
 
     if (!file) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
+    }
+
+    // Check file size (Whisper API limit: 25MB)
+    const WHISPER_MAX_SIZE = 25 * 1024 * 1024; // 25MB
+    if (file.size > WHISPER_MAX_SIZE) {
+      return NextResponse.json(
+        {
+          error: 'FILE_TOO_LARGE',
+          message: `Audio file size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds Whisper API limit (25MB). Please compress or split the audio.`,
+          maxSize: WHISPER_MAX_SIZE,
+          actualSize: file.size,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check audio format
+    const allowedMimeTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/webm', 'audio/m4a', 'audio/x-m4a', 'audio/mp4'];
+    const allowedExtensions = ['.mp3', '.wav', '.webm', '.m4a', '.mp4'];
+    const fileName = file.name.toLowerCase();
+    const isValidFormat = allowedMimeTypes.includes(file.type) || 
+                          allowedExtensions.some(ext => fileName.endsWith(ext));
+    
+    if (!isValidFormat && file.type) {
+      return NextResponse.json(
+        {
+          error: 'UNSUPPORTED_AUDIO_FORMAT',
+          message: `Audio format not supported. Please use MP3, WAV, WebM, or M4A format.`,
+          allowedFormats: allowedExtensions,
+        },
+        { status: 400 }
+      );
     }
 
     // Check usage limits

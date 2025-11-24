@@ -2,6 +2,79 @@ import { detectVideoPlatform, extractVideoId } from '../videoPlatforms';
 import { getYouTubeTranscript, getYouTubeMetadata } from './youtube';
 import { getBilibiliTranscript, getBilibiliMetadata } from './bilibili';
 import OpenAI from 'openai';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+import { createHash } from 'crypto';
+
+// Cache directory for video transcripts
+const CACHE_DIR = path.join(process.cwd(), '.notra-data', 'video-cache');
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+interface CachedTranscript {
+  transcript: string;
+  title: string;
+  description: string;
+  cachedAt: number;
+  platform: string;
+  videoId: string;
+}
+
+// Ensure cache directory exists
+async function ensureCacheDir() {
+  try {
+    await mkdir(CACHE_DIR, { recursive: true });
+  } catch (error) {
+    // Directory might already exist
+  }
+}
+
+// Generate cache key from URL
+function getCacheKey(url: string, platform: string, videoId: string): string {
+  const hash = createHash('sha256').update(`${platform}:${videoId}`).digest('hex');
+  return path.join(CACHE_DIR, `${hash}.json`);
+}
+
+// Load cached transcript
+async function loadCachedTranscript(cacheKey: string): Promise<CachedTranscript | null> {
+  try {
+    const data = await readFile(cacheKey, 'utf-8');
+    const cached: CachedTranscript = JSON.parse(data);
+    
+    // Check if cache is still valid
+    const age = Date.now() - cached.cachedAt;
+    if (age > CACHE_TTL) {
+      // Cache expired, delete it
+      await writeFile(cacheKey, '').catch(() => {});
+      return null;
+    }
+    
+    return cached;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Save transcript to cache
+async function saveCachedTranscript(
+  cacheKey: string,
+  data: { transcript: string; title: string; description: string },
+  platform: string,
+  videoId: string
+): Promise<void> {
+  try {
+    await ensureCacheDir();
+    const cached: CachedTranscript = {
+      ...data,
+      cachedAt: Date.now(),
+      platform,
+      videoId,
+    };
+    await writeFile(cacheKey, JSON.stringify(cached, null, 2), 'utf-8');
+  } catch (error) {
+    console.error('Failed to cache transcript:', error);
+    // Don't throw - caching is optional
+  }
+}
 
 /**
  * 获取视频转录文本
@@ -30,6 +103,18 @@ export async function getVideoTranscript(url: string): Promise<{
 - Bilibili: https://www.bilibili.com/video/BVxxxxx or https://www.bilibili.com/video/avxxxxx`);
   }
   
+  // Check cache first
+  const cacheKey = getCacheKey(url, platform, videoId);
+  const cached = await loadCachedTranscript(cacheKey);
+  if (cached) {
+    console.log(`[VideoCache] Using cached transcript for ${platform}:${videoId}`);
+    return {
+      transcript: cached.transcript,
+      title: cached.title,
+      description: cached.description,
+    };
+  }
+
   try {
     let transcript: string;
     let title: string;
@@ -63,11 +148,16 @@ export async function getVideoTranscript(url: string): Promise<{
       }
     }
     
-    return {
+    const result = {
       transcript: transcript.trim(),
       title: title || `Video ${videoId}`,
       description: description || '',
     };
+    
+    // Cache the result
+    await saveCachedTranscript(cacheKey, result, platform, videoId);
+    
+    return result;
   } catch (error: any) {
     console.error(`Video transcript error (${platform}):`, error);
     

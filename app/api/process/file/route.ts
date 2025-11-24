@@ -63,8 +63,37 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Check usage limits
+    // Check file size limits (20MB for free, 100MB for pro)
     const plan = getCurrentUserPlan();
+    const maxFileSize = plan === 'pro' ? 100 * 1024 * 1024 : 20 * 1024 * 1024; // 20MB free, 100MB pro
+    if (file.size > maxFileSize) {
+      return NextResponse.json(
+        {
+          error: 'FILE_TOO_LARGE',
+          message: `File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the limit (${maxFileSize / 1024 / 1024}MB for ${plan} plan).`,
+          maxSize: maxFileSize,
+          actualSize: file.size,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check file type
+    const fileName = file.name.toLowerCase();
+    const allowedExtensions = ['.pdf', '.docx', '.txt', '.md'];
+    const isValidFileType = allowedExtensions.some(ext => fileName.endsWith(ext));
+    if (!isValidFileType) {
+      return NextResponse.json(
+        {
+          error: 'UNSUPPORTED_FILE_TYPE',
+          message: `File type not supported. Please upload PDF, DOCX, TXT, or Markdown files.`,
+          allowedTypes: allowedExtensions,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check usage limits (plan already retrieved above)
     const limits = USAGE_LIMITS[plan];
     const monthKey = getMonthKey();
     const used = await getUsage("file", monthKey);

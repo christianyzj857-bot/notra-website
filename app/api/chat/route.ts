@@ -128,20 +128,44 @@ export async function POST(req: Request) {
           .filter(m => m.role === "user")
           .pop()?.content || "";
 
-        // Pick relevant note sections to reduce token usage
-        const relevantSections = pickRelevantSections(session.notes, latestUserMessage, 3);
+        // Enhanced RAG: Pick relevant note sections (more sections for pro users)
+        const maxSections = currentUserPlan === "free" ? 3 : 5;
+        const relevantSections = pickRelevantSections(session.notes, latestUserMessage, maxSections);
 
-        // Build context-aware system prompt
+        // Build context-aware system prompt with enhanced context
         let contextText = `Summary: ${session.summaryForChat}\n\n`;
         
         if (relevantSections.length > 0) {
-          contextText += "Relevant sections:\n";
-          relevantSections.forEach((section: any) => {
-            contextText += `- ${section.heading}: ${section.content.substring(0, 200)}\n`;
+          contextText += "Relevant sections from the study material:\n\n";
+          relevantSections.forEach((section: any, idx: number) => {
+            contextText += `## ${section.heading}\n`;
+            contextText += `${section.content.substring(0, 300)}${section.content.length > 300 ? '...' : ''}\n`;
+            
+            // Include bullets if available
+            if (section.bullets && section.bullets.length > 0) {
+              contextText += `Key points: ${section.bullets.slice(0, 3).join(', ')}\n`;
+            }
+            
+            // Include formula if available and relevant
+            if (section.formulaDerivation && (latestUserMessage.toLowerCase().includes('formula') || latestUserMessage.toLowerCase().includes('equation'))) {
+              contextText += `Formula: ${section.formulaDerivation}\n`;
+            }
+            
+            // Include example if available and relevant
+            if (section.example && (latestUserMessage.toLowerCase().includes('example') || latestUserMessage.toLowerCase().includes('instance'))) {
+              contextText += `Example: ${section.example.substring(0, 200)}\n`;
+            }
+            
+            contextText += '\n';
           });
         } else {
-          // Fallback to summary only if no relevant sections
-          contextText += "Key concepts from the study material.\n";
+          // Fallback: Use summary and first few sections
+          contextText += "Key concepts from the study material:\n";
+          if (session.notes && session.notes.length > 0) {
+            session.notes.slice(0, 2).forEach((section: any) => {
+              contextText += `- ${section.heading}: ${section.content.substring(0, 150)}\n`;
+            });
+          }
         }
 
         systemMessage = `You are Notra, an AI learning assistant.
@@ -164,8 +188,9 @@ If the question is not related to the study material, politely redirect to the m
       }
     }
 
-    // Trim messages to save tokens (keep recent 3 rounds)
-    const trimmedMessages = trimMessages(conversationMessages, 3);
+    // Trim messages to save tokens (keep recent 3 rounds for free, 5 for pro)
+    const maxRounds = currentUserPlan === "free" ? 3 : 5;
+    const trimmedMessages = trimMessages(conversationMessages, maxRounds);
 
     // Build final messages array with proper types
     const messagesWithSystem: Array<{ role: "system" | "user" | "assistant"; content: string }> = [

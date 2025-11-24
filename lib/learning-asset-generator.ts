@@ -94,58 +94,112 @@ export async function generateLearningAsset(
       break;
   }
 
-  const prompt = `You are an AI learning assistant. Analyze the following ${contentDescription} and generate comprehensive structured study materials.
+  // Smart text preprocessing: handle short/long text
+  let processedText = truncatedText;
+  let preprocessingNote = "";
+  
+  if (text.length < 500) {
+    preprocessingNote = "\n\nNote: Content is relatively short. Please generate comprehensive learning materials based on what is available, and feel free to expand on concepts if needed.";
+  } else if (text.length > 8000) {
+    preprocessingNote = truncationNote;
+    // For very long content, create a summary first
+    processedText = truncatedText.substring(0, 6000) + "\n\n[Content continues but truncated for processing]";
+  }
+
+  const prompt = `You are an AI learning assistant specialized in creating Turbo-level educational content. Analyze the following ${contentDescription} and generate comprehensive, highly structured study materials.
 
 ${typeSpecificInstructions}
 
 Content:
-${truncatedText}${truncationNote}
+${processedText}${preprocessingNote}
 
-Please return a JSON object with the following structure:
+CRITICAL REQUIREMENTS - Generate Turbo-quality content:
+
+1. **NOTES (Generate 5-10 sections)**:
+   - Each note must have a clear heading (use ## for main sections, ### for subsections in Markdown)
+   - Rich content with explanations, not just bullet points
+   - Include formulas in LaTeX format (e.g., $E = mc^2$ or $$\\int_0^1 x dx$$)
+   - Add examples with step-by-step solutions where applicable
+   - Create summary tables using Markdown table format when comparing concepts
+   - Include concept explanations, applications, and common mistakes
+   - Use structured formatting: headings, paragraphs, lists, tables
+
+2. **QUIZZES (Generate 5-10 questions)**:
+   - Multiple choice questions (4 options: A, B, C, D)
+   - Questions should test understanding, not just recall
+   - Include clear explanations for correct answers
+   - Vary difficulty levels (easy, medium, hard)
+   - Questions should cover different aspects of the content
+
+3. **FLASHCARDS (Generate 10-15 cards)**:
+   - Front: Concise question or term
+   - Back: Clear, academic definition or explanation
+   - Tag: Category or topic for organization
+   - Cover key concepts, definitions, formulas, and important facts
+
+4. **SUMMARY_FOR_CHAT**:
+   - 2-3 sentences summarizing key concepts
+   - Must be informative enough for AI context
+   - Focus on main topics and important takeaways
+
+Please return a JSON object with the following EXACT structure:
 {
   "title": "A concise, descriptive title for this ${options.type} content",
   "notes": [
     {
       "id": "note-1",
-      "heading": "Section heading",
-      "content": "Main content paragraph explaining the concept",
-      "bullets": ["Key point 1", "Key point 2"],
-      "example": "Optional example or illustration",
-      "tableSummary": [{"label": "Term", "value": "Definition"}]
+      "heading": "Main Section Title",
+      "content": "Detailed explanation paragraph. Use **bold** for emphasis. Include formulas like $formula$ or $$block formula$$. Add examples with step-by-step solutions.",
+      "bullets": ["Key point 1", "Key point 2", "Key point 3"],
+      "example": "Example: [Step-by-step example with explanation]",
+      "tableSummary": [
+        {"label": "Concept 1", "value": "Definition 1"},
+        {"label": "Concept 2", "value": "Definition 2"}
+      ],
+      "conceptExplanation": "Enhanced explanation of the core concept",
+      "formulaDerivation": "Step-by-step formula derivation in LaTeX: $E = mc^2$",
+      "applications": ["Application 1", "Application 2"],
+      "commonMistakes": ["Common mistake 1", "Common mistake 2"],
+      "summaryTable": [
+        {"concept": "Concept A", "formula": "$f(x) = x^2$", "notes": "Notes about concept A"},
+        {"concept": "Concept B", "formula": "$g(x) = \\sin(x)$", "notes": "Notes about concept B"}
+      ]
     }
   ],
   "quizzes": [
     {
       "id": "quiz-1",
-      "question": "Question text",
+      "question": "Clear, concise question text",
       "options": [
-        {"label": "A", "text": "Option A"},
-        {"label": "B", "text": "Option B"},
-        {"label": "C", "text": "Option C"},
-        {"label": "D", "text": "Option D"}
+        {"label": "A", "text": "Option A text"},
+        {"label": "B", "text": "Option B text"},
+        {"label": "C", "text": "Option C text"},
+        {"label": "D", "text": "Option D text"}
       ],
       "correctIndex": 0,
-      "explanation": "Why this answer is correct",
-      "difficulty": "easy"
+      "explanation": "Detailed explanation of why this answer is correct and why others are wrong",
+      "difficulty": "medium"
     }
   ],
   "flashcards": [
     {
       "id": "card-1",
-      "front": "Question or term",
-      "back": "Answer or definition",
+      "front": "Concise question or term",
+      "back": "Clear, academic definition or explanation",
       "tag": "Category or topic"
     }
   ],
-  "summaryForChat": "A concise 2-3 sentence summary of the key concepts for chat context. This will be used to help the AI assistant understand the content when answering questions."
+  "summaryForChat": "2-3 sentence summary of key concepts for AI chat context"
 }
 
-Requirements:
-- Generate 4-6 note sections covering the main topics
-- Generate 3-5 quiz questions with clear explanations
-- Generate 4-6 flashcards with important terms/concepts
-- Make sure all content is educational, accurate, and well-structured
-- The summaryForChat should be concise but informative enough for context`;
+QUALITY STANDARDS:
+- All content must be educational, accurate, and well-structured
+- Notes should be comprehensive with proper formatting
+- Quizzes should test deep understanding
+- Flashcards should be concise but informative
+- Use Markdown formatting throughout (headings, bold, lists, tables)
+- Include LaTeX formulas where applicable
+- Make content engaging and easy to understand`;
 
   try {
     console.log('[LearningAssetGenerator] Calling OpenAI API, model:', DEFAULT_MODEL, 'text length:', text.length);
@@ -160,7 +214,7 @@ Requirements:
       ],
       response_format: { type: "json_object" },
       temperature: 0.7,
-      max_tokens: 3000,
+      max_tokens: 4000, // Increased for more comprehensive content
     });
 
     const responseText = completion.choices[0]?.message?.content || '{}';
@@ -175,17 +229,35 @@ Requirements:
       throw new Error(`Failed to parse OpenAI response as JSON: ${parseError.message}`);
     }
 
-    // Validate and structure the response
+    // Validate and structure the response with enhanced fields
+    const notes = (parsed.notes || []).map((note: any, idx: number) => ({
+      id: note.id || `note-${idx + 1}`,
+      heading: note.heading || "",
+      content: note.content || "",
+      bullets: note.bullets || [],
+      example: note.example,
+      tableSummary: note.tableSummary || [],
+      // Enhanced fields
+      conceptExplanation: note.conceptExplanation,
+      formulaDerivation: note.formulaDerivation,
+      applications: note.applications || [],
+      commonMistakes: note.commonMistakes || [],
+      summaryTable: note.summaryTable || [],
+    })) as NoteSection[];
+
+    // Ensure minimum counts (Turbo quality)
+    const minNotes = 5;
+    const minQuizzes = 5;
+    const minFlashcards = 10;
+
+    // If we got fewer than minimum, log a warning but proceed
+    if (notes.length < minNotes) {
+      console.warn(`[LearningAssetGenerator] Generated only ${notes.length} notes, expected at least ${minNotes}`);
+    }
+
     return {
       title: parsed.title || `Untitled ${options.type}`,
-      notes: (parsed.notes || []).map((note: any, idx: number) => ({
-        id: note.id || `note-${idx + 1}`,
-        heading: note.heading || "",
-        content: note.content || "",
-        bullets: note.bullets || [],
-        example: note.example,
-        tableSummary: note.tableSummary || [],
-      })) as NoteSection[],
+      notes: notes,
       quizzes: (parsed.quizzes || []).map((quiz: any, idx: number) => ({
         id: quiz.id || `quiz-${idx + 1}`,
         question: quiz.question || "",

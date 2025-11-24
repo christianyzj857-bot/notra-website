@@ -5,8 +5,9 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const userId = searchParams.get('userId') || undefined;
 
-    const sessions = await listRecentSessions(limit);
+    const sessions = await listRecentSessions(limit, userId);
 
     return NextResponse.json(sessions);
   } catch (error: any) {
