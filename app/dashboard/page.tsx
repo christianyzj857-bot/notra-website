@@ -80,6 +80,8 @@ export default function Dashboard() {
   } | null>(null);
   const [limits, setLimits] = useState(USAGE_LIMITS.free);
   const [currentLang, setCurrentLang] = useState<string>('en'); // Track language for re-render
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState('');
 
   // Check if user is onboarded and get initial language
   useEffect(() => {
@@ -180,45 +182,117 @@ export default function Dashboard() {
   };
 
   // Handle document upload
-  const handleDocumentUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'document',
-      createdAt: Date.now(),
-      summary: generateDocumentSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleDocumentUpload = async (file: File) => {
+    if (isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+      setProcessingMessage(`Processing ${file.name}...`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/process/file', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.error === 'limit_reached') {
+          alert(error.message);
+          setIsProcessing(false);
+          return;
+        }
+        throw new Error(error.error || 'Failed to process file');
+      }
+
+      const data = await response.json();
+
+      // Redirect to session detail page
+      window.location.href = `/dashboard/${data.sessionId}`;
+    } catch (error: any) {
+      console.error('File upload error:', error);
+      alert(`Failed to upload file: ${error.message}`);
+      setIsProcessing(false);
+    }
   };
 
   // Handle audio upload
-  const handleAudioUpload = (file: File) => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: file.name,
-      type: 'audio',
-      createdAt: Date.now(),
-      summary: generateAudioSummary(file.name)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
+  const handleAudioUpload = async (file: File) => {
+    if (isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+      setProcessingMessage(`Transcribing ${file.name}...`);
+
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      const response = await fetch('/api/process/audio', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.error === 'limit_reached') {
+          alert(error.message);
+          setIsProcessing(false);
+          return;
+        }
+        throw new Error(error.error || 'Failed to process audio');
+      }
+
+      const data = await response.json();
+
+      // Redirect to session detail page
+      window.location.href = `/dashboard/${data.sessionId}`;
+    } catch (error: any) {
+      console.error('Audio upload error:', error);
+      alert(`Failed to upload audio: ${error.message}`);
+      setIsProcessing(false);
+    }
   };
 
   // Handle video link
-  const handleVideoLink = () => {
-    if (!videoUrl.trim()) return;
-    
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      title: `Video: ${videoUrl.substring(0, 30)}...`,
-      type: 'video',
-      createdAt: Date.now(),
-      summary: generateVideoSummary(videoUrl)
-    };
-    setProjects([newProject, ...projects]);
-    setSelectedProject(newProject);
-    setVideoUrl('');
+  const handleVideoLink = async () => {
+    if (!videoUrl.trim() || isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+      setProcessingMessage('Analyzing video content...');
+
+      const response = await fetch('/api/process/video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: videoUrl }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        if (error.error === 'limit_reached') {
+          alert(error.message);
+          setIsProcessing(false);
+          return;
+        }
+        throw new Error(error.error || 'Failed to process video');
+      }
+
+      const data = await response.json();
+
+      setVideoUrl('');
+
+      // Redirect to session detail page
+      window.location.href = `/dashboard/${data.sessionId}`;
+    } catch (error: any) {
+      console.error('Video processing error:', error);
+      alert(`Failed to process video: ${error.message}`);
+      setVideoUrl('');
+      setIsProcessing(false);
+    }
   };
 
   // Drag and drop handlers
@@ -272,6 +346,24 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-transparent relative overflow-hidden">
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative w-20 h-20">
+                <div className="absolute inset-0 border-4 border-indigo-500/30 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-white mb-2">Processing...</h3>
+                <p className="text-slate-300">{processingMessage}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 移除背景代码，由 MagicBackground 全局组件接管 */}
       
       {/* 3D Floating Notebooks - Decorative Elements */}
