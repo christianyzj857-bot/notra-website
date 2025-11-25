@@ -5,6 +5,7 @@
 
 import MiniSearch from 'minisearch';
 import { NoteSection } from '@/types/notra';
+import { splitIntoSentences } from './text-splitter';
 
 interface SearchableSection {
   id: string;
@@ -20,9 +21,11 @@ interface SearchableSection {
 function buildSearchIndex(notes: NoteSection[]): MiniSearch<SearchableSection> {
   const searchableSections: SearchableSection[] = notes.map((section, idx) => {
     // Combine all text fields for better search
+    // Split content into sentences for better matching
+    const contentSentences = splitIntoSentences(section.content || '');
     const fullText = [
       section.heading,
-      section.content,
+      ...contentSentences,
       section.conceptExplanation,
       section.formulaDerivation,
       section.example,
