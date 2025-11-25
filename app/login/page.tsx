@@ -42,7 +42,8 @@ export default function LoginPage() {
         localStorage.setItem('user_display_name', data.user.displayName || data.user.username);
         localStorage.setItem('user_logged_in', 'true');
         localStorage.setItem('user_id', data.user.id);
-        localStorage.setItem('user_plan', data.user.plan || 'free');
+        // 🚧 DEVELOPMENT: Force "pro" for all users during testing
+        localStorage.setItem('user_plan', 'pro');
         
         // Store session token if available
         if (data.session?.access_token) {

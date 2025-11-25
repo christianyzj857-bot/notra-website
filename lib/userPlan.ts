@@ -18,9 +18,14 @@ export function getCurrentUserPlan(): UserPlan {
   // Check localStorage for client-side (browser)
   if (typeof window !== 'undefined') {
     const plan = localStorage.getItem('user_plan') as UserPlan | null;
-    if (plan === 'free' || plan === 'pro') {
-      return plan;
+    // 🚧 DEVELOPMENT: Force "pro" for all users during testing
+    // Even if localStorage has "free", return "pro" for development
+    if (plan === 'pro') {
+      return 'pro';
     }
+    // If plan is "free" or null, still return "pro" for development
+    // In production, uncomment the line below to respect localStorage
+    // if (plan === 'free' || plan === 'pro') return plan;
   }
   
   // Default to "pro" for development/testing (allows full feature access)

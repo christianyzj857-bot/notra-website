@@ -22,13 +22,14 @@ export async function POST(req: Request) {
         supabaseUrl.includes('placeholder') || 
         supabaseAnonKey.includes('placeholder')) {
       // Mock login for development (when Supabase not configured)
+      // 🚧 DEVELOPMENT: All users default to "pro" for testing
       return NextResponse.json({
         user: {
           id: `mock-${Date.now()}`,
           email: email,
           username: email.split('@')[0],
           displayName: email.split('@')[0],
-          plan: 'free',
+          plan: 'pro', // Development: default to pro
         },
         session: {
           access_token: `mock-token-${Date.now()}`,
@@ -55,13 +56,15 @@ export async function POST(req: Request) {
                        'User';
 
     // Return user data
+    // 🚧 DEVELOPMENT: All users default to "pro" for testing
+    // In production, read plan from user metadata or database
     return NextResponse.json({
       user: {
         id: data.user?.id,
         email: data.user?.email,
         username: displayName,
         displayName: displayName,
-        plan: 'free',
+        plan: 'pro', // Development: default to pro for all users
       },
       session: data.session,
     });
