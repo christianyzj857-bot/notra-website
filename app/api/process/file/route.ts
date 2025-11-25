@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+// Import DOMMatrix polyfill first (before any libraries that might use it)
+import "@/lib/dom-polyfill";
 import { createSession, findSessionByHash, generateContentHash } from "@/lib/db";
 import { NotraSession, FileSource } from "@/types/notra";
 import { getCurrentUserPlan } from "@/lib/userPlan";

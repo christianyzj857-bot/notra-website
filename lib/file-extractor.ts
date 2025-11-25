@@ -6,6 +6,8 @@
  * Using remove-markdown instead for server-side safety
  */
 
+// Import DOMMatrix polyfill first (before any libraries that might use it)
+import './dom-polyfill';
 import removeMarkdown from 'remove-markdown';
 
 /**
