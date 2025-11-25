@@ -12,12 +12,29 @@ import removeMarkdown from 'remove-markdown';
 
 /**
  * Extract text from PDF buffer
+ * Note: pdf-parse 2.4.5 uses PDFParse class
  */
 export async function extractPDFText(buffer: Buffer): Promise<string> {
-  const pdfParseModule = await import("pdf-parse");
-  const pdfParse = (pdfParseModule as any).default || pdfParseModule;
-  const data = await pdfParse(buffer);
-  return data.text || '';
+  try {
+    // pdf-parse 2.4.5 使用 PDFParse 类
+    const pdfParseModule = await import("pdf-parse");
+    
+    // 获取 PDFParse 类
+    const PDFParse = (pdfParseModule as any).PDFParse;
+    
+    if (!PDFParse) {
+      throw new Error('PDFParse class not found in pdf-parse module');
+    }
+    
+    // 创建 PDFParse 实例并解析
+    const parser = new PDFParse({ data: buffer });
+    const result = await parser.getText();
+    
+    return result?.text || '';
+  } catch (error: any) {
+    console.error('[FileExtractor] PDF parsing error:', error);
+    throw new Error(`Failed to parse PDF: ${error.message || 'Unknown error'}`);
+  }
 }
 
 /**
