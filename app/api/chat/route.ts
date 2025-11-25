@@ -70,10 +70,11 @@ export async function POST(req: Request) {
 
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-    // Get user plan (use provided userPlan or default to "free" in Edge runtime)
+    // Get user plan (use provided userPlan or default to "pro" for development)
     // Note: getCurrentUserPlan() uses window object which doesn't exist in Edge runtime
-    // So we default to "free" if userPlan is not provided
-    const currentUserPlan = userPlan || "free";
+    // For development/testing, default to "pro" to allow full feature access
+    // In production, this should come from auth session/token
+    const currentUserPlan = userPlan || (process.env.DEV_DEFAULT_PLAN as "free" | "pro" | undefined) || "pro";
     
     // Model selection and permission check
     const requestedModel = (model || "gpt-4o-mini") as ModelKey;
