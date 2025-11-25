@@ -1,28 +1,30 @@
 /**
  * Text processing utilities for learning asset generation
  * Handles text cleaning, summarization, and chunking
+ * 
+ * Note: remark() removed to avoid "DOMMatrix is not defined" error in Node.js
+ * Using remove-markdown instead for server-side safety
  */
 
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
 import removeMarkdown from 'remove-markdown';
 
 /**
  * Clean and normalize text content
+ * Note: remark() may cause DOMMatrix errors in Node.js, so we use remove-markdown instead
  */
 export function cleanText(text: string): string {
   // Remove excessive whitespace
   let cleaned = text.replace(/\s+/g, ' ').trim();
   
   // Remove markdown if present (but preserve structure)
+  // ⚠️ remark() can cause "DOMMatrix is not defined" in Node.js server environment
+  // So we use remove-markdown which is safer for server-side processing
   try {
-    const processed = remark()
-      .use(remarkGfm)
-      .processSync(cleaned);
-    cleaned = String(processed);
-  } catch (error) {
-    // If remark fails, use remove-markdown as fallback
+    // Use remove-markdown directly (server-safe)
     cleaned = removeMarkdown(cleaned);
+  } catch (error) {
+    // If remove-markdown fails, just use the text as-is
+    console.warn('[TextProcessor] Markdown removal failed, using text as-is:', error);
   }
   
   // Normalize line breaks

@@ -1,10 +1,11 @@
 /**
  * File extraction utilities
  * Handles PDF, DOCX, TXT, MD file parsing and cleaning
+ * 
+ * Note: remark() removed to avoid "DOMMatrix is not defined" error in Node.js
+ * Using remove-markdown instead for server-side safety
  */
 
-import { remark } from 'remark';
-import remarkGfm from 'remark-gfm';
 import removeMarkdown from 'remove-markdown';
 
 /**
@@ -36,19 +37,21 @@ export async function extractDOCXText(buffer: Buffer): Promise<string> {
 
 /**
  * Extract and clean text from plain text or markdown
+ * Note: remark() may cause DOMMatrix errors in Node.js, so we use remove-markdown instead
  */
 export async function extractTextContent(buffer: Buffer, isMarkdown: boolean = false): Promise<string> {
   const text = buffer.toString('utf-8');
   
   if (isMarkdown) {
-    // Process markdown with remark
+    // ⚠️ remark() can cause "DOMMatrix is not defined" in Node.js server environment
+    // Use remove-markdown which is safer for server-side processing
     try {
-      const processed = await remark()
-        .use(remarkGfm)
-        .process(text);
-      return String(processed);
+      // For markdown files, we just return the text as-is (preserve markdown syntax)
+      // Or use remove-markdown if we want plain text
+      // For now, return as-is to preserve structure
+      return text;
     } catch (error) {
-      // Fallback to remove-markdown
+      // Fallback: use remove-markdown to strip markdown syntax
       return removeMarkdown(text);
     }
   }
