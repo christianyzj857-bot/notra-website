@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getSessionById } from "@/lib/db";
 
+// Use Node.js runtime for file system operations
+export const runtime = "nodejs";
+
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
